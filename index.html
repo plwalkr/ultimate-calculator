@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ultimate Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; }
+    /* ... your existing CSS ... */
     :root {
       --bg-color: #2d472c;
       --container-bg: #1a2e1a;
@@ -114,7 +114,6 @@
       right: 1rem;
       z-index: 10;
     }
-    /* Show gender/height inputs inline and label styling */
     .inline-label {
       display: inline-block;
       margin-top: 1rem;
@@ -124,13 +123,12 @@
       font-family: 'Fira Code', monospace;
       font-size: 1rem;
     }
-    #gender, #height {
+    #gender, #height, #goal {
       width: 100%;
       max-width: 150px;
       margin-bottom: 1rem;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js"></script>
 </head>
 <body>
   <div class="theme-toggle">
@@ -152,7 +150,6 @@
       <option value="time">Time Clock</option>
     </select>
 
-    <!-- Gender and Height inputs -->
     <label for="gender" id="gender-label" class="inline-label" style="display:none;">Gender:</label>
     <select id="gender" style="display:none;">
       <option value="male">Male</option>
@@ -162,6 +159,13 @@
 
     <label for="height" id="height-label" class="inline-label" style="display:none;">Height (inches):</label>
     <input type="number" id="height" placeholder="e.g. 70" min="36" max="96" style="display:none;" />
+
+    <label for="goal" id="goal-label" class="inline-label" style="display:none;">Goal:</label>
+    <select id="goal" style="display:none;">
+      <option value="maintain">Maintain Weight</option>
+      <option value="lose">Lose Weight</option>
+      <option value="gain">Gain Weight</option>
+    </select>
 
     <textarea id="input1" rows="3" placeholder="Enter input..."></textarea>
     <div id="unitUI">
@@ -177,6 +181,7 @@
     <div class="history" id="history"></div>
     <button class="clear-btn" onclick="clearHistory()">Clear History</button>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js"></script>
   <script>
     const unitCategories = {
       Length: ["mm", "cm", "m", "km", "in", "ft", "yd", "mi"],
@@ -264,18 +269,20 @@
         calculus: "e.g. d/dx(x^2 + 3x)",
         solve: "e.g. simplify (2x^2 + 4x - 2x^2)",
         convert: "e.g. 5 inch to cm",
-        macro: "Enter your weight in lbs, gender, and optionally height",
+        macro: "Enter your weight in lbs, gender, goal, and optionally height",
         fuel: "e.g. 120 20 3.75 (miles mpg cost/gal)",
         time: "e.g. 7.5 16 (worked hrs & goal) or 7.5 16 13:00 (current time)"
       };
 
       if (type === 'macro') {
         inputBox.placeholder = 'Weight in lbs (e.g. 180)';
-        hint.textContent = 'Enter weight, select gender, and optionally enter height';
+        hint.textContent = 'Enter weight, select gender, goal, and optionally enter height';
         document.getElementById('gender').style.display = 'inline-block';
         document.getElementById('gender-label').style.display = 'inline-block';
         document.getElementById('height').style.display = 'inline-block';
         document.getElementById('height-label').style.display = 'inline-block';
+        document.getElementById('goal').style.display = 'inline-block';
+        document.getElementById('goal-label').style.display = 'inline-block';
       } else {
         inputBox.placeholder = examples[type] || 'Enter input...';
         hint.textContent = examples[type] || '';
@@ -283,6 +290,8 @@
         document.getElementById('gender-label').style.display = 'none';
         document.getElementById('height').style.display = 'none';
         document.getElementById('height-label').style.display = 'none';
+        document.getElementById('goal').style.display = 'none';
+        document.getElementById('goal-label').style.display = 'none';
       }
 
       document.getElementById('unitUI').style.display = type === 'convert' ? 'flex' : 'none';
@@ -315,6 +324,7 @@
           const weight = parseFloat(input);
           const gender = document.getElementById('gender').value;
           const height = parseFloat(document.getElementById('height').value);
+          const goal = document.getElementById('goal').value;
 
           if (isNaN(weight) || weight <= 0) throw new Error("Please enter a valid weight");
 
@@ -324,16 +334,22 @@
           else if (gender === 'female') proteinPerLb = 0.9;
           else proteinPerLb = 1.0;
 
-          // Optional: Slight height adjustment (just example, can be improved)
+          // Adjust multipliers based on goal
+          let goalMultiplier;
+          if (goal === 'lose') goalMultiplier = 0.8;
+          else if (goal === 'gain') goalMultiplier = 1.2;
+          else goalMultiplier = 1.0; // maintain
+
+          // Optional: Slight height adjustment (can be refined)
           let heightAdj = 1.0;
           if (!isNaN(height)) {
             if (height < 60) heightAdj = 0.9;
             else if (height > 75) heightAdj = 1.1;
           }
 
-          const protein = weight * proteinPerLb * heightAdj;
-          const fat = weight * 0.4 * heightAdj;
-          const carbs = weight * 2 * heightAdj;
+          const protein = weight * proteinPerLb * heightAdj * goalMultiplier;
+          const fat = weight * 0.4 * heightAdj * goalMultiplier;
+          const carbs = weight * 2 * heightAdj * goalMultiplier;
 
           result = `Protein: ${protein.toFixed(1)}g\nFat: ${fat.toFixed(1)}g\nCarbs: ${carbs.toFixed(1)}g`;
         } else if (type === 'fuel') {

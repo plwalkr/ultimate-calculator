@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --container-bg: #1e1e2f;
+      --text-color: #e0e0e0;
+      --accent-color: #82aaff;
+      --button-bg: #3a3f58;
+      --button-hover-bg: #5c63bc;
+      --input-bg: #2c2f44;
+      --input-border: #44475a;
+      --result-bg: #282a36;
+      --history-bg: #21222c;
+      --shadow-color: rgba(0, 0, 0, 0.7);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: var(--container-bg);
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 800px;
+      width: 95%;
+      margin: 2rem auto;
+      box-shadow: 0 0 15px var(--shadow-color);
+    }
+    input, select, textarea, button {
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      padding: 0.75rem;
+      font-size: 1rem;
+      background: var(--input-bg);
+      color: var(--text-color);
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: var(--button-bg);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: var(--button-hover-bg);
+    }
+    .result, .history {
+      background-color: var(--result-bg);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      color: var(--text-color);
+      font-size: 1rem;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+    canvas {
+      display: block;
+      margin: 1rem auto;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="theme-toggle">
+    <select id="themeSwitcher" onchange="switchTheme()">
+      <option value="zelda">Zelda</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
+  <div class="container">
+    <h1>Ultimate Calculator</h1>
+    <select id="calcType" onchange="updateUI()">
+      <option value="basic">Basic Math</option>
+      <option value="calculus">Calculus</option>
+      <option value="solve">Simplify Expression</option>
+      <option value="convert">Unit Conversion</option>
+      <option value="macro">Macro Split</option>
+      <option value="burned">Calories Burned</option>
+      <option value="fuel">Fuel Cost Estimator</option>
+      <option value="debt">Debt Payoff</option>
+      <option value="currency">Currency Converter</option>
+      <option value="time">Work Time Tracker</option>
+    </select>
+    <textarea id="input1" placeholder="Enter input..."></textarea>
+    <div id="extraUI"></div>
+    <div class="button-grid">
+      <button onclick="calculate()">Calculate</button>
+      <button onclick="clearFields()">Clear</button>
+      <button onclick="clearHistory()">Clear History</button>
+    </div>
+    <div id="result" class="result"></div>
+    <div id="history" class="history"></div>
+  </div>
+  <script>
+// Full JavaScript logic for Ultimate Calculator
+const resultBox = document.getElementById('result');
+const historyBox = document.getElementById('history');
+
+function updateUI() {
+  const type = document.getElementById('calcType').value;
+  const extraUI = document.getElementById('extraUI');
+  extraUI.innerHTML = '';
+  if (type === 'burned') {
+    extraUI.innerHTML = `
+      <input id="burnWeight" placeholder="Weight (lbs)" />
+      <input id="burnDuration" placeholder="Duration (minutes)" />
+      <select id="burnActivity">
+        <option value="3.5">Walking (slow)</option>
+        <option value="7">Jogging</option>
+        <option value="8">Running</option>
+        <option value="6">Biking (moderate)</option>
+        <option value="5">Weightlifting (light)</option>
+        <option value="8">Weightlifting (vigorous)</option>
+      </select>`;
+  } else if (type === 'debt') {
+    extraUI.innerHTML = `
+      <input id="debtAmount" placeholder="Total Debt ($)" />
+      <input id="debtRate" placeholder="Annual Interest Rate (%)" />
+      <input id="debtPayment" placeholder="Monthly Payment ($)" />`;
+  } else if (type === 'currency') {
+    extraUI.innerHTML = `
+      <input id="currencyAmount" placeholder="Amount" />
+      <select id="fromCurrency">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="JPY">JPY</option>
+      </select>
+      <select id="toCurrency">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="JPY">JPY</option>
+      </select>`;
+  } else if (type === 'macro') {
+    extraUI.innerHTML = `
+      <input id="calories" placeholder="Calorie goal" />
+      <label for="protein">Protein %</label>
+      <input type="range" id="protein" min="0" max="100" value="30" oninput="macroAdjust('protein')">
+      <span id="proteinVal">30%</span> <span id="proteinGrams">0g</span>
+      <label for="fat">Fat %</label>
+      <input type="range" id="fat" min="0" max="100" value="30" oninput="macroAdjust('fat')">
+      <span id="fatVal">30%</span> <span id="fatGrams">0g</span>
+      <label for="carbs">Carbs %</label>
+      <input type="range" id="carbs" min="0" max="100" value="40" oninput="macroAdjust('carbs')">
+      <span id="carbsVal">40%</span> <span id="carbsGrams">0g</span>
+      <canvas id="macroPie" width="300" height="300"></canvas>`;
+    setTimeout(() => macroAdjust('protein'), 100);
+  } else if (type === 'time') {
+    extraUI.innerHTML = `
+      <input id="workedHours" placeholder="Hours worked" />
+      <input id="goalHours" placeholder="Goal hours" />
+      <canvas id="timeGraph" width="300" height="200"></canvas>`;
+  }
+}
+
+function calculate() {
+  const type = document.getElementById('calcType').value;
+  const input = document.getElementById('input1').value.trim();
+  try {
+    let result = '';
+    if (type === 'basic') {
+      result = `Result: ${math.evaluate(input)}`;
+    } else if (type === 'calculus') {
+      const match = input.match(/d\/d(\w+)\((.*)\)/);
+      if (match) {
+        const [, variable, expression] = match;
+        const derivative = math.derivative(expression, variable);
+        result = `d/d${variable}(${expression}) = ${derivative.toString()}`;
+      } else {
+        throw new Error('Use format d/dx(expression)');
+      }
+    } else if (type === 'solve') {
+      result = `Simplified: ${math.simplify(input).toString()}`;
+    } else if (type === 'convert') {
+      const [value, from, , to] = input.split(' ');
+      const converted = math.unit(parseFloat(value), from).to(to);
+      result = `${value} ${from} = ${converted.toString()}`;
+    } else if (type === 'burned') {
+      const w = parseFloat(document.getElementById('burnWeight').value);
+      const d = parseFloat(document.getElementById('burnDuration').value);
+      const met = parseFloat(document.getElementById('burnActivity').value);
+      const kg = w * 0.453592;
+      const hrs = d / 60;
+      const kcal = met * kg * hrs;
+      result = `Calories Burned: ${kcal.toFixed(1)} kcal`;
+    } else if (type === 'debt') {
+      const a = parseFloat(document.getElementById('debtAmount').value);
+      const r = parseFloat(document.getElementById('debtRate').value) / 100 / 12;
+      const p = parseFloat(document.getElementById('debtPayment').value);
+      if (p <= a * r) throw new Error("Payment too low to reduce debt");
+      const m = Math.log(p / (p - a * r)) / Math.log(1 + r);
+      result = `Months to Pay Off: ${Math.ceil(m)}\nTotal Paid: $${(p * m).toFixed(2)}\nInterest Paid: $${(p * m - a).toFixed(2)}`;
+    } else if (type === 'currency') {
+      const amount = parseFloat(document.getElementById('currencyAmount').value);
+      const from = document.getElementById('fromCurrency').value;
+      const to = document.getElementById('toCurrency').value;
+      const rates = {
+        USD: { USD: 1, EUR: 0.91, GBP: 0.78, JPY: 142 },
+        EUR: { USD: 1.1, EUR: 1, GBP: 0.86, JPY: 156 },
+        GBP: { USD: 1.28, EUR: 1.17, GBP: 1, JPY: 181 },
+        JPY: { USD: 0.007, EUR: 0.0064, GBP: 0.0055, JPY: 1 }
+      };
+      const converted = amount * rates[from][to];
+      result = `${amount} ${from} = ${converted.toFixed(2)} ${to}`;
+    } else if (type === 'fuel') {
+      const [miles, mpg, cost] = input.split(' ').map(parseFloat);
+      const totalCost = (miles / mpg) * cost;
+      result = `${miles} miles @ ${mpg} mpg @ $${cost}/gal = $${totalCost.toFixed(2)}`;
+    } else if (type === 'time') {
+      const worked = parseFloat(document.getElementById('workedHours').value);
+      const goal = parseFloat(document.getElementById('goalHours').value);
+      const remaining = goal - worked;
+      const hr = Math.floor(remaining);
+      const min = Math.round((remaining - hr) * 60);
+      updateTimeGraph(worked, goal);
+      result = `Time left: ${remaining.toFixed(2)} hrs\nOr: ${hr} hrs ${min} mins`;
+    }
+    resultBox.textContent = result;
+    const stamp = new Date().toLocaleString();
+    historyBox.innerHTML += `<div>[${stamp}] ${type}: ${result}</div>`;
+    localStorage.setItem('calcHistory', historyBox.innerHTML);
+  } catch (err) {
+    resultBox.textContent = 'Error: ' + err.message;
+  }
+}
+
+function macroAdjust(changed) {
+  const sliders = ['protein', 'fat', 'carbs'].map(id => document.getElementById(id));
+  const values = sliders.map(s => parseInt(s.value));
+  const total = values.reduce((a, b) => a + b, 0);
+  const idx = ['protein', 'fat', 'carbs'].indexOf(changed);
+  let excess = total - 100;
+  for (let i = 0; i < 3 && excess > 0; i++) {
+    if (i !== idx && sliders[i].value > 0) {
+      const reduction = Math.min(excess, sliders[i].value);
+      sliders[i].value -= reduction;
+      excess -= reduction;
+    }
+  }
+  document.getElementById('proteinVal').textContent = sliders[0].value + '%';
+  document.getElementById('fatVal').textContent = sliders[1].value + '%';
+  document.getElementById('carbsVal').textContent = sliders[2].value + '%';
+  const cal = parseFloat(document.getElementById('calories').value || 0);
+  document.getElementById('proteinGrams').textContent = `${(cal * sliders[0].value / 100 / 4).toFixed(1)}g`;
+  document.getElementById('fatGrams').textContent = `${(cal * sliders[1].value / 100 / 9).toFixed(1)}g`;
+  document.getElementById('carbsGrams').textContent = `${(cal * sliders[2].value / 100 / 4).toFixed(1)}g`;
+  updateMacroPie();
+}
+
+function updateMacroPie() {
+  const p = parseFloat(document.getElementById('protein').value);
+  const f = parseFloat(document.getElementById('fat').value);
+  const c = parseFloat(document.getElementById('carbs').value);
+  const ctx = document.getElementById('macroPie')?.getContext('2d');
+  if (!ctx) return;
+  if (window.macroChart) window.macroChart.destroy();
+  window.macroChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Protein', 'Fat', 'Carbs'],
+      datasets: [{ data: [p, f, c], backgroundColor: ['#4caf50', '#f44336', '#2196f3'] }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
+
+function updateTimeGraph(worked, goal) {
+  const ctx = document.getElementById('timeGraph')?.getContext('2d');
+  if (!ctx) return;
+  if (window.timeChart) window.timeChart.destroy();
+  window.timeChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Worked', 'Remaining'],
+      datasets: [{
+        label: 'Hours',
+        data: [worked, Math.max(goal - worked, 0)],
+        backgroundColor: ['#4caf50', '#f44336']
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function switchTheme() {
+  const theme = document.getElementById('themeSwitcher').value;
+  const root = document.documentElement;
+  const themes = {
+    zelda: {
+      '--bg-color': '#2d472c',
+      '--container-bg': '#1a2e1a',
+      '--text-color': '#e5e2d7',
+      '--input-bg': '#25331f',
+      '--input-border': '#476146',
+      '--button-bg': '#3a4427',
+      '--button-hover-bg': '#5a752e',
+      '--result-bg': '#213b2a',
+      '--history-bg': '#0f1c0f',
+      '--shadow-color': 'rgba(0, 0, 0, 0.8)'
+    },
+    light: {
+      '--bg-color': '#ffffff',
+      '--container-bg': '#f0f0f0',
+      '--text-color': '#111111',
+      '--input-bg': '#ffffff',
+      '--input-border': '#cccccc',
+      '--button-bg': '#bbbbbb',
+      '--button-hover-bg': '#888888',
+      '--result-bg': '#e0ffe0',
+      '--history-bg': '#e8e8e8',
+      '--shadow
+</body>
+</html>

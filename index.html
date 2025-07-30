@@ -2,145 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ultimate Calculator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CalcuLegend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
   <style>
-    /* ... your existing CSS ... */
     :root {
-      --bg-color: #2d472c;
-      --container-bg: #1a2e1a;
-      --text-color: #e5e2d7;
+      --bg-color: #121212;
+      --container-bg: #1e1e2f;
+      --text-color: #e0e0e0;
+      --accent-color: #82aaff;
+      --button-bg: #3a3f58;
+      --button-hover: #5c63bc;
       --result-color: #d1e231;
-      --hint-color: #a3cfa5;
-      --history-bg: #0f1c0f;
-      --clear-btn-bg: #7a0b0b;
-      --lcd-screen: #213b2a;
-      --lcd-border: #476146;
+      --input-bg: #232438;
+      --fav-unit-bg: #3d483a;
+      --overtime: #d1311e;
     }
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom right, var(--bg-color), #0d1e12);
-      color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      width: 95%;
-      max-width: 800px;
-      padding: 2rem;
-      background: var(--container-bg);
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    h1 {
-      text-align: center;
-      font-family: 'Fira Code', monospace;
-      font-size: 2rem;
-      color: var(--result-color);
-    }
-    select, textarea, button, input {
-      width: 100%;
-      padding: 1rem;
-      font-size: 1.2rem;
-      border-radius: 8px;
-      border: 2px solid var(--lcd-border);
-      font-family: 'Fira Code', monospace;
-      background-color: #fff;
-      color: #000;
-    }
-    button {
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    button:hover {
-      transform: translateY(-2px);
-      background-color: var(--result-color);
-      color: var(--container-bg);
-    }
-    .result {
-      font-weight: bold;
-      font-size: 1.4rem;
-      background-color: var(--lcd-screen);
-      border: 2px solid var(--lcd-border);
-      padding: 1rem;
-      border-radius: 8px;
-      white-space: pre-wrap;
-    }
-    .history {
-      background: var(--history-bg);
-      padding: 1.5rem;
-      border-radius: 8px;
-      max-height: 400px;
-      overflow-y: auto;
-      color: #fff;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      font-family: 'Fira Code', monospace;
-      border: 2px solid var(--lcd-border);
-    }
-    .history div {
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px dashed #4a5c49;
-    }
-    .clear-btn {
-      background-color: var(--clear-btn-bg);
-      color: white;
-      border: none;
-      padding: 0.7rem;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    #unitUI {
-      display: none;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    #unitUI select, #unitUI input {
-      flex: 1 1 30%;
-    }
-    .theme-toggle {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      z-index: 10;
-    }
-    .inline-label {
-      display: inline-block;
-      margin-top: 1rem;
-      margin-bottom: 0.3rem;
-      color: var(--text-color);
-      font-weight: bold;
-      font-family: 'Fira Code', monospace;
-      font-size: 1rem;
-    }
-    #gender, #height, #goal {
-      width: 100%;
-      max-width: 150px;
-      margin-bottom: 1rem;
-    }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #151616 0%, #234b28 100%); color: var(--text-color); margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center;}
+    .container { background-color: var(--container-bg); box-shadow: 0 6px 40px #000b; padding: 2.5rem 2rem; border-radius: 20px; max-width: 480px; width: 100%; min-width: 320px; margin: 1rem; animation: popin 0.7s cubic-bezier(.4,2.7,.7,0.7);}
+    @keyframes popin { from {transform: scale(0.85) translateY(30px);} to {transform: scale(1) translateY(0);} }
+    h1 { text-align: center; color: var(--result-color); font-weight: 700; letter-spacing: 2px; font-size: 2.2rem; margin-bottom: 0.8rem; user-select: none; text-shadow: 0 4px 16px #000a; font-family: 'Ringbearer', 'Inter', sans-serif;}
+    .theme-scrollbar { display: flex; overflow-x: auto; margin-bottom: 1rem; justify-content: center; gap: 0.5rem;}
+    .theme-option { min-width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fff4; cursor: pointer; transition: border 0.15s; outline: none;}
+    .theme-option:hover, .theme-option:focus { border: 2.5px solid var(--accent-color);}
+    #ringModeBtn { background: radial-gradient(circle at 70% 30%, #edb941 30%, #d9ad26 65%, #a28209 100%); color: #4b3c07; border: none; font-family: 'Ringbearer', 'Inter', sans-serif; font-size: 1.05em; margin-bottom: 8px; margin-left: 8px; border-radius: 11px; padding: 4px 18px; cursor: pointer; box-shadow: 0 2px 14px #0006; transition: filter 0.13s;}
+    #ringModeBtn.active { outline: 2px solid #edb941; filter: drop-shadow(0 0 8px #fbe62c99); background: radial-gradient(circle at 60% 40%, #edb941 40%, #f4e49e 100%);}
+    #colorThemeBtn { background: #3a3f58; color: #fff; border-radius: 8px; padding: 4px 18px; border: none; font-size: 1.01em; margin-bottom: 8px; margin-left: 8px; cursor: pointer;}
+    select, input, textarea { width: 100%; padding: 0.6rem; margin-bottom: 0.7rem; border-radius: 8px; border: 1.5px solid #44475a; background: var(--input-bg); color: var(--text-color); font-size: 1.08rem; box-sizing: border-box; outline: none; transition: border 0.15s;}
+    input:focus, select:focus, textarea:focus { border: 1.5px solid var(--accent-color);}
+    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; margin-bottom: 1rem;}
+    .extra-button-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.1rem;}
+    button { cursor: pointer; background-color: var(--button-bg); color: var(--text-color); font-weight: 700; border: none; border-radius: 9px; padding: 0.9em 0.3em; font-size: 1.08rem; letter-spacing: 1px; transition: background 0.16s, transform 0.09s; box-shadow: 0 2px 7px #0008;}
+    button:hover, button:focus { background-color: var(--button-hover); transform: scale(1.04);}
+    .fav-unit-btn { background: var(--fav-unit-bg); color: #d1e231; border: none; margin: 0 3px 7px 0; padding: 3px 11px; border-radius: 7px; font-size: 1.01em; font-weight: 600; cursor: pointer; transition: filter 0.14s; box-shadow: 0 1px 6px #0004;}
+    .fav-unit-btn:hover { filter: brightness(1.1);}
+    .result { background: #282a36; padding: 1.1rem; margin-top: 0.5rem; border-radius: 9px; font-size: 1.14rem; color: var(--result-color); word-break: break-word; min-height: 2.2rem; font-family: 'Fira Mono', 'Consolas', monospace; box-shadow: 0 1px 10px #131c2a42; user-select: text;}
+    .history { background: #22252c; padding: 0.9rem; margin-top: 1.1rem; border-radius: 9px; font-size: 1.01rem; min-height: 2.3rem; max-height: 180px; overflow-y: auto;}
+    .history div { border-bottom: 1px dashed #3337; padding: 0.17rem 0 0.17rem 0.3rem; opacity: 0.96; font-size: 0.97rem; position: relative;}
+    .history div:last-child { border-bottom: none;}
+    .pin-btn { position: absolute; right: 7px; top: 7px; font-size: 0.95em; background: #27230e; color: #f4de47; border-radius: 7px; border: none; padding: 2px 10px; cursor: pointer;}
+    .macro-slider-container { margin-bottom: 1.0rem;}
+    .macro-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.98rem; margin-bottom: 0.1rem; color: var(--accent-color);}
+    .macro-slider-container input[type="range"] { width: 100%; accent-color: var(--result-color); margin-bottom: 0.1rem;}
+    .copy-toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #212c2f; color: #fff; padding: 9px 22px; border-radius: 20px; font-size: 1.08rem; box-shadow: 0 3px 12px #000b; opacity: 0.95; z-index: 9; pointer-events: none; animation: fadeToast 2s linear;}
+    .toggle-switch { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; font-size: 1rem; user-select: none;}
+    .toggle-switch input[type="checkbox"] { width: 28px; height: 18px; accent-color: var(--accent-color); cursor: pointer; vertical-align: middle;}
+    .overtime { color: var(--overtime); font-weight: 700; font-size: 1.09em;}
+    #weeklyLogTable { width: 100%; border-collapse: collapse; font-size: 0.98em; margin: 0.7em 0 0.2em 0;}
+    #weeklyLogTable th, #weeklyLogTable td { border: 1px solid #454e4c; padding: 5px 2px; text-align: center; background: #202e25; color: #eee;}
+    #weeklyLogTable th {background: #1b2b18; color: #d1e231;}
+    #weeklyLogTable tfoot td { font-weight: 700;}
+    #addLogBtn {margin-bottom: 6px;}
+    .csv-btn { background: #26602a; color:#fff;}
+    .csv-btn:hover { background: #51a757;}
+    .pinned-result { background: #382a00 !important; color: #fbe62c !important; border: 1.3px solid #e0b900 !important; font-size: 1.09em;}
+    #colorThemeModal { display: none; position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 99; background: #000c; align-items: center; justify-content: center;}
+    #colorThemeBox { background: #1e1e2f; padding: 1.4em 2.2em 1.4em 2.2em; border-radius: 15px; box-shadow: 0 4px 30px #000a; min-width: 270px; text-align: center;}
+    .ct-input {width: 70px;}
+    .ct-btn {background: #3442a7;color:#fff;margin: 0 7px;}
+    @keyframes fadeToast { 0%{opacity:0;} 10%{opacity:1;} 90%{opacity:0.98;} 100%{opacity:0;}}
+    @font-face { font-family: 'Ringbearer'; src: url('https://cdn.jsdelivr.net/gh/danielgjackson/ringbearer/ringbearer.ttf');}
+    @media (max-width:600px) {.container { max-width:98vw; padding:1.1rem 0.3rem;} h1 { font-size: 1.2rem; }}
   </style>
 </head>
 <body>
-  <div class="theme-toggle">
-    <select id="themeSwitcher" onchange="switchTheme()">
-      <option value="zelda">Zelda</option>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select>
-  </div>
   <div class="container">
-    <h1>Ultimate Calculator</h1>
-    <select id="calcType" onchange="updatePlaceholder()">
+    <h1>CalcuLegend</h1>
+    <div class="theme-scrollbar">
+      <div class="theme-option" style="background:#121212" tabindex="0" onclick="setTheme('#121212','#1e1e2f','#e0e0e0','#232438')"></div>
+      <div class="theme-option" style="background:#2d472c" tabindex="0" onclick="setTheme('#2d472c','#1a2e1a','#e5e2d7','#234b28')"></div>
+      <div class="theme-option" style="background:#0f0f0f" tabindex="0" onclick="setTheme('#0f0f0f','#202020','#ffffff','#222')"></div>
+      <div class="theme-option" style="background:#1e1f26" tabindex="0" onclick="setTheme('#1e1f26','#2e2f3e','#c0c0c0','#292d3d')"></div>
+      <button id="ringModeBtn" onclick="toggleRingMode()">Ring Mode</button>
+      <button id="colorThemeBtn" onclick="showColorTheme()">Custom Theme</button>
+    </div>
+    <div class="extra-button-row" id="extraBtns"></div>
+    <select id="calcType" onchange="updateUI()">
       <option value="basic">Basic Math</option>
       <option value="calculus">Calculus</option>
       <option value="solve">Simplify Expression</option>
@@ -148,308 +86,529 @@
       <option value="macro">Macro Estimator</option>
       <option value="fuel">Fuel Cost Estimator</option>
       <option value="time">Time Clock</option>
+      <option value="bmi">BMI Calculator</option>
     </select>
-
-    <label for="gender" id="gender-label" class="inline-label" style="display:none;">Gender:</label>
-    <select id="gender" style="display:none;">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-      <option value="other">Other / Prefer not to say</option>
-    </select>
-
-    <label for="height" id="height-label" class="inline-label" style="display:none;">Height (inches):</label>
-    <input type="number" id="height" placeholder="e.g. 70" min="36" max="96" style="display:none;" />
-
-    <label for="goal" id="goal-label" class="inline-label" style="display:none;">Goal:</label>
-    <select id="goal" style="display:none;">
-      <option value="maintain">Maintain Weight</option>
-      <option value="lose">Lose Weight</option>
-      <option value="gain">Gain Weight</option>
-    </select>
-
-    <textarea id="input1" rows="3" placeholder="Enter input..."></textarea>
-    <div id="unitUI">
-      <input type="number" id="unitValue" placeholder="Enter value" />
-      <select id="fromUnit"></select>
-      to
-      <select id="toUnit"></select>
-      <button onclick="convertViaDropdown()">Convert</button>
+    <div id="extraUI"></div>
+    <textarea id="inputBox" rows="2" placeholder="e.g. 3+4*2 or sin(pi/4)"></textarea>
+    <div class="button-grid">
+      <button onclick="calculate()">Calculate</button>
+      <button onclick="copyResultToClipboard()">Copy Result</button>
+      <button onclick="clearFields()">Clear Fields</button>
+      <button onclick="clearHistory()">Clear History</button>
     </div>
-    <div class="hint" id="inputHint"></div>
-    <button onclick="calculate()">🧮 Calculate</button>
     <div class="result" id="result"></div>
     <div class="history" id="history"></div>
-    <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+    <div id="colorThemeModal">
+      <div id="colorThemeBox">
+        <h3>Custom Theme</h3>
+        <label>Background: <input class="ct-input" type="color" id="ct-bg"></label><br>
+        <label>Container: <input class="ct-input" type="color" id="ct-container"></label><br>
+        <label>Text: <input class="ct-input" type="color" id="ct-text"></label><br>
+        <label>Accent: <input class="ct-input" type="color" id="ct-accent"></label><br>
+        <label>Result: <input class="ct-input" type="color" id="ct-result"></label><br>
+        <button class="ct-btn" onclick="applyCustomTheme()">Apply</button>
+        <button class="ct-btn" onclick="closeColorTheme()">Close</button>
+      </div>
+    </div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js"></script>
   <script>
+    // ==== DATA STORAGE ====
+    let customUnits = JSON.parse(localStorage.getItem('customUnits')||'[]');
+    let favoritePairs = [
+      ['lb','kg'], ['kg','lb'], ['psi','bar'], ['bar','psi'],
+      ['ft','m'], ['m','ft'], ['Nm','ft-lb'], ['ft-lb','Nm'],
+      ['F','C'], ['C','F']
+    ];
+    let weeklyLog = JSON.parse(localStorage.getItem('weeklyLog')||'[]');
+    let pinnedResults = JSON.parse(localStorage.getItem('pinnedResults')||'[]');
+
+    // ==== UNIT CATEGORIES (GLOBAL!) ====
     const unitCategories = {
-      Length: ["mm", "cm", "m", "km", "in", "ft", "yd", "mi"],
-      Mass: ["mg", "g", "kg", "oz", "lb", "ton"],
-      Time: ["ms", "s", "min", "h", "day"],
-      Volume: ["ml", "l", "tsp", "Tbs", "cup", "pt", "qt", "gal"],
-      Temperature: ["degC", "degF", "K"],
-      Area: ["m^2", "cm^2", "ft^2", "in^2", "acre", "ha"],
-      Speed: ["m/s", "km/h", "mph", "knot"]
+      length: ['mm', 'cm', 'm', 'km', 'in', 'ft', 'yd', 'mi'],
+      mass: ['mg', 'g', 'kg', 'oz', 'lb', 'ton'],
+      volume: ['mm3', 'cm3', 'ml', 'l', 'm3', 'in3', 'ft3', 'yd3', 'gal', 'qt', 'pt', 'cup', 'floz', 'tbsp', 'tsp'],
+      force: ['N', 'lbf'],
+      energy: ['J', 'kJ', 'Wh', 'kWh', 'cal', 'kcal'],
+      power: ['W', 'kW', 'MW', 'hp'],
+      temp: ['degC', 'degF', 'K'],
+      pressure: ['Pa', 'kPa', 'MPa', 'bar', 'atm', 'psi', 'mmHg', 'torr'],
+      torque: ['N*m', 'ft*lbf']
     };
 
-    const allUnits = Object.values(unitCategories).flat();
-
-    function populateUnitDropdowns() {
-      const fromSelect = document.getElementById("fromUnit");
-      const toSelect = document.getElementById("toUnit");
-      fromSelect.innerHTML = "";
-      toSelect.innerHTML = "";
-
-      for (const [category, units] of Object.entries(unitCategories)) {
-        const optGroupFrom = document.createElement("optgroup");
-        const optGroupTo = document.createElement("optgroup");
-        optGroupFrom.label = category;
-        optGroupTo.label = category;
-
-        units.forEach(unit => {
-          const optionFrom = document.createElement("option");
-          const optionTo = document.createElement("option");
-          optionFrom.value = optionTo.value = unit;
-          optionFrom.textContent = optionTo.textContent = unit;
-          optGroupFrom.appendChild(optionFrom);
-          optGroupTo.appendChild(optionTo);
-        });
-
-        fromSelect.appendChild(optGroupFrom);
-        toSelect.appendChild(optGroupTo);
-      }
+    // ==== THEMING ====
+    function setTheme(bg, container, text, inputbg) {
+      document.documentElement.style.setProperty('--bg-color', bg);
+      document.documentElement.style.setProperty('--container-bg', container);
+      document.documentElement.style.setProperty('--text-color', text);
+      document.documentElement.style.setProperty('--input-bg', inputbg);
     }
-
-    function switchTheme() {
-      const theme = document.getElementById('themeSwitcher').value;
-      const root = document.documentElement;
-      const themes = {
-        zelda: {
-          '--bg-color': '#2d472c',
-          '--container-bg': '#1a2e1a',
-          '--text-color': '#e5e2d7',
-          '--result-color': '#d1e231',
-          '--hint-color': '#a3cfa5',
-          '--history-bg': '#0f1c0f',
-          '--clear-btn-bg': '#7a0b0b',
-        },
-        light: {
-          '--bg-color': '#f0f0f0',
-          '--container-bg': '#ffffff',
-          '--text-color': '#222222',
-          '--result-color': '#007700',
-          '--hint-color': '#555555',
-          '--history-bg': '#e0e0e0',
-          '--clear-btn-bg': '#cccccc',
-        },
-        dark: {
-          '--bg-color': '#1a1a1a',
-          '--container-bg': '#2a2a2a',
-          '--text-color': '#eeeeee',
-          '--result-color': '#66ff66',
-          '--hint-color': '#999999',
-          '--history-bg': '#333333',
-          '--clear-btn-bg': '#444444',
-        }
-      };
-      const vars = themes[theme];
-      for (let key in vars) {
-        root.style.setProperty(key, vars[key]);
-      }
-    }
-
-    function updatePlaceholder() {
-      const type = document.getElementById('calcType').value;
-      const inputBox = document.getElementById('input1');
-      const hint = document.getElementById('inputHint');
-
-      const examples = {
-        basic: "e.g. 2 + 2 * 3",
-        calculus: "e.g. d/dx(x^2 + 3x)",
-        solve: "e.g. simplify (2x^2 + 4x - 2x^2)",
-        convert: "e.g. 5 inch to cm",
-        macro: "Enter your weight in lbs, gender, goal, and optionally height",
-        fuel: "e.g. 120 20 3.75 (miles mpg cost/gal)",
-        time: "e.g. 7.5 16 (worked hrs & goal) or 7.5 16 13:00 (current time)"
-      };
-
-      if (type === 'macro') {
-        inputBox.placeholder = 'Weight in lbs (e.g. 180)';
-        hint.textContent = 'Enter weight, select gender, goal, and optionally enter height';
-        document.getElementById('gender').style.display = 'inline-block';
-        document.getElementById('gender-label').style.display = 'inline-block';
-        document.getElementById('height').style.display = 'inline-block';
-        document.getElementById('height-label').style.display = 'inline-block';
-        document.getElementById('goal').style.display = 'inline-block';
-        document.getElementById('goal-label').style.display = 'inline-block';
+    function toggleRingMode() {
+      let btn = document.getElementById('ringModeBtn');
+      if (!btn.classList.contains('active')) {
+        setTheme('#2a2009','#382a00','#fbe62c','#271e05');
+        document.body.style.background = 'radial-gradient(ellipse at center, #fbe62c22 0%, #271e0580 100%)';
+        btn.classList.add('active');
+        document.querySelector('h1').style.fontFamily = "'Ringbearer','Inter',sans-serif";
       } else {
-        inputBox.placeholder = examples[type] || 'Enter input...';
-        hint.textContent = examples[type] || '';
-        document.getElementById('gender').style.display = 'none';
-        document.getElementById('gender-label').style.display = 'none';
-        document.getElementById('height').style.display = 'none';
-        document.getElementById('height-label').style.display = 'none';
-        document.getElementById('goal').style.display = 'none';
-        document.getElementById('goal-label').style.display = 'none';
+        setTheme('#121212','#1e1e2f','#e0e0e0','#232438');
+        document.body.style.background = '';
+        btn.classList.remove('active');
+        document.querySelector('h1').style.fontFamily = "'Inter',sans-serif";
       }
-
-      document.getElementById('unitUI').style.display = type === 'convert' ? 'flex' : 'none';
+    }
+    function showColorTheme() {
+      document.getElementById('colorThemeModal').style.display='flex';
+    }
+    function closeColorTheme() {
+      document.getElementById('colorThemeModal').style.display='none';
+    }
+    function applyCustomTheme() {
+      setTheme(
+        document.getElementById('ct-bg').value,
+        document.getElementById('ct-container').value,
+        document.getElementById('ct-text').value,
+        document.getElementById('ct-accent').value
+      );
+      document.documentElement.style.setProperty('--result-color',document.getElementById('ct-result').value);
+      closeColorTheme();
     }
 
+    // ==== UI RENDERING ====
+    function updateUI() {
+      const extraUI = document.getElementById('extraUI');
+      extraUI.innerHTML = '';
+      document.getElementById('inputBox').style.display = 'none';
+      document.getElementById('extraBtns').innerHTML = '';
+      const type = document.getElementById('calcType').value;
+      if (type === 'convert') {
+        let customSet = new Set(customUnits.map(u=>u.name));
+        Object.values(unitCategories).forEach(arr=>arr.forEach(u=>customSet.add(u)));
+        let allUnits = Array.from(customSet);
+
+        let favHtml = favoritePairs.map(([from,to]) =>
+          `<button class="fav-unit-btn" onclick="setFavUnits('${from}','${to}')">${from}→${to}</button>`
+        ).join('');
+        favHtml += `<button class="fav-unit-btn" onclick="showAddCustomUnit()">+Custom Unit</button>`;
+
+        extraUI.innerHTML = `
+          <div id="favUnitsRow" style="margin-bottom:5px;">${favHtml}</div>
+          <input id="unitValue" placeholder="Value to convert e.g. 100" />
+          <select id="fromUnit" onchange="updateToUnits()">
+            ${allUnits.map(u => `<option value="${u}">${u}</option>`).join('')}
+          </select>
+          <select id="toUnit"></select>
+          <button onclick="reverseUnits()">Reverse</button>
+          <div id="customUnitBox"></div>
+        `;
+        setTimeout(()=>updateToUnits(), 0); // ensures toUnit gets filled
+      } else if (type === 'macro') {
+        extraUI.innerHTML = `
+          <input id="weight" placeholder="Weight (lbs)" />
+          <input id="height" placeholder="Height (inches)" />
+          <input id="age" placeholder="Age" />
+          <select id="gender"><option value="male">Male</option><option value="female">Female</option></select>
+          <select id="activityLevel" onchange="adjustCalories()">
+            <option value="1.2">Sedentary (little/no exercise)</option>
+            <option value="1.375">Light (1-3 days/wk)</option>
+            <option value="1.55">Moderate (3-5 days/wk)</option>
+            <option value="1.725">Active (6-7 days/wk)</option>
+            <option value="1.9">Very Active (physical job)</option>
+          </select>
+          <select id="goal" onchange="adjustCalories()">
+            <option value="maintain">Maintain</option>
+            <option value="lose">Lose Weight</option>
+            <option value="gain">Gain Weight</option>
+          </select>
+          <input id="calories" placeholder="Calorie goal" readonly />
+          <div class="macro-slider-container">
+            <div class="macro-label"><label for="protein">Protein %</label><span id="proteinVal">30%</span></div>
+            <input type="range" id="protein" min="0" max="100" value="30" oninput="adjustMacros('protein')">
+          </div>
+          <div class="macro-slider-container">
+            <div class="macro-label"><label for="fat">Fat %</label><span id="fatVal">30%</span></div>
+            <input type="range" id="fat" min="0" max="100" value="30" oninput="adjustMacros('fat')">
+          </div>
+          <div class="macro-slider-container">
+            <div class="macro-label"><label for="carbs">Carbs %</label><span id="carbsVal">40%</span></div>
+            <input type="range" id="carbs" min="0" max="100" value="40" oninput="adjustMacros('carbs')">
+          </div>
+          <div id="macroRec" style="font-size:0.96em;color:#b4b4b4;margin:0.4em 0;"></div>
+        `;
+      } else if (type === 'fuel') {
+        extraUI.innerHTML = `
+          <input id="miles" placeholder="Miles (one way)" />
+          <input id="mpg" placeholder="MPG" />
+          <input id="fuelPrice" placeholder="Fuel Price/gal" />
+          <input id="daysPerWeek" placeholder="Days/week (for commute)" style="display:none;" />
+          <input id="weeksPerYear" placeholder="Weeks/year (default 50)" style="display:none;" />
+          <input id="altMPG" placeholder="Compare: MPG of Efficient Vehicle" style="display:none;" />
+          <div id="fuelComparison"></div>
+        `;
+      } else if (type === 'time') {
+        extraUI.innerHTML = `
+          <input id="workedHours" placeholder="Hours you've worked so far (e.g. 6.5)" />
+          <input id="goalHours" placeholder="Goal total hours (e.g. 16)" />
+          <input id="clockInTime" type="time" placeholder="Clock-in time (when you started this new block)" />
+          <input id="lunchBreak" placeholder="Lunch break (min, e.g. 30)" type="number" min="0" value="30"/>
+          <div class="toggle-switch">
+            <label for="lunchPaid">Lunch break paid?</label>
+            <input id="lunchPaid" type="checkbox" checked />
+            <span style="font-size:0.94em;">Paid</span>
+          </div>
+          <div style="font-size:0.93rem;color:#aaa;margin:-0.5rem 0 0.7rem 0;">
+            (24h format: 07:30 = 7:30 AM, 13:00 = 1:00 PM)
+          </div>
+          <div id="weeklyLogArea"></div>
+        `;
+        renderWeeklyLog();
+      } else if (type === 'bmi') {
+        extraUI.innerHTML = `
+          <input id="bmiWeight" placeholder="Weight in lbs" />
+          <input id="bmiHeight" placeholder="Height in inches" />
+          <input id="waist" placeholder="Waist circumference (inches, optional)" />
+          <input id="ageBMI" placeholder="Age (for body fat %)" />
+          <select id="genderBMI">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>`;
+      } else {
+        document.getElementById('inputBox').style.display = '';
+      }
+      clearResultsOnly();
+    }
+
+    // Smart Unit Converter Logic
+    function renderUnitExtras() {
+      let favHtml = favoritePairs.map(([from,to]) =>
+        `<button class="fav-unit-btn" onclick="setFavUnits('${from}','${to}')">${from}→${to}</button>`
+      ).join('');
+      favHtml += `<button class="fav-unit-btn" onclick="showAddCustomUnit()">+Custom Unit</button>`;
+      document.getElementById('favUnitsRow').innerHTML = favHtml;
+    }
+    function setFavUnits(from, to) {
+      document.getElementById('fromUnit').value = from;
+      updateToUnits();
+      setTimeout(() => {document.getElementById('toUnit').value = to;}, 50);
+    }
+    function updateToUnits() {
+      const from = document.getElementById('fromUnit').value;
+      let categories = {...unitCategories};
+      for (let u of customUnits) categories[u.name] = [u.name];
+      let group = Object.values(categories).find(units => units.includes(from)) || [];
+      const toSelect = document.getElementById('toUnit');
+      toSelect.innerHTML = group.map(u => `<option value="${u}">${u}</option>`).join('');
+    }
+    function reverseUnits() {
+      let from = document.getElementById('fromUnit').value;
+      let to = document.getElementById('toUnit').value;
+      document.getElementById('fromUnit').value = to;
+      updateToUnits();
+      setTimeout(()=>{document.getElementById('toUnit').value = from;},50);
+    }
+    function showAddCustomUnit() {
+      document.getElementById('customUnitBox').innerHTML = `
+        <input id="customUnitName" placeholder="Custom unit name" />
+        <input id="customUnitBase" placeholder="Equals how many (base unit)" />
+        <select id="customUnitBaseType">
+          <option value="lb">lb</option>
+          <option value="kg">kg</option>
+          <option value="ft">ft</option>
+          <option value="m">m</option>
+          <option value="psi">psi</option>
+          <option value="bar">bar</option>
+        </select>
+        <button onclick="addCustomUnit()">Add</button>
+      `;
+    }
+    function addCustomUnit() {
+      let name = document.getElementById('customUnitName').value;
+      let factor = parseFloat(document.getElementById('customUnitBase').value);
+      let base = document.getElementById('customUnitBaseType').value;
+      if (!name || isNaN(factor) || !base) return;
+      customUnits.push({name, factor, base});
+      localStorage.setItem('customUnits',JSON.stringify(customUnits));
+      updateUI();
+      showCopyToast(`Added custom unit: ${name}`);
+    }
+
+    // ---- Macro Calculator Upgrades ----
+    function adjustMacros(changed) {
+      const p = document.getElementById('protein');
+      const f = document.getElementById('fat');
+      const c = document.getElementById('carbs');
+      let vals = {
+        protein: +p.value,
+        fat: +f.value,
+        carbs: +c.value
+      };
+      let sum = vals.protein + vals.fat + vals.carbs;
+      if (sum > 100) {
+        let other1 = changed === 'protein' ? 'fat' : 'protein';
+        let other2 = changed === 'carbs' ? (changed === 'protein' ? 'fat' : 'protein') : 'carbs';
+        let over = sum - 100;
+        if (vals[other1] > 0) {
+          let diff = Math.min(vals[other1], over);
+          vals[other1] -= diff;
+          over -= diff;
+        }
+        if (over > 0 && vals[other2] > 0) {
+          vals[other2] = Math.max(0, vals[other2] - over);
+        }
+        p.value = vals.protein;
+        f.value = vals.fat;
+        c.value = vals.carbs;
+      }
+      document.getElementById('proteinVal').textContent = p.value + '%';
+      document.getElementById('fatVal').textContent = f.value + '%';
+      document.getElementById('carbsVal').textContent = c.value + '%';
+      renderMacroRec();
+    }
+    function adjustCalories() {
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      const height = parseFloat(document.getElementById('height').value) || 0;
+      const age = parseFloat(document.getElementById('age').value) || 0;
+      const gender = document.getElementById('gender').value;
+      const activity = parseFloat(document.getElementById('activityLevel').value) || 1.2;
+      const goal = document.getElementById('goal').value;
+      let bmr;
+      if (!weight || !height || !age) return;
+      if (gender === 'male') {
+        bmr = 66 + (6.23 * weight) + (12.7 * height) - (6.8 * age);
+      } else {
+        bmr = 655 + (4.35 * weight) + (4.7 * height) - (4.7 * age);
+      }
+      let tdee = bmr * activity;
+      let adjusted = tdee;
+      if (goal === 'lose') adjusted -= 500;
+      else if (goal === 'gain') adjusted += 300;
+      document.getElementById('calories').value = Math.round(adjusted);
+      renderMacroRec();
+    }
+    function renderMacroRec() {
+      let goal = document.getElementById('goal')?.value || 'maintain';
+      let txt = '';
+      if (goal === 'gain') txt = "Muscle gain: Protein 30-35%, Carbs 40-55%, Fat 20-25%";
+      else if (goal === 'lose') txt = "Fat loss: Protein 30-40%, Carbs 20-30%, Fat 30-35%";
+      else txt = "Maintain: Protein 25-30%, Carbs 40-50%, Fat 20-30%";
+      document.getElementById('macroRec') && (document.getElementById('macroRec').innerHTML = txt);
+    }
+
+    // ---- All Calculators ----
     function calculate() {
       const type = document.getElementById('calcType').value;
-      const input = document.getElementById('input1').value.trim();
-      const resultBox = document.getElementById('result');
+      const result = document.getElementById('result');
+      const history = document.getElementById('history');
+      let output = '';
       try {
-        let result = '';
-        if (type === 'basic') {
-          result = `Result: ${math.evaluate(input)}`;
-        } else if (type === 'calculus') {
-          const match = input.match(/d\/d(\w+)\((.*)\)/);
-          if (match) {
-            const [, variable, expression] = match;
-            const derivative = math.derivative(expression, variable);
-            result = `d/d${variable}(${expression}) = ${derivative.toString()}`;
+        if (type === 'convert') {
+          let val = parseFloat(document.getElementById('unitValue').value);
+          let from = document.getElementById('fromUnit').value;
+          let to = document.getElementById('toUnit').value;
+          // Try custom unit
+          let custom = customUnits.find(u=>u.name===from||u.name===to);
+          if (custom) {
+            if (from===custom.name) val = val * custom.factor;
+            if (to===custom.name) val = val / custom.factor;
+            output = val.toFixed(4) + ' ' + to;
           } else {
-            throw new Error('Use format d/dx(expression)');
+            if (isNaN(val)) throw new Error('Enter a valid value to convert');
+            try {
+              const unit = math.unit(val, from);
+              output = unit.toNumber(to).toFixed(4) + ' ' + to;
+            } catch (e) {
+              throw new Error(`Invalid conversion: "${from}" to "${to}"`);
+            }
           }
-        } else if (type === 'solve') {
-          result = `Simplified: ${math.simplify(input).toString()}`;
-        } else if (type === 'convert') {
-          const [value, from, , to] = input.split(' ');
-          const converted = math.unit(parseFloat(value), from).to(to);
-          result = `${value} ${from} = ${converted.toString()}`;
         } else if (type === 'macro') {
-          const weight = parseFloat(input);
-          const gender = document.getElementById('gender').value;
-          const height = parseFloat(document.getElementById('height').value);
-          const goal = document.getElementById('goal').value;
-
-          if (isNaN(weight) || weight <= 0) throw new Error("Please enter a valid weight");
-
-          // Protein multipliers by gender
-          let proteinPerLb;
-          if (gender === 'male') proteinPerLb = 1.1;
-          else if (gender === 'female') proteinPerLb = 0.9;
-          else proteinPerLb = 1.0;
-
-          // Adjust multipliers based on goal
-          let goalMultiplier;
-          if (goal === 'lose') goalMultiplier = 0.8;
-          else if (goal === 'gain') goalMultiplier = 1.2;
-          else goalMultiplier = 1.0; // maintain
-
-          // Optional: Slight height adjustment (can be refined)
-          let heightAdj = 1.0;
-          if (!isNaN(height)) {
-            if (height < 60) heightAdj = 0.9;
-            else if (height > 75) heightAdj = 1.1;
-          }
-
-          const protein = weight * proteinPerLb * heightAdj * goalMultiplier;
-          const fat = weight * 0.4 * heightAdj * goalMultiplier;
-          const carbs = weight * 2 * heightAdj * goalMultiplier;
-
-          result = `Protein: ${protein.toFixed(1)}g\nFat: ${fat.toFixed(1)}g\nCarbs: ${carbs.toFixed(1)}g`;
+          const cal = parseFloat(document.getElementById('calories').value);
+          const p = parseFloat(document.getElementById('protein').value);
+          const f = parseFloat(document.getElementById('fat').value);
+          const c = parseFloat(document.getElementById('carbs').value);
+          if (p + f + c !== 100) throw new Error('Macros must total 100%');
+          if (!cal) throw new Error('Set or calculate calorie goal');
+          output = `Protein: ${(cal * p / 100 / 4).toFixed(1)}g\nFat: ${(cal * f / 100 / 9).toFixed(1)}g\nCarbs: ${(cal * c / 100 / 4).toFixed(1)}g`;
+        } else if (type === 'calculus') {
+          let expr = document.getElementById('inputBox').value;
+          if (!expr.includes('x')) throw new Error('Expression must include variable x');
+          output = math.derivative(expr, 'x').toString();
+        } else if (type === 'solve') {
+          let expr = document.getElementById('inputBox').value;
+          output = math.simplify(expr).toString();
         } else if (type === 'fuel') {
-          const [miles, mpg, cost] = input.split(' ').map(parseFloat);
-          if ([miles, mpg, cost].some(isNaN)) throw new Error("Invalid input");
-          const totalCost = (miles / mpg) * cost;
-          result = `${miles} miles @ ${mpg} mpg @ $${cost}/gal = $${totalCost.toFixed(2)}`;
-        } else if (type === 'time') {
-          const parts = input.split(' ');
-          if (parts.length === 2) {
-            const start = parseFloat(parts[0]);
-            const end = parseFloat(parts[1]);
-            if (isNaN(start) || isNaN(end)) throw new Error("Invalid input");
-            const remaining = (end - start).toFixed(2);
-            const completedPct = ((start / end) * 100).toFixed(1);
-            const minutesRemaining = Math.round(remaining * 60);
-            const now = new Date();
-            const offTime = new Date(now.getTime() + minutesRemaining * 60000);
-            const hrs = Math.floor(minutesRemaining / 60);
-            const mins = minutesRemaining % 60;
-            result = `${remaining} hours remaining (approx. ${hrs}h ${mins}m)\nYou’ve completed about ${completedPct}% of your shift.\nIf you keep working, you’ll be off at: ${offTime.toLocaleTimeString()}`;
-          } else if (parts.length === 3) {
-            const [worked, goal, current] = parts;
-            const [h, m] = current.split(':').map(Number);
-            if (isNaN(worked) || isNaN(goal) || isNaN(h) || isNaN(m)) throw new Error("Invalid input");
-            const currentTime = new Date();
-            currentTime.setHours(h);
-            currentTime.setMinutes(m);
-            currentTime.setSeconds(0);
-            const workedHours = parseFloat(worked);
-            const goalHours = parseFloat(goal);
-            const remainingHours = goalHours - workedHours;
-            const completedPct = ((workedHours / goalHours) * 100).toFixed(1);
-            const startTime = new Date(currentTime.getTime() - workedHours * 60 * 60 * 1000);
-            const endTime = new Date(startTime.getTime() + goalHours * 60 * 60 * 1000);
-            const hrs = Math.floor(remainingHours);
-            const mins = Math.round((remainingHours % 1) * 60);
-            result = `You’ve worked ${workedHours.toFixed(2)} hrs out of ${goalHours} hrs.\nProgress: ${completedPct}%.\nTime remaining: ${hrs}h ${mins}m.\nEstimated clock-out time: ${endTime.toLocaleTimeString()}`;
-          } else {
-            throw new Error('Invalid time input.');
+          let miles = parseFloat(document.getElementById('miles').value);
+          let mpg = parseFloat(document.getElementById('mpg').value);
+          let price = parseFloat(document.getElementById('fuelPrice').value);
+          let commute = document.getElementById('daysPerWeek').style.display==='inline';
+          if (!miles || !mpg || !price) throw new Error('Enter all fuel info');
+          let baseCost = (miles / mpg) * price;
+          output = 'Fuel Cost (one way): $' + baseCost.toFixed(2);
+          if (commute) {
+            let days = parseInt(document.getElementById('daysPerWeek').value)||5;
+            let weeks = parseInt(document.getElementById('weeksPerYear').value)||50;
+            let roundTrip = 2*baseCost;
+            let total = roundTrip * days * weeks;
+            output += `\nCommute: $${(roundTrip*days).toFixed(2)}/week, $${total.toFixed(2)}/year`;
+            let altMPG = parseFloat(document.getElementById('altMPG').value)||30;
+            let altCost = (miles/altMPG)*price;
+            let altTotal = 2*altCost*days*weeks;
+            output += `\nIf vehicle got ${altMPG}mpg: $${altTotal.toFixed(2)}/year (save $${(total-altTotal).toFixed(0)})`;
           }
+        } else if (type === 'time') {
+          const worked = parseFloat(document.getElementById('workedHours').value);
+          const goal = parseFloat(document.getElementById('goalHours').value);
+          const clockIn = document.getElementById('clockInTime').value;
+          const lunchMin = parseFloat(document.getElementById('lunchBreak').value) || 0;
+          const lunchPaid = document.getElementById('lunchPaid').checked;
+          if (isNaN(worked) || isNaN(goal) || !clockIn) throw new Error('Enter worked hours, goal, and clock-in time');
+          if (worked >= goal) {
+            output = `Goal already achieved!\nWorked: ${worked.toFixed(2)} hours\nGoal: ${goal.toFixed(2)} hours`;
+          } else {
+            const remain = Math.max(0, goal - worked);
+            const pct = ((worked / goal) * 100).toFixed(1);
+
+            const [h, m] = clockIn.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(h, m, 0, 0);
+            let msRemain = remain * 60 * 60 * 1000;
+            if (!lunchPaid && lunchMin > 0) msRemain += lunchMin * 60 * 1000;
+            const outTime = new Date(startDate.getTime() + msRemain);
+            const fmt = t => {
+              let hr = t.getHours();
+              let min = t.getMinutes();
+              let ampm = hr >= 12 ? 'PM' : 'AM';
+              hr = hr % 12; if (hr === 0) hr = 12;
+              return `${hr}:${min.toString().padStart(2, '0')} ${ampm}`;
+            };
+            const hoursLeft = Math.floor(remain);
+            const minsLeft = Math.round((remain - hoursLeft) * 60);
+            let ot = (remain>8) ? "\nOvertime! More than 8 hrs left." : "";
+            output =
+              `Goal: ${goal.toFixed(2)} hrs  |  Worked: ${worked.toFixed(2)} hrs\n` +
+              `Percent Complete: ${pct}%\n` +
+              `-----------------------\n` +
+              `Still need to work: ${remain.toFixed(2)} hrs (${hoursLeft} hr ${minsLeft} min)\n` +
+              `Lunch break: ${lunchMin} min (${lunchPaid ? 'Paid' : 'Unpaid'})\n` +
+              `Estimated clock-out: ${fmt(outTime)}\n` +
+              `You clocked in at: ${fmt(startDate)}` + ot;
+          }
+        } else if (type === 'bmi') {
+          const weight = parseFloat(document.getElementById('bmiWeight').value);
+          const height = parseFloat(document.getElementById('bmiHeight').value);
+          const waist = parseFloat(document.getElementById('waist')?.value);
+          const age = parseFloat(document.getElementById('ageBMI')?.value);
+          const gender = document.getElementById('genderBMI')?.value || 'male';
+          if (!weight || !height) throw new Error('Enter both weight and height');
+          const bmi = (weight / (height * height)) * 703;
+          let desc = '';
+          if (bmi < 18.5) desc = 'Underweight';
+          else if (bmi < 25) desc = 'Normal';
+          else if (bmi < 30) desc = 'Overweight';
+          else desc = 'Obese';
+
+          let bodyFatMsg = '';
+          if (waist && age) {
+            let bf = 0;
+            if (gender === 'male') {
+              bf = 86.010 * Math.log10(waist - height) - 70.041 * Math.log10(height) + 36.76;
+            } else {
+              bf = 163.205 * Math.log10(waist + height - height) - 97.684 * Math.log10(height) - 78.387;
+            }
+            if (!isNaN(bf) && isFinite(bf)) {
+              bodyFatMsg = `\nEstimated Body Fat: ${bf.toFixed(1)}% (U.S. Navy method)`;
+            }
+          }
+
+          let funMsg = '';
+          if (bmi < 18.5) funMsg = "You are lighter than a hobbit's snack stash!";
+          else if (bmi < 25) funMsg = "You're in the Shire sweet spot.";
+          else if (bmi < 30) funMsg = "Consider more journeys on foot, like Samwise!";
+          else funMsg = "Orc-sized risk. The ring weighs heavy. Walk it off!";
+
+          if (age && age < 19) funMsg += "\n*Note: BMI for age is needed for kids/teens. This is for adults!";
+
+          output = `BMI: ${bmi.toFixed(1)} (${desc})\n${bodyFatMsg}\n${funMsg}`;
         } else {
-          throw new Error('Unknown calculation type.');
+          let expr = document.getElementById('inputBox').value;
+          if (!expr) throw new Error('Enter an expression');
+          output = math.evaluate(expr).toString();
         }
-        resultBox.textContent = result;
-        addToHistory(`${type}: ${result}`);
+        result.textContent = output;
+        if (output) {
+          const stamp = new Date().toLocaleString();
+          let pinBtn = `<button class="pin-btn" onclick="pinResult(\`${output.replace(/`/g,"\\`")}\`)">📌</button>`;
+          history.innerHTML += `<div>[${stamp}] ${type}:<br>${output.replace(/\n/g,"<br>")}${pinBtn}</div>`;
+          history.scrollTop = history.scrollHeight;
+        }
+        renderPinned();
       } catch (err) {
-        const errorMsg = `Error: ${err.message}`;
-        resultBox.textContent = errorMsg;
-        addToHistory(`${type}: ${errorMsg}`);
+        result.textContent = 'Error: ' + err.message;
       }
     }
 
-    function convertViaDropdown() {
-      const from = document.getElementById('fromUnit').value;
-      const to = document.getElementById('toUnit').value;
-      const val = parseFloat(document.getElementById('unitValue').value);
-      const resultBox = document.getElementById('result');
-      try {
-        if (isNaN(val)) throw new Error("Enter a valid number");
-        const converted = math.unit(val, from).to(to);
-        const result = `${val} ${from} = ${converted.toString()}`;
-        resultBox.textContent = result;
-        addToHistory(`convert: ${result}`);
-      } catch (err) {
-        const errorMsg = `Error: ${err.message}`;
-        resultBox.textContent = errorMsg;
-        addToHistory(`convert: ${errorMsg}`);
+    // ---- Other Stuff ----
+    function copyResultToClipboard() {
+      const text = document.getElementById('result').textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+      showCopyToast('Copied!');
+    }
+    function clearFields() {
+      clearResultsOnly();
+      const type = document.getElementById('calcType').value;
+      document.getElementById('inputBox').value = '';
+      if (type === 'convert') {
+        document.getElementById('unitValue').value = '';
+      } else if (type === 'macro') {
+        ['weight','height','age','calories'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        ['protein','fat','carbs'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = id==='carbs'?40:30; });
+        ['proteinVal','fatVal','carbsVal'].forEach((id,i) => { if(document.getElementById(id)) document.getElementById(id).textContent = (id==='carbsVal'?'40':'30')+'%'; });
+      } else if (type === 'fuel') {
+        ['miles','mpg','fuelPrice','daysPerWeek','weeksPerYear','altMPG'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        document.getElementById('fuelComparison').innerHTML = '';
+      } else if (type === 'time') {
+        ['workedHours','goalHours','clockInTime','lunchBreak','lunchPaid'].forEach(id => {
+          if(document.getElementById(id)) {
+            if (id === 'lunchPaid') document.getElementById(id).checked = true;
+            else document.getElementById(id).value = '';
+          }
+        });
+      } else if (type === 'bmi') {
+        ['bmiWeight','bmiHeight','waist','ageBMI'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        if(document.getElementById('genderBMI')) document.getElementById('genderBMI').value = 'male';
       }
     }
-
-    function addToHistory(entry) {
-      const historyBox = document.getElementById('history');
-      const div = document.createElement('div');
-      div.textContent = entry;
-      historyBox.prepend(div);
+    function clearResultsOnly() {
+      document.getElementById('result').textContent = '';
     }
-
     function clearHistory() {
       document.getElementById('history').innerHTML = '';
+      pinnedResults = [];
+      localStorage.setItem('pinnedResults','[]');
     }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      updatePlaceholder();
-      populateUnitDropdowns();
-      const fromUnit = document.getElementById("fromUnit");
-      fromUnit.addEventListener("change", () => {
-        const selected = fromUnit.value;
-        const toUnit = document.getElementById("toUnit");
-        toUnit.innerHTML = "";
-        allUnits.forEach(unit => {
-          try {
-            math.unit(1, selected).to(unit);
-            const opt = document.createElement("option");
-            opt.value = opt.textContent = unit;
-            toUnit.appendChild(opt);
-          } catch {}
-        });
-      });
-    });
+    function showCopyToast(msg) {
+      let toast = document.createElement('div');
+      toast.className = 'copy-toast';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 2000);
+    }
+    function pinResult(html) {
+      pinnedResults.push(html);
+      localStorage.setItem('pinnedResults',JSON.stringify(pinnedResults));
+      showCopyToast('Pinned result!');
+      renderPinned();
+    }
+    function renderPinned() {
+      if (!pinnedResults.length) return;
+      let his = document.getElementById('history');
+      let phtml = pinnedResults.map(r=>`<div class="pinned-result">${r}</div>`).join('');
+      his.innerHTML = phtml + his.innerHTML;
+    }
+    // Start the app (always show UI for current calc mode)
+    window.onload = function() {
+      updateUI();
+      renderPinned();
+    };
   </script>
 </body>
 </html>

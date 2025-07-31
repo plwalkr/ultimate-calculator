@@ -19,51 +19,308 @@
       --fav-unit-bg: #3d483a;
       --overtime: #d1311e;
     }
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #151616 0%, #234b28 100%); color: var(--text-color); margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center;}
-    .container { background-color: var(--container-bg); box-shadow: 0 6px 40px #000b; padding: 2.5rem 2rem; border-radius: 20px; max-width: 480px; width: 100%; min-width: 320px; margin: 1rem; animation: popin 0.7s cubic-bezier(.4,2.7,.7,0.7);}
-    @keyframes popin { from {transform: scale(0.85) translateY(30px);} to {transform: scale(1) translateY(0);} }
-    h1 { text-align: center; color: var(--result-color); font-weight: 700; letter-spacing: 2px; font-size: 2.2rem; margin-bottom: 0.8rem; user-select: none; text-shadow: 0 4px 16px #000a; font-family: 'Ringbearer', 'Inter', sans-serif;}
-    .theme-scrollbar { display: flex; overflow-x: auto; margin-bottom: 1rem; justify-content: center; gap: 0.5rem;}
-    .theme-option { min-width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fff4; cursor: pointer; transition: border 0.15s; outline: none;}
-    .theme-option:hover, .theme-option:focus { border: 2.5px solid var(--accent-color);}
-    #ringModeBtn { background: radial-gradient(circle at 70% 30%, #edb941 30%, #d9ad26 65%, #a28209 100%); color: #4b3c07; border: none; font-family: 'Ringbearer', 'Inter', sans-serif; font-size: 1.05em; margin-bottom: 8px; margin-left: 8px; border-radius: 11px; padding: 4px 18px; cursor: pointer; box-shadow: 0 2px 14px #0006; transition: filter 0.13s;}
-    #ringModeBtn.active { outline: 2px solid #edb941; filter: drop-shadow(0 0 8px #fbe62c99); background: radial-gradient(circle at 60% 40%, #edb941 40%, #f4e49e 100%);}
-    #colorThemeBtn { background: #3a3f58; color: #fff; border-radius: 8px; padding: 4px 18px; border: none; font-size: 1.01em; margin-bottom: 8px; margin-left: 8px; cursor: pointer;}
-    select, input, textarea { width: 100%; padding: 0.6rem; margin-bottom: 0.7rem; border-radius: 8px; border: 1.5px solid #44475a; background: var(--input-bg); color: var(--text-color); font-size: 1.08rem; box-sizing: border-box; outline: none; transition: border 0.15s;}
-    input:focus, select:focus, textarea:focus { border: 1.5px solid var(--accent-color);}
-    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; margin-bottom: 1rem;}
-    .extra-button-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.1rem;}
-    button { cursor: pointer; background-color: var(--button-bg); color: var(--text-color); font-weight: 700; border: none; border-radius: 9px; padding: 0.9em 0.3em; font-size: 1.08rem; letter-spacing: 1px; transition: background 0.16s, transform 0.09s; box-shadow: 0 2px 7px #0008;}
-    button:hover, button:focus { background-color: var(--button-hover); transform: scale(1.04);}
-    .fav-unit-btn { background: var(--fav-unit-bg); color: #d1e231; border: none; margin: 0 3px 7px 0; padding: 3px 11px; border-radius: 7px; font-size: 1.01em; font-weight: 600; cursor: pointer; transition: filter 0.14s; box-shadow: 0 1px 6px #0004;}
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #151616 0%, #234b28 100%);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background-color: var(--container-bg);
+      box-shadow: 0 6px 40px #000b;
+      padding: 2.5rem 2rem;
+      border-radius: 20px;
+      max-width: 480px;
+      width: 100%;
+      min-width: 320px;
+      margin: 1rem;
+      animation: popin 0.7s cubic-bezier(.4,2.7,.7,0.7);
+    }
+    @keyframes popin {
+      from {transform: scale(0.85) translateY(30px);}
+      to {transform: scale(1) translateY(0);}
+    }
+    h1 {
+      text-align: center;
+      color: var(--result-color);
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      user-select: none;
+      text-shadow: 0 4px 16px #000a;
+      font-family: 'Ringbearer', 'Inter', sans-serif;
+    }
+    .theme-scrollbar {
+      display: flex;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .theme-option {
+      min-width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #fff4;
+      cursor: pointer;
+      transition: border 0.15s;
+      outline: none;
+    }
+    .theme-option:hover, .theme-option:focus {
+      border: 2.5px solid var(--accent-color);
+    }
+    #ringModeBtn {
+      background: radial-gradient(circle at 70% 30%, #edb941 30%, #d9ad26 65%, #a28209 100%);
+      color: #4b3c07;
+      border: none;
+      font-family: 'Ringbearer', 'Inter', sans-serif;
+      font-size: 1.05em;
+      margin-bottom: 8px;
+      margin-left: 8px;
+      border-radius: 11px;
+      padding: 4px 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 14px #0006;
+      transition: filter 0.13s;
+    }
+    #ringModeBtn.active {
+      outline: 2px solid #edb941;
+      filter: drop-shadow(0 0 8px #fbe62c99);
+      background: radial-gradient(circle at 60% 40%, #edb941 40%, #f4e49e 100%);
+    }
+    #colorThemeBtn {
+      background: #3a3f58;
+      color: #fff;
+      border-radius: 8px;
+      padding: 4px 18px;
+      border: none;
+      font-size: 1.01em;
+      margin-bottom: 8px;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 0.7rem;
+      border-radius: 8px;
+      border: 1.5px solid #44475a;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1.08rem;
+      box-sizing: border-box;
+      outline: none;
+      transition: border 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border: 1.5px solid var(--accent-color);
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .extra-button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.1rem;
+    }
+    button {
+      cursor: pointer;
+      background-color: var(--button-bg);
+      color: var(--text-color);
+      font-weight: 700;
+      border: none;
+      border-radius: 9px;
+      padding: 0.9em 0.3em;
+      font-size: 1.08rem;
+      letter-spacing: 1px;
+      transition: background 0.16s, transform 0.09s;
+      box-shadow: 0 2px 7px #0008;
+    }
+    button:hover, button:focus {
+      background-color: var(--button-hover);
+      transform: scale(1.04);
+    }
+    .fav-unit-btn {
+      background: var(--fav-unit-bg);
+      color: #d1e231;
+      border: none;
+      margin: 0 3px 7px 0;
+      padding: 3px 11px;
+      border-radius: 7px;
+      font-size: 1.01em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter 0.14s;
+      box-shadow: 0 1px 6px #0004;
+    }
     .fav-unit-btn:hover { filter: brightness(1.1);}
-    .result { background: #282a36; padding: 1.1rem; margin-top: 0.5rem; border-radius: 9px; font-size: 1.14rem; color: var(--result-color); word-break: break-word; min-height: 2.2rem; font-family: 'Fira Mono', 'Consolas', monospace; box-shadow: 0 1px 10px #131c2a42; user-select: text;}
-    .history { background: #22252c; padding: 0.9rem; margin-top: 1.1rem; border-radius: 9px; font-size: 1.01rem; min-height: 2.3rem; max-height: 180px; overflow-y: auto;}
-    .history div { border-bottom: 1px dashed #3337; padding: 0.17rem 0 0.17rem 0.3rem; opacity: 0.96; font-size: 0.97rem; position: relative;}
+    .result {
+      background: #282a36;
+      padding: 1.1rem;
+      margin-top: 0.5rem;
+      border-radius: 9px;
+      font-size: 1.14rem;
+      color: var(--result-color);
+      word-break: break-word;
+      min-height: 2.2rem;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      box-shadow: 0 1px 10px #131c2a42;
+      user-select: text;
+    }
+    .history {
+      background: #22252c;
+      padding: 0.9rem;
+      margin-top: 1.1rem;
+      border-radius: 9px;
+      font-size: 1.01rem;
+      min-height: 2.3rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .history div {
+      border-bottom: 1px dashed #3337;
+      padding: 0.17rem 0 0.17rem 0.3rem;
+      opacity: 0.96;
+      font-size: 0.97rem;
+      position: relative;
+    }
     .history div:last-child { border-bottom: none;}
-    .pin-btn { position: absolute; right: 7px; top: 7px; font-size: 0.95em; background: #27230e; color: #f4de47; border-radius: 7px; border: none; padding: 2px 10px; cursor: pointer;}
-    .macro-slider-container { margin-bottom: 1.0rem;}
-    .macro-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.98rem; margin-bottom: 0.1rem; color: var(--accent-color);}
-    .macro-slider-container input[type="range"] { width: 100%; accent-color: var(--result-color); margin-bottom: 0.1rem;}
-    .copy-toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #212c2f; color: #fff; padding: 9px 22px; border-radius: 20px; font-size: 1.08rem; box-shadow: 0 3px 12px #000b; opacity: 0.95; z-index: 9; pointer-events: none; animation: fadeToast 2s linear;}
-    .toggle-switch { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; font-size: 1rem; user-select: none;}
-    .toggle-switch input[type="checkbox"] { width: 28px; height: 18px; accent-color: var(--accent-color); cursor: pointer; vertical-align: middle;}
-    .overtime { color: var(--overtime); font-weight: 700; font-size: 1.09em;}
-    #weeklyLogTable { width: 100%; border-collapse: collapse; font-size: 0.98em; margin: 0.7em 0 0.2em 0;}
-    #weeklyLogTable th, #weeklyLogTable td { border: 1px solid #454e4c; padding: 5px 2px; text-align: center; background: #202e25; color: #eee;}
+    .pin-btn {
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      font-size: 0.95em;
+      background: #27230e;
+      color: #f4de47;
+      border-radius: 7px;
+      border: none;
+      padding: 2px 10px;
+      cursor: pointer;
+    }
+    .macro-slider-container {
+      margin-bottom: 1.0rem;
+    }
+    .macro-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.98rem;
+      margin-bottom: 0.1rem;
+      color: var(--accent-color);
+    }
+    .macro-slider-container input[type="range"] {
+      width: 100%;
+      accent-color: var(--result-color);
+      margin-bottom: 0.1rem;
+    }
+    .copy-toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #212c2f;
+      color: #fff;
+      padding: 9px 22px;
+      border-radius: 20px;
+      font-size: 1.08rem;
+      box-shadow: 0 3px 12px #000b;
+      opacity: 0.95;
+      z-index: 9;
+      pointer-events: none;
+      animation: fadeToast 2s linear;
+    }
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .toggle-switch input[type="checkbox"] {
+      width: 28px;
+      height: 18px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    .overtime {
+      color: var(--overtime);
+      font-weight: 700;
+      font-size: 1.09em;
+    }
+    #weeklyLogTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.98em;
+      margin: 0.7em 0 0.2em 0;
+    }
+    #weeklyLogTable th, #weeklyLogTable td {
+      border: 1px solid #454e4c;
+      padding: 5px 2px;
+      text-align: center;
+      background: #202e25;
+      color: #eee;
+    }
     #weeklyLogTable th {background: #1b2b18; color: #d1e231;}
     #weeklyLogTable tfoot td { font-weight: 700;}
     #addLogBtn {margin-bottom: 6px;}
     .csv-btn { background: #26602a; color:#fff;}
     .csv-btn:hover { background: #51a757;}
-    .pinned-result { background: #382a00 !important; color: #fbe62c !important; border: 1.3px solid #e0b900 !important; font-size: 1.09em;}
-    #colorThemeModal { display: none; position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 99; background: #000c; align-items: center; justify-content: center;}
-    #colorThemeBox { background: #1e1e2f; padding: 1.4em 2.2em 1.4em 2.2em; border-radius: 15px; box-shadow: 0 4px 30px #000a; min-width: 270px; text-align: center;}
+    .pinned-result {
+      background: #382a00 !important;
+      color: #fbe62c !important;
+      border: 1.3px solid #e0b900 !important;
+      font-size: 1.09em;
+    }
+    #colorThemeModal {
+      display: none;
+      position: fixed;
+      left: 0; top: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: #000c;
+      align-items: center;
+      justify-content: center;
+    }
+    #colorThemeBox {
+      background: #1e1e2f;
+      padding: 1.4em 2.2em 1.4em 2.2em;
+      border-radius: 15px;
+      box-shadow: 0 4px 30px #000a;
+      min-width: 270px;
+      text-align: center;
+    }
     .ct-input {width: 70px;}
     .ct-btn {background: #3442a7;color:#fff;margin: 0 7px;}
-    @keyframes fadeToast { 0%{opacity:0;} 10%{opacity:1;} 90%{opacity:0.98;} 100%{opacity:0;}}
-    @font-face { font-family: 'Ringbearer'; src: url('https://cdn.jsdelivr.net/gh/danielgjackson/ringbearer/ringbearer.ttf');}
-    @media (max-width:600px) {.container { max-width:98vw; padding:1.1rem 0.3rem;} h1 { font-size: 1.2rem; }}
+    @keyframes fadeToast {
+      0%{opacity:0;}
+      10%{opacity:1;}
+      90%{opacity:0.98;}
+      100%{opacity:0;}
+    }
+    @font-face {
+      font-family: 'Ringbearer';
+      src: url('https://cdn.jsdelivr.net/gh/danielgjackson/ringbearer/ringbearer.ttf');
+    }
+    @media (max-width:800px) {
+      .container { max-width:98vw; padding:1.1rem 0.3rem; min-width: 0;}
+      h1 { font-size: 1.3rem; }
+      .button-grid {grid-template-columns: 1fr;gap: 0.7rem;}
+    }
+    @media (max-width:430px) {
+      .container { padding: 0.6rem 0.1rem; border-radius: 0;}
+      .extra-button-row, .theme-scrollbar { flex-direction: column; gap: 0.3rem;}
+      h1 {font-size: 1rem;}
+    }
   </style>
 </head>
 <body>
@@ -112,27 +369,50 @@
     </div>
   </div>
   <script>
-    // ==== DATA STORAGE ====
+    // ==== ADD US COOKING UNITS TO MATH.JS ====
+    try {
+      math.createUnit('tsp', { definition: '4.92892159375 ml', aliases: ['teaspoon', 'teaspoons', 'tspn'] });
+      math.createUnit('tbsp', { definition: '3 tsp', aliases: ['tablespoon', 'tablespoons', 'T', 'tblsp'] });
+      math.createUnit('fl_oz', { definition: '2 tbsp', aliases: ['fl oz', 'fluid ounce', 'fluid ounces'] });
+      math.createUnit('cup', { definition: '8 fl_oz', aliases: ['cups'] });
+      math.createUnit('pt', { definition: '2 cup', aliases: ['pint', 'pints'] });
+      math.createUnit('qt', { definition: '2 pt', aliases: ['quart', 'quarts'] });
+      math.createUnit('gal', { definition: '4 qt', aliases: ['gallon', 'gallons'] });
+    } catch(e) {}
+
     let customUnits = JSON.parse(localStorage.getItem('customUnits')||'[]');
     let favoritePairs = [
-      ['lb','kg'], ['kg','lb'], ['psi','bar'], ['bar','psi'],
-      ['ft','m'], ['m','ft'], ['Nm','ft-lb'], ['ft-lb','Nm'],
-      ['F','C'], ['C','F']
+      ['lb','kg'], ['kg','lb'],
+      ['psi','bar'], ['bar','psi'],
+      ['ft','m'], ['m','ft'],
+      ['tsp','tbsp'], ['tbsp','cup'],
+      ['cup','pt'], ['pt','qt'], ['qt','gal'],
+      ['oz','g'], ['g','oz'],
+      ['degF','degC'], ['degC','degF']
     ];
+    let unitAliases = {
+      'tablespoon':'tbsp', 'tablespoons':'tbsp', 'T':'tbsp', 'tblsp':'tbsp',
+      'teaspoon':'tsp', 'teaspoons':'tsp', 'tspn':'tsp',
+      'ounces':'oz', 'ounce':'oz', 'fl oz':'fl_oz', 'fluid ounce':'fl_oz', 'fluid ounces':'fl_oz',
+      'cups':'cup', 'pint':'pt', 'pints':'pt',
+      'quart':'qt', 'quarts':'qt', 'gallon':'gal', 'gallons':'gal',
+      'pound':'lb', 'pounds':'lb', 'lbs':'lb',
+      'degrees F':'degF', 'degrees C':'degC', 'fahrenheit':'degF', 'celsius':'degC'
+    };
     let weeklyLog = JSON.parse(localStorage.getItem('weeklyLog')||'[]');
     let pinnedResults = JSON.parse(localStorage.getItem('pinnedResults')||'[]');
 
-    // ==== UNIT CATEGORIES (GLOBAL!) ====
+    // ==== UNIT CATEGORIES ====
     const unitCategories = {
       length: ['mm', 'cm', 'm', 'km', 'in', 'ft', 'yd', 'mi'],
       mass: ['mg', 'g', 'kg', 'oz', 'lb', 'ton'],
-      volume: ['mm3', 'cm3', 'ml', 'l', 'm3', 'in3', 'ft3', 'yd3', 'gal', 'qt', 'pt', 'cup', 'floz', 'tbsp', 'tsp'],
+      volume: ['ml', 'l', 'tsp', 'tbsp', 'fl_oz', 'cup', 'pt', 'qt', 'gal'],
       force: ['N', 'lbf'],
       energy: ['J', 'kJ', 'Wh', 'kWh', 'cal', 'kcal'],
       power: ['W', 'kW', 'MW', 'hp'],
       temp: ['degC', 'degF', 'K'],
-      pressure: ['Pa', 'kPa', 'MPa', 'bar', 'atm', 'psi', 'mmHg', 'torr'],
-      torque: ['N*m', 'ft*lbf']
+      pressure: ['Pa', 'kPa', 'bar', 'atm', 'psi'],
+      torque: ['Nm', 'ft*lbf']
     };
 
     // ==== THEMING ====
@@ -192,20 +472,21 @@
 
         extraUI.innerHTML = `
           <div id="favUnitsRow" style="margin-bottom:5px;">${favHtml}</div>
-          <input id="unitValue" placeholder="Value to convert e.g. 100" />
+          <input id="unitValue" placeholder="Value to convert (e.g. 100)" inputmode="decimal" />
           <select id="fromUnit" onchange="updateToUnits()">
             ${allUnits.map(u => `<option value="${u}">${u}</option>`).join('')}
           </select>
           <select id="toUnit"></select>
           <button onclick="reverseUnits()">Reverse</button>
           <div id="customUnitBox"></div>
+          <div style="color:#aaa;font-size:0.91em;margin-top:6px;">Note: Not all units can be converted to each other! If it fails, try another pair.</div>
         `;
         setTimeout(()=>updateToUnits(), 0); // ensures toUnit gets filled
       } else if (type === 'macro') {
         extraUI.innerHTML = `
-          <input id="weight" placeholder="Weight (lbs)" />
-          <input id="height" placeholder="Height (inches)" />
-          <input id="age" placeholder="Age" />
+          <input id="weight" placeholder="Weight (lbs)" inputmode="decimal" />
+          <input id="height" placeholder="Height (inches)" inputmode="decimal" />
+          <input id="age" placeholder="Age" inputmode="numeric" />
           <select id="gender"><option value="male">Male</option><option value="female">Female</option></select>
           <select id="activityLevel" onchange="adjustCalories()">
             <option value="1.2">Sedentary (little/no exercise)</option>
@@ -236,37 +517,39 @@
         `;
       } else if (type === 'fuel') {
         extraUI.innerHTML = `
-          <input id="miles" placeholder="Miles (one way)" />
-          <input id="mpg" placeholder="MPG" />
-          <input id="fuelPrice" placeholder="Fuel Price/gal" />
-          <input id="daysPerWeek" placeholder="Days/week (for commute)" style="display:none;" />
-          <input id="weeksPerYear" placeholder="Weeks/year (default 50)" style="display:none;" />
-          <input id="altMPG" placeholder="Compare: MPG of Efficient Vehicle" style="display:none;" />
+          <input id="miles" placeholder="Miles (one way)" inputmode="decimal" />
+          <input id="mpg" placeholder="MPG" inputmode="decimal" />
+          <input id="fuelPrice" placeholder="Fuel Price/gal" inputmode="decimal" />
+          <input id="daysPerWeek" placeholder="Days/week (for commute)" style="display:none;" inputmode="numeric" />
+          <input id="weeksPerYear" placeholder="Weeks/year (default 50)" style="display:none;" inputmode="numeric" />
+          <input id="altMPG" placeholder="Compare: MPG of Efficient Vehicle" style="display:none;" inputmode="decimal" />
           <div id="fuelComparison"></div>
         `;
       } else if (type === 'time') {
         extraUI.innerHTML = `
-          <input id="workedHours" placeholder="Hours you've worked so far (e.g. 6.5)" />
-          <input id="goalHours" placeholder="Goal total hours (e.g. 16)" />
-          <input id="clockInTime" type="time" placeholder="Clock-in time (when you started this new block)" />
+          <input id="workedHours" placeholder="Hours you've worked so far (e.g. 6.5)" inputmode="decimal" />
+          <input id="goalHours" placeholder="Goal total hours (e.g. 16)" inputmode="decimal" />
+          <input id="clockInTime" type="time" placeholder="08:00" />
           <input id="lunchBreak" placeholder="Lunch break (min, e.g. 30)" type="number" min="0" value="30"/>
+          <div style="font-size:0.93rem;color:#b4b4b4;margin:-0.3rem 0 0.5rem 0;">
+            Example: If you started work at 8:15am, enter <b>08:15</b><br>
+            For 1:45pm, enter <b>13:45</b>.<br>
+            (24h format: 07:30 = 7:30 AM, 13:00 = 1:00 PM)
+          </div>
           <div class="toggle-switch">
             <label for="lunchPaid">Lunch break paid?</label>
             <input id="lunchPaid" type="checkbox" checked />
             <span style="font-size:0.94em;">Paid</span>
-          </div>
-          <div style="font-size:0.93rem;color:#aaa;margin:-0.5rem 0 0.7rem 0;">
-            (24h format: 07:30 = 7:30 AM, 13:00 = 1:00 PM)
           </div>
           <div id="weeklyLogArea"></div>
         `;
         renderWeeklyLog();
       } else if (type === 'bmi') {
         extraUI.innerHTML = `
-          <input id="bmiWeight" placeholder="Weight in lbs" />
-          <input id="bmiHeight" placeholder="Height in inches" />
-          <input id="waist" placeholder="Waist circumference (inches, optional)" />
-          <input id="ageBMI" placeholder="Age (for body fat %)" />
+          <input id="bmiWeight" placeholder="Weight in lbs" inputmode="decimal" />
+          <input id="bmiHeight" placeholder="Height in inches" inputmode="decimal" />
+          <input id="waist" placeholder="Waist circumference (inches, optional)" inputmode="decimal" />
+          <input id="ageBMI" placeholder="Age (for body fat %)" inputmode="numeric" />
           <select id="genderBMI">
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -277,14 +560,7 @@
       clearResultsOnly();
     }
 
-    // Smart Unit Converter Logic
-    function renderUnitExtras() {
-      let favHtml = favoritePairs.map(([from,to]) =>
-        `<button class="fav-unit-btn" onclick="setFavUnits('${from}','${to}')">${from}→${to}</button>`
-      ).join('');
-      favHtml += `<button class="fav-unit-btn" onclick="showAddCustomUnit()">+Custom Unit</button>`;
-      document.getElementById('favUnitsRow').innerHTML = favHtml;
-    }
+    // Unit Converter Logic with Aliases
     function setFavUnits(from, to) {
       document.getElementById('fromUnit').value = from;
       updateToUnits();
@@ -331,7 +607,8 @@
       showCopyToast(`Added custom unit: ${name}`);
     }
 
-    // ---- Macro Calculator Upgrades ----
+    // Macro Calculator, Fuel, Time Clock, BMI -- UNCHANGED FROM LAST VERSION
+
     function adjustMacros(changed) {
       const p = document.getElementById('protein');
       const f = document.getElementById('fat');
@@ -404,6 +681,11 @@
           let val = parseFloat(document.getElementById('unitValue').value);
           let from = document.getElementById('fromUnit').value;
           let to = document.getElementById('toUnit').value;
+
+          // Use aliases so "tablespoon" etc. work too
+          from = unitAliases[from] || from;
+          to = unitAliases[to] || to;
+
           // Try custom unit
           let custom = customUnits.find(u=>u.name===from||u.name===to);
           if (custom) {
@@ -416,7 +698,7 @@
               const unit = math.unit(val, from);
               output = unit.toNumber(to).toFixed(4) + ' ' + to;
             } catch (e) {
-              throw new Error(`Invalid conversion: "${from}" to "${to}"`);
+              throw new Error(`Can't convert from "${from}" to "${to}". Try another pair!`);
             }
           }
         } else if (type === 'macro') {
@@ -545,7 +827,7 @@
       }
     }
 
-    // ---- Other Stuff ----
+    // --- The rest of the unchanged code for pins, logs, clear, etc. ---
     function copyResultToClipboard() {
       const text = document.getElementById('result').textContent;
       if (!text) return;
@@ -604,7 +886,88 @@
       let phtml = pinnedResults.map(r=>`<div class="pinned-result">${r}</div>`).join('');
       his.innerHTML = phtml + his.innerHTML;
     }
-    // Start the app (always show UI for current calc mode)
+
+    // Weekly log stuff (unchanged)
+    function addWeeklyLog() {
+      const worked = parseFloat(document.getElementById('workedHours').value);
+      const goal = parseFloat(document.getElementById('goalHours').value);
+      const clockIn = document.getElementById('clockInTime').value;
+      const lunchMin = parseFloat(document.getElementById('lunchBreak').value) || 0;
+      const lunchPaid = document.getElementById('lunchPaid').checked;
+      let logDate = prompt("Enter date for log (YYYY-MM-DD)", new Date().toISOString().slice(0,10));
+      if (!logDate) return;
+      let log = {date:logDate,worked,goal,clockIn,lunchMin,lunchPaid};
+      weeklyLog.push(log);
+      localStorage.setItem('weeklyLog',JSON.stringify(weeklyLog));
+      renderWeeklyLog();
+      showCopyToast('Added to weekly log');
+    }
+    function renderWeeklyLog() {
+      let area = document.getElementById('weeklyLogArea');
+      if (!area) return;
+      if (!weeklyLog.length) {area.innerHTML=''; return;}
+      let sum = 0;
+      let rows = weeklyLog.map(l=>{
+        sum += l.worked;
+        let ot = l.worked>8?'<span class="overtime">Overtime!</span>':'';
+        return `<tr>
+          <td>${l.date}</td>
+          <td>${l.worked}</td>
+          <td>${l.goal||'-'}</td>
+          <td>${ot}</td>
+        </tr>`;
+      }).join('');
+      let avg = (sum/weeklyLog.length).toFixed(2);
+      area.innerHTML = `
+        <table id="weeklyLogTable">
+          <thead><tr><th>Date</th><th>Worked</th><th>Goal</th><th>OT</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><td>Totals</td><td>${sum.toFixed(2)}</td><td></td><td>Avg/day: ${avg}</td></tr></tfoot>
+        </table>
+        <button onclick="clearWeeklyLog()">Clear Log</button>
+      `;
+    }
+    function clearWeeklyLog() {
+      weeklyLog = [];
+      localStorage.setItem('weeklyLog','[]');
+      renderWeeklyLog();
+    }
+    function exportWeeklyLog() {
+      if (!weeklyLog.length) return;
+      let csv = "Date,Worked,Goal,ClockIn,LunchMin,LunchPaid\n";
+      weeklyLog.forEach(l=>{
+        csv+=`${l.date},${l.worked},${l.goal},${l.clockIn},${l.lunchMin},${l.lunchPaid}\n`;
+      });
+      let blob = new Blob([csv],{type:'text/csv'});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url; a.download = "weekly_log.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showCopyToast('Exported weekly log');
+    }
+
+    // Fuel Commute
+    function toggleCommute() {
+      let days = document.getElementById('daysPerWeek');
+      let weeks = document.getElementById('weeksPerYear');
+      let alt = document.getElementById('altMPG');
+      let show = days.style.display !== 'inline';
+      [days,weeks,alt].forEach(el=>el.style.display=show?'inline':'none');
+      document.getElementById('fuelComparison').innerHTML = '';
+    }
+
+    // History Export
+    function exportHistory() {
+      let history = document.getElementById('history').innerText;
+      let blob = new Blob([history],{type:'text/plain'});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url; a.download = "calculegend_history.txt";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showCopyToast('Exported history');
+    }
+
+    // App start
     window.onload = function() {
       updateUI();
       renderPinned();

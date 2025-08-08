@@ -11,23 +11,27 @@
       --bg:#0f1115;--card:#161a22;--screen:#0b0e13;--ink:#f3f6ff;--muted:#97a3b6;--accent:#5bd38e;--accent-2:#2b78e4;
       --key:#222836;--key-op:#2b3144;--key-fn:#1e2433;--key-eq:#2b78e4;--ring:#fbe62c;--error:#ff6b6b;--ok:#5bd38e;
       --radius:16px;--shadow:0 20px 60px #0005;
-      /* tokens used by components */
       --tab-bg:#1a2030; --tab-fg:#9db0d0; --tab-active-bg:#2b78e4; --tab-active-fg:#fff;
       --control-bg:#0e131c; --control-bd:#263046;
     }
-    /* Light theme: higher contrast */
+    /* Light theme: higher contrast fixes */
     .theme-light{
       --bg:#f7f9ff; --card:#ffffff; --screen:#eef3ff; --ink:#0b1020; --muted:#49556c;
       --accent:#205fbe; --accent-2:#205fbe;
-      --key:#e8edf7; --key-op:#dfe7f7; --key-fn:#d8e4ff; --key-eq:#205fbe;
-      --tab-bg:#e7eefc; --tab-fg:#21406a; --tab-active-bg:#205fbe; --tab-active-fg:#ffffff;
+
+      --key:#f0f4ff;       /* lighter key */
+      --key-op:#e8eefc;
+      --key-fn:#e6f0ff;
+      --key-eq:#205fbe;
+
+      --tab-bg:#e7eefc; --tab-fg:#1a3358; --tab-active-bg:#205fbe; --tab-active-fg:#ffffff;
       --control-bg:#ffffff; --control-bd:#c9d7ef;
     }
     /* TI-Nspire themed */
     .theme-inspire{
       --bg:#171a1e; --card:#0e1114; --screen:#091018; --ink:#e9f1ff; --muted:#9fb2c9;
       --accent:#00f09a; --accent-2:#008cff;
-      --key:#14181d; --key-op:#1a2027; --key-fn:#10151b; --key-eq:#008cff;
+      --key:#0f141a; --key-op:#131a21; --key-fn:#0e151c; --key-eq:#008cff;
       --tab-bg:#0f1722; --tab-fg:#b8c7dd; --tab-active-bg:#008cff; --tab-active-fg:#ffffff;
       --control-bg:#0f141a; --control-bd:#283a4a;
     }
@@ -46,7 +50,6 @@
     .theme-picker{display:flex;align-items:center;gap:8px}
     .theme-select{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:0.95rem}
 
-    /* calculator look */
     .calc-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     @media (max-width:900px){.calc-grid{grid-template-columns:1fr}}
     .screen{background:linear-gradient(180deg,var(--screen),#0a0d12);border:1px solid #1e2533;border-radius:16px;padding:14px;min-height:130px;position:relative;overflow:hidden}
@@ -60,15 +63,24 @@
     .key:active{transform:translateY(1px)}
     .span2{grid-column:span 2}
     .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-    .input, select, textarea{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:#eaf0ff;padding:10px;font-size:1rem}
+    .input, select, textarea{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:1rem}
     .btn{border:1px solid var(--control-bd);background:#22304a;color:#cfe0ff;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer}
     .btn.primary{background:var(--accent-2);color:#fff;border-color:#0b5fb8}
 
+    /* Light theme button label contrast fix */
+    .theme-light .key{ color:#0b1020; border-color:#d6e3fb; box-shadow:inset 0 -2px 0 #c9d7ef; }
+    .theme-light .btn{ background:#eaf1ff; color:#0b1020; border-color:#c9d7ef; }
+    .theme-light .result{ color:#0b1020; }
+    .theme-light .expr{ color:#2f4466; }
+
     .tape{max-height:420px;overflow:auto}
     .trow{display:flex;justify-content:space-between;gap:10px;padding:8px;border-bottom:1px dashed #25304a;font-size:.95rem}
+    .theme-light .trow{ border-bottom-color:#d6e3fb; }
     .trow .l{color:#9db0d0}
+    .theme-light .trow .l{ color:#5574a6; }
 
     .section-title{margin:8px 0 10px;color:#9bd3ff}
+    .theme-light .section-title{ color:#205fbe; }
     .note{color:var(--muted);font-size:.9rem}
 
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -84,6 +96,8 @@
     table{width:100%;border-collapse:collapse}
     th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
     th{color:#9bd3ff}
+    .theme-light th{ color:#205fbe; }
+    .theme-light td{ border-bottom-color:#d6e3fb; }
 
     #diag{display:none;margin:10px 0;padding:10px;border-radius:10px;font-weight:800}
     #diag.ok{display:block;background:#0f2a1c;color:#c6ffdf;border:1px solid #31c27c}
@@ -107,7 +121,7 @@
     }
     .theme-inspire .key{
       background:#0f141a; border:1px solid #1f2a34; border-radius:10px; color:#e7f5ff;
-      box-shadow: inset 0 -2px 0 #0008, 0 1px 0 #0a0d10;
+      box-shadow:inset 0 -2px 0 #0008, 0 1px 0 #0a0d10;
     }
     .theme-inspire .key.op{ background:#131a21; }
     .theme-inspire .key.fn{ background:#0e151c; }
@@ -180,7 +194,7 @@
       /* ---------- Utils & persistence ---------- */
       const $ = (s, r=document)=> r.querySelector(s);
       const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
-      const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+      const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;","&gt;":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
       const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
       function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
@@ -215,7 +229,6 @@
         $('#themeSel').value=theme;
         $('#themeSel').addEventListener('change',()=>{
           const next=$('#themeSel').value; applyTheme(next); savePrefs({...loadPrefs(), theme:next});
-          // re-tint title immediately
           document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
         });
         document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
@@ -375,7 +388,7 @@
               <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
             </div>
             <div id="chart" class="chart"></div>
-            <div class="note">Enter up to ~6 functions. Pan/zoom with mouse or touch.</div>
+            <div class="note">Tip: Press <b>Enter</b> in the box to add a new line and auto-plot.</div>
           </section>`;
 
         const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
@@ -384,10 +397,10 @@
         $$('.input').forEach(el=> el.addEventListener('input', persist));
         $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value=''); Plotly.purge('chart'); };
 
-        $('#plotBtn').onclick=()=>{
+        function doPlot(){
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length) return;
+          if(!lines.length){ Plotly.purge('chart'); return; }
           try{
             const xs = linspace(xmin,xmax,n);
             const traces = lines.map((ex,i)=>{
@@ -398,12 +411,31 @@
             Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
             persist();
           }catch(e){ alert('Parse error in one of the functions'); }
-        };
+        }
+
+        $('#plotBtn').onclick=doPlot;
         $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
         $('#exportBtn').onclick=async ()=>{
           try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
         };
         function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
+
+        // NEW: Enter inserts newline and auto-plots
+        const gx = $('#gx');
+        gx.addEventListener('keydown', (e)=>{
+          if(e.key==='Enter' && !e.shiftKey){
+            e.preventDefault();
+            const start = gx.selectionStart, end = gx.selectionEnd;
+            const val = gx.value;
+            gx.value = val.slice(0, start) + '\n' + val.slice(end);
+            gx.selectionStart = gx.selectionEnd = start + 1;
+            persist();
+            doPlot();
+          }
+        });
+
+        // Initial render if content exists
+        if(($('#gx').value||'').trim()) doPlot();
       }
 
       /* ---------- Unit Converter ---------- */
@@ -536,7 +568,6 @@
         const PREFS = loadPrefs();
         const time12 = !!PREFS.time12;
         const ocuPref = (typeof PREFS.ocuMode === 'boolean') ? (PREFS.ocuMode ? '7a7p' : 'off') : (PREFS.ocuMode || 'off');
-        const customs = Array.isArray(PREFS.ocuCustoms)? PREFS.ocuCustoms : [];
 
         view.innerHTML=`
           <section class="surface">

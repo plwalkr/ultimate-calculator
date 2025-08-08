@@ -3,62 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LegendCalc Suite</title>
+  <title>LegendCalc Suite (Math + Time Clock) — Unzipped</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js"></script>
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     :root{
       --bg:#0f1115;--card:#161a22;--screen:#0b0e13;--ink:#f3f6ff;--muted:#97a3b6;--accent:#5bd38e;--accent-2:#2b78e4;
       --key:#222836;--key-op:#2b3144;--key-fn:#1e2433;--key-eq:#2b78e4;--ring:#fbe62c;--error:#ff6b6b;--ok:#5bd38e;
       --radius:16px;--shadow:0 20px 60px #0005;
+      /* tokens used by components */
+      --tab-bg:#1a2030; --tab-fg:#9db0d0; --tab-active-bg:#2b78e4; --tab-active-fg:#fff;
+      --control-bg:#0e131c; --control-bd:#263046;
     }
+    /* Light theme: higher contrast */
+    .theme-light{
+      --bg:#f7f9ff; --card:#ffffff; --screen:#eef3ff; --ink:#0b1020; --muted:#49556c;
+      --accent:#205fbe; --accent-2:#205fbe;
+      --key:#e8edf7; --key-op:#dfe7f7; --key-fn:#d8e4ff; --key-eq:#205fbe;
+      --tab-bg:#e7eefc; --tab-fg:#21406a; --tab-active-bg:#205fbe; --tab-active-fg:#ffffff;
+      --control-bg:#ffffff; --control-bd:#c9d7ef;
+    }
+    /* TI-Nspire themed */
+    .theme-inspire{
+      --bg:#171a1e; --card:#0e1114; --screen:#091018; --ink:#e9f1ff; --muted:#9fb2c9;
+      --accent:#00f09a; --accent-2:#008cff;
+      --key:#14181d; --key-op:#1a2027; --key-fn:#10151b; --key-eq:#008cff;
+      --tab-bg:#0f1722; --tab-fg:#b8c7dd; --tab-active-bg:#008cff; --tab-active-fg:#ffffff;
+      --control-bg:#0f141a; --control-bd:#283a4a;
+    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0e121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0e121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
     h1{font-family:Ringbearer,Inter,serif;letter-spacing:1px;font-size:1.8rem;margin:0;color:var(--accent)}
     .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tab{border:0;background:#1a2030;color:#9db0d0;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
-    .tab.active{background:var(--accent-2);color:#fff}
+    .tab{border:0;background:var(--tab-bg);color:var(--tab-fg);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
+    .tab.active{background:var(--tab-active-bg);color:var(--tab-active-fg)}
     .surface{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+
+    .theme-picker{display:flex;align-items:center;gap:8px}
+    .theme-select{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:0.95rem}
 
     /* calculator look */
     .calc-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     @media (max-width:900px){.calc-grid{grid-template-columns:1fr}}
-    .screen{background:linear-gradient(180deg,#0d121a,#0a0d12);border:1px solid #1e2533;border-radius:16px;padding:14px;min-height:130px}
+    .screen{background:linear-gradient(180deg,var(--screen),#0a0d12);border:1px solid #1e2533;border-radius:16px;padding:14px;min-height:130px;position:relative;overflow:hidden}
     .expr{color:#9db0d0;min-height:24px}
     .result{font-size:2.2rem;font-weight:800;word-break:break-all}
     .keys{display:grid;grid-template-columns:repeat(6,minmax(60px,1fr));gap:8px;margin-top:12px}
-    .key{border:0;border-radius:14px;padding:14px 10px;background:var(--key);color:#eaf0ff;font-weight:800;cursor:pointer;box-shadow:inset 0 -2px 0 #0008}
+    .key{border:1px solid transparent;border-radius:14px;padding:14px 10px;background:var(--key);color:#eaf0ff;font-weight:800;cursor:pointer;box-shadow:inset 0 -2px 0 #0008}
     .key.op{background:var(--key-op)}
     .key.fn{background:var(--key-fn)}
     .key.eq{background:var(--key-eq)}
     .key:active{transform:translateY(1px)}
     .span2{grid-column:span 2}
     .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-    .input, select{background:#0e131c;border:1.5px solid #263046;border-radius:12px;color:#eaf0ff;padding:10px;font-size:1rem}
-    .btn{border:0;background:#22304a;color:#cfe0ff;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer}
-    .btn.primary{background:var(--accent-2);color:#fff}
+    .input, select, textarea{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:#eaf0ff;padding:10px;font-size:1rem}
+    .btn{border:1px solid var(--control-bd);background:#22304a;color:#cfe0ff;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer}
+    .btn.primary{background:var(--accent-2);color:#fff;border-color:#0b5fb8}
 
     .tape{max-height:420px;overflow:auto}
     .trow{display:flex;justify-content:space-between;gap:10px;padding:8px;border-bottom:1px dashed #25304a;font-size:.95rem}
     .trow .l{color:#9db0d0}
 
     .section-title{margin:8px 0 10px;color:#9bd3ff}
-    .note{color:#97a3b6;font-size:.9rem}
+    .note{color:var(--muted);font-size:.9rem}
 
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:900px){.two-col{grid-template-columns:1fr}}
 
-    .chart{width:100%;height:360px}
+    .chart{width:100%;height:380px}
 
     .ok{color:var(--ok)} .err{color:var(--error)}
     .tests{margin-top:12px;font-size:.9rem}
     .tests .pass{color:#5bd38e}
     .tests .fail{color:#ff6b6b}
+
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
+    th{color:#9bd3ff}
+
+    #diag{display:none;margin:10px 0;padding:10px;border-radius:10px;font-weight:800}
+    #diag.ok{display:block;background:#0f2a1c;color:#c6ffdf;border:1px solid #31c27c}
+    #diag.warn{display:block;background:#2a2a0f;color:#f8ffb3;border:1px solid #f5e160}
+    #diag.err{display:block;background:#3b1116;color:#ffd5d5;border:1px solid #ff6b6b}
+
+    /* TI-Nspire vibe: LCD grid and beveled keys */
+    .theme-inspire .screen{
+      background:linear-gradient(180deg,#0c121a,#0a0f15);
+      border:1px solid #1f2a34;
+      box-shadow:inset 0 1px 0 #253444, inset 0 -1px 0 #070a0e;
+    }
+    .theme-inspire .screen::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(#1f2a34 1px, transparent 1px),
+        linear-gradient(90deg,#1f2a34 1px, transparent 1px);
+      background-size: 24px 24px, 24px 24px;
+      opacity:.14; pointer-events:none;
+    }
+    .theme-inspire .key{
+      background:#0f141a; border:1px solid #1f2a34; border-radius:10px; color:#e7f5ff;
+      box-shadow: inset 0 -2px 0 #0008, 0 1px 0 #0a0d10;
+    }
+    .theme-inspire .key.op{ background:#131a21; }
+    .theme-inspire .key.fn{ background:#0e151c; }
+    .theme-inspire .key.eq{
+      background:#008cff; border-color:#0b5fb8; color:#fff;
+      box-shadow:inset 0 -2px 0 #064b91, 0 1px 0 #0a0d10;
+    }
+    .theme-inspire .key:active{ transform:none; box-shadow:inset 0 2px 0 #0006; }
+
+    /* Focus rings per theme */
+    .theme-light :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #205fbe; outline-offset:2px; }
+    .theme-inspire :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #00f09a; outline-offset:2px; }
+    :root :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #5bd38e; outline-offset:2px; }
   </style>
 </head>
 <body>
@@ -72,623 +134,640 @@
         <button class="tab" data-tab="units">Unit Converter</button>
         <button class="tab" data-tab="time">Time Clock</button>
       </div>
+      <div class="theme-picker">
+        <span class="note">Theme</span>
+        <select id="themeSel" class="theme-select">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="inspire">TI-Inspire</option>
+        </select>
+      </div>
     </header>
-
+    <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
     <div id="selfTests" class="tests"></div>
   </div>
 
   <script>
-    /* Utils */
-    const $ = (s, r=document)=> r.querySelector(s);
-    const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
-    const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-    const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  // Prefer local libs in ./libs, fallback to CDN, then start app
+  (function(){
+    const DI = document.getElementById('diag');
+    const note=(cls,msg)=>{ DI.className=cls; DI.textContent=msg; DI.style.display='block'; };
 
-    /* Persistence helpers per tab */
-    function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
-    function loadTab(name, def){ try{ const v=localStorage.getItem('legendcalc_'+name); return v? JSON.parse(v): def; }catch(e){ return def; } }
-    function clearTab(name){ try{ localStorage.removeItem('legendcalc_'+name); }catch(e){} }
+    const libs=[
+      {global:'math', local:'./libs/math.min.js', cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
+      {global:'Plotly', local:'./libs/plotly.min.js', cdn:'https://cdn.plot.ly/plotly-2.35.2.min.js', name:'Plotly'}
+    ];
+    function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load failed: '+src)); document.head.appendChild(s); }); }
 
-    /* Router */
-    const tabs=$$('.tab');
-    tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
+    (async function ensureLibs(){
+      try{
+        for(const L of libs){
+          if(!(L.global in window)){
+            try{ await loadScript(L.local); if(!(L.global in window)) throw new Error('local missing'); }
+            catch(eLocal){ await loadScript(L.cdn); }
+          }
+        }
+        note('ok','Libraries loaded ✔ Local if present, otherwise CDN.');
+        startApp();
+      }catch(e){
+        console.error(e);
+        note('err','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs and reload.');
+      }
+    })();
 
-    function render(which){
-      if(which==='calculus') return renderCalculus();
-      if(which==='graph') return renderGraph();
-      if(which==='units') return renderUnits();
-      if(which==='time') return renderTime();
-      return renderCalc();
-    }
+    function startApp(){
+      /* ---------- Utils & persistence ---------- */
+      const $ = (s, r=document)=> r.querySelector(s);
+      const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
+      const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+      const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
-    /* =================
-       1) Calculator
-    =================== */
-    function renderCalc(){
-      const view=$('#view');
-      view.innerHTML=`
-        <section class="surface calc-grid">
-          <div>
-            <div class="screen">
-              <div class="expr" id="expr"></div>
-              <div class="result" id="res">0</div>
+      function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
+      function loadTab(name, def){ try{ const v=localStorage.getItem('legendcalc_'+name); return v? JSON.parse(v): def; }catch(e){ return def; } }
+      function clearTab(name){ try{ localStorage.removeItem('legendcalc_'+name); }catch(e){} }
+
+      const PREFS_KEY='legendcalc_prefs';
+      function loadPrefs(){ try{ return JSON.parse(localStorage.getItem(PREFS_KEY)||'{}'); }catch(e){ return {}; } }
+      function savePrefs(p){ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
+      function applyTheme(name){
+        document.body.classList.remove('theme-light','theme-inspire');
+        if(name==='light') document.body.classList.add('theme-light');
+        if(name==='inspire') document.body.classList.add('theme-inspire');
+      }
+
+      /* ---------- Router & theme ---------- */
+      const tabs=$$('.tab');
+      tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
+
+      function render(which){
+        if(which==='calculus') return renderCalculus();
+        if(which==='graph') return renderGraph();
+        if(which==='units') return renderUnits();
+        if(which==='time') return renderTime();
+        return renderCalc();
+      }
+
+      (function initTheme(){
+        const prefs=loadPrefs();
+        const theme=prefs.theme||'dark';
+        applyTheme(theme);
+        $('#themeSel').value=theme;
+        $('#themeSel').addEventListener('change',()=>{
+          const next=$('#themeSel').value; applyTheme(next); savePrefs({...loadPrefs(), theme:next});
+          // re-tint title immediately
+          document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+        });
+        document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+      })();
+
+      /* ---------- Calculator ---------- */
+      function renderCalc(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface calc-grid">
+            <div>
+              <div class="screen">
+                <div class="expr" id="expr"></div>
+                <div class="result" id="res">0</div>
+              </div>
+              <div class="keys" id="keys"></div>
             </div>
-            <div class="keys" id="keys"></div>
-          </div>
-          <div>
-            <div class="section-title">History</div>
-            <div class="surface" style="padding:10px">
-              <div class="tape" id="tape"></div>
-              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-                <button class="btn" id="copyTape">Copy</button>
-                <button class="btn" id="clearTape">Clear</button>
-                <button class="btn" id="clearSavedCalc" title="Forget saved history">Clear Saved</button>
+            <div>
+              <div class="section-title">History</div>
+              <div class="surface" style="padding:10px">
+                <div class="tape" id="tape"></div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+                  <button class="btn" id="copyTape">Copy</button>
+                  <button class="btn" id="clearTape">Clear</button>
+                  <button class="btn" id="clearSavedCalc" title="Forget saved history">Clear Saved</button>
+                </div>
               </div>
             </div>
-          </div>
-        </section>`;
+          </section>`;
 
-      const K=['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','=',' ='];
-      const keysEl=$('#keys');
-      K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq'); b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
+        const K=['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','=',' ='];
+        const keysEl=$('#keys');
+        K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq'); b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
 
-      // load saved
-      const saved = loadTab('calc', {tape:[], ans:0});
-      let expr=''; let ans=saved.ans||0; const tape=[...(saved.tape||[])]; const exprEl=$('#expr'); const resEl=$('#res');
-      function persist(){ saveTab('calc', {tape, ans}); }
+        const saved = loadTab('calc', {tape:[], ans:0});
+        let expr=''; let ans=saved.ans||0; const tape=[...(saved.tape||[])]; const exprEl=$('#expr'); const resEl=$('#res');
+        function persist(){ saveTab('calc', {tape, ans}); }
 
-      function setRes(v){ resEl.textContent=v; }
-      function renderExpr(){ exprEl.textContent=expr||'\u00A0'; }
-      function renderTape(){ $('#tape').innerHTML=tape.map(t=>`<div class='trow'><div class='l'>${esc(t.e)}</div><div class='r'>${t.v}</div></div>`).join(''); }
+        function setRes(v){ resEl.textContent=v; }
+        function renderExpr(){ exprEl.textContent=expr||'\u00A0'; }
+        function renderTape(){ $('#tape').innerHTML=tape.map(t=>`<div class='trow'><div class='l'>${esc(t.e)}</div><div class='r'>${t.v}</div></div>`).join(''); }
 
-      function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=math.evaluate(sanitized,scope); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
-      function press(k){ switch(k){ case 'C': expr=''; setRes(0); break; case '⌫': expr=expr.slice(0,-1); break; case '=': case ' =': evalExpr(); break; case '√': expr+='sqrt('; break; case 'π': expr+=Math.PI.toString(); break; case 'e': expr+=Math.E.toString(); break; case 'ANS': expr+=String(ans); break; case 'sin': case 'cos': case 'tan': expr+=k+'('; break; default: expr+=k; } renderExpr(); }
-      window.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); evalExpr(); } else if(e.key==='Backspace'){ press('⌫'); } else if(e.key==='Escape'){ press('C'); } else if(/[0-9.()+\-/*^%]/.test(e.key)){ press(e.key); } });
-      $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
-      $('#clearTape').onclick=()=>{ tape.length=0; renderTape(); persist(); };
-      $('#clearSavedCalc').onclick=()=>{ clearTab('calc'); tape.length=0; ans=0; renderTape(); setRes(0); };
+        function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=math.evaluate(sanitized,scope); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
+        function press(k){ switch(k){ case 'C': expr=''; setRes(0); break; case '⌫': expr=expr.slice(0,-1); break; case '=': case ' =': evalExpr(); break; case '√': expr+='sqrt('; break; case 'π': expr+=Math.PI.toString(); break; case 'e': expr+=Math.E.toString(); break; case 'ANS': expr+=String(ans); break; case 'sin': case 'cos': case 'tan': expr+=k+'('; break; default: expr+=k; } renderExpr(); }
+        window.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); evalExpr(); } else if(e.key==='Backspace'){ press('⌫'); } else if(e.key==='Escape'){ press('C'); } else if(/[0-9.()+\-/*^%]/.test(e.key)){ press(e.key); } });
+        $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
+        $('#clearTape').onclick=()=>{ tape.length=0; renderTape(); persist(); };
+        $('#clearSavedCalc').onclick=()=>{ clearTab('calc'); tape.length=0; ans=0; renderTape(); setRes(0); };
 
-      function round(x){ return +(+x).toPrecision(12); }
-      renderExpr(); renderTape(); setRes(ans||0);
-    }
+        function round(x){ return +(+x).toPrecision(12); }
+        renderExpr(); renderTape(); setRes(ans||0);
+      }
 
-    /* =================
-       2) Calculus
-    =================== */
-    function renderCalculus(){
-      const view=$('#view');
-      view.innerHTML=`
-        <section class="surface two-col">
-          <div>
-            <div class="section-title">Symbolic</div>
+      /* ---------- Calculus ---------- */
+      function renderCalculus(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface two-col">
+            <div>
+              <div class="section-title">Symbolic</div>
+              <div class="row">
+                <label><div class="note">f(x)</div><input id="fx" class="input" placeholder="e.g. x^3 - 4x + 1"></label>
+                <label><div class="note">Point (x = …) for f'(x)</div><input id="x0" class="input" type="number" placeholder="optional"></label>
+              </div>
+              <div style="display:flex;gap:8px;margin:10px 0">
+                <button class="btn primary" id="diffBtn">Differentiate</button>
+                <button class="btn" id="integrateBtn">Definite Integral</button>
+                <button class="btn" id="clearSavedCalcus" title="Forget saved inputs">Clear Saved</button>
+              </div>
+              <div class="note">Integration supports numeric definite integrals (Simpson) — enter bounds below.</div>
+              <div class="row" style="margin-top:8px">
+                <label><div class="note">Lower bound a</div><input id="a" class="input" type="number" placeholder="e.g. 0"></label>
+                <label><div class="note">Upper bound b</div><input id="b" class="input" type="number" placeholder="e.g. 2"></label>
+                <label><div class="note">Subdivisions (even)</div><input id="n" class="input" type="number" value="200"></label>
+              </div>
+              <div id="calcOut" style="margin-top:12px"></div>
+            </div>
+            <div>
+              <div class="section-title">Quick Checks</div>
+              <div class="row">
+                <label><div class="note">Limit x → a</div><input id="limExpr" class="input" placeholder="e.g. (sin(x))/x"></label>
+                <label><div class="note">a</div><input id="limA" class="input" type="number" placeholder="0"></label>
+              </div>
+              <div style="display:flex;gap:8px;margin:10px 0"><button class="btn" id="limitBtn">Compute Limit (numeric)</button></div>
+              <div id="limitOut"></div>
+            </div>
+          </section>`;
+
+        const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
+        $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
+        function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
+        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $('#clearSavedCalcus').onclick=()=>{ clearTab('calculus'); ['fx','x0','a','b','n','limExpr','limA'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; }); };
+
+        $('#diffBtn').onclick=()=>{
+          const fx=$('#fx').value.trim(); if(!fx){ return setCalcOut("<div class='err'>Enter f(x)</div>"); }
+          try{
+            const d = math.derivative(fx,'x').toString();
+            const x0 = parseFloat($('#x0').value);
+            let evalAt='';
+            if(!Number.isNaN(x0)){
+              const f = math.parse(d).compile();
+              const val = f.evaluate({x:x0});
+              evalAt = `<div>f'( ${x0} ) = <b>${round(val)}</b></div>`;
+            }
+            setCalcOut(`<div>f'(x) = <b>${esc(d)}</b></div>${evalAt}`);
+          }catch(e){ setCalcOut("<div class='err'>Bad function</div>"); }
+        };
+
+        $('#integrateBtn').onclick=()=>{
+          const fx=$('#fx').value.trim(); const a=parseFloat($('#a').value); const b=parseFloat($('#b').value); let n=parseInt($('#n').value||200,10);
+          if(!fx||Number.isNaN(a)||Number.isNaN(b)) return setCalcOut("<div class='err'>Enter f(x), a, b</div>");
+          if(n%2===1) n+=1; // Simpson needs even
+          try{
+            const f = math.parse(fx).compile();
+            const F = x=>{ const v=f.evaluate({x}); if(!Number.isFinite(v)) throw 0; return v; };
+            const h=(b-a)/n; let s=F(a)+F(b);
+            for(let i=1;i<n;i++){ const x=a+i*h; s += (i%2? 4:2)*F(x); }
+            const I = (h/3)*s;
+            setCalcOut(`<div>∫<sub>${a}</sub><sup>${b}</sup> f(x) dx ≈ <b>${round(I)}</b> (n=${n})</div>`);
+          }catch(e){ setCalcOut("<div class='err'>Numerical integration failed</div>"); }
+        };
+
+        $('#limitBtn').onclick=()=>{
+          const ex=$('#limExpr').value.trim(); const a=parseFloat($('#limA').value);
+          if(!ex||Number.isNaN(a)) return setLimitOut("<div class='err'>Enter expression and a</div>");
+          try{
+            const f = math.parse(ex).compile();
+            const lim = numericLimit(x=>f.evaluate({x}), a);
+            setLimitOut(`<div>lim<sub>x→${a}</sub> ${esc(ex)} = <b>${round(lim)}</b></div>`);
+          }catch(e){ setLimitOut("<div class='err'>Limit failed</div>"); }
+        };
+
+        function numericLimit(F,a){ const eps=1e-6; const left=F(a-eps); const right=F(a+eps); return (left+right)/2; }
+        function setCalcOut(html){ $('#calcOut').innerHTML=html; }
+        function setLimitOut(html){ $('#limitOut').innerHTML=html; }
+        function round(x){ return +(+x).toPrecision(12); }
+      }
+
+      /* ---------- Graphing ---------- */
+      function renderGraph(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface">
             <div class="row">
-              <label><div class="note">f(x)</div><input id="fx" class="input" placeholder="e.g. x^3 - 4x + 1"></label>
-              <label><div class="note">Point (x = …) for f'(x)</div><input id="x0" class="input" type="number" placeholder="optional"></label>
+              <label style="grid-column:1/-1"><div class="note">Functions (one per line)</div>
+                <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
+              </label>
+              <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
+              <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
+              <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
             </div>
             <div style="display:flex;gap:8px;margin:10px 0">
-              <button class="btn primary" id="diffBtn">Differentiate</button>
-              <button class="btn" id="integrateBtn">Definite Integral</button>
-              <button class="btn" id="clearSavedCalcus" title="Forget saved inputs">Clear Saved</button>
+              <button class="btn primary" id="plotBtn">Plot</button>
+              <button class="btn" id="clearBtn">Clear</button>
+              <button class="btn" id="exportBtn">Export PNG</button>
+              <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
             </div>
-            <div class="note">Integration supports numeric definite integrals (Simpson) — enter bounds below.</div>
-            <div class="row" style="margin-top:8px">
-              <label><div class="note">Lower bound a</div><input id="a" class="input" type="number" placeholder="e.g. 0"></label>
-              <label><div class="note">Upper bound b</div><input id="b" class="input" type="number" placeholder="e.g. 2"></label>
-              <label><div class="note">Subdivisions (even)</div><input id="n" class="input" type="number" value="200"></label>
-            </div>
-            <div id="calcOut" style="margin-top:12px"></div>
-          </div>
-          <div>
-            <div class="section-title">Quick Checks</div>
+            <div id="chart" class="chart"></div>
+            <div class="note">Enter up to ~6 functions. Pan/zoom with mouse or touch.</div>
+          </section>`;
+
+        const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
+        $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
+        function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
+        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value=''); Plotly.purge('chart'); };
+
+        $('#plotBtn').onclick=()=>{
+          const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
+          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
+          if(!lines.length) return;
+          try{
+            const xs = linspace(xmin,xmax,n);
+            const traces = lines.map((ex,i)=>{
+              const f = math.parse(ex).compile();
+              const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+              return {x:xs,y:ys,mode:'lines',name:ex};
+            });
+            Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
+            persist();
+          }catch(e){ alert('Parse error in one of the functions'); }
+        };
+        $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
+        $('#exportBtn').onclick=async ()=>{
+          try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
+        };
+        function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
+      }
+
+      /* ---------- Unit Converter ---------- */
+      function renderUnits(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface">
             <div class="row">
-              <label><div class="note">Limit x → a</div><input id="limExpr" class="input" placeholder="e.g. (sin(x))/x"></label>
-              <label><div class="note">a</div><input id="limA" class="input" type="number" placeholder="0"></label>
+              <label><div class="note">Value</div><input id="uVal" class="input" type="number" value="1"></label>
+              <label><div class="note">From</div>
+                <select id="uFromSel" class="input"></select>
+              </label>
+              <label><div class="note">To</div>
+                <select id="uTo" class="input"></select>
+              </label>
             </div>
-            <div style="display:flex;gap:8px;margin:10px 0"><button class="btn" id="limitBtn">Compute Limit (numeric)</button></div>
-            <div id="limitOut"></div>
-          </div>
-        </section>`;
+            <div class="row">
+              <label><div class="note">Search units</div><input id="uSearch" class="input" placeholder="type to filter (e.g., psi, km, kWh)"></label>
+              <div style="display:flex;align-items:end;gap:8px">
+                <button class="btn" id="uSwap">⇄ Swap</button>
+                <button class="btn primary" id="uConvert">Convert</button>
+                <button class="btn" id="uSmart">Smart Suggest</button>
+                <button class="btn" id="clearSavedUnits" title="Forget saved inputs">Clear Saved</button>
+              </div>
+            </div>
+            <div id="uOut" class="section-title"></div>
+            <div class="note">Dropdown uses categories; only compatible targets are shown. Search filters both lists. "Smart Suggest" picks a human-friendly unit. No miles → cups.</div>
+          </section>`;
 
-      // load saved inputs
-      const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
-      $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
-      function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
-      $$('.input').forEach(el=> el.addEventListener('input', persist));
-      $('#clearSavedCalcus').onclick=()=>{ clearTab('calculus'); ['fx','x0','a','b','n','limExpr','limA'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; }); };
+        const toSel=$('#uTo');
+        const fromSel=$('#uFromSel');
+        const searchEl=$('#uSearch');
+        const setOut = (html)=>{ $('#uOut').innerHTML = html; };
 
-      $('#diffBtn').onclick=()=>{
-        const fx=$('#fx').value.trim(); if(!fx){ return setCalcOut("<div class='err'>Enter f(x)</div>"); }
-        try{
-          const d = math.derivative(fx,'x').toString();
-          const x0 = parseFloat($('#x0').value);
-          let evalAt='';
-          if(!Number.isNaN(x0)){
-            const f = math.parse(d).compile();
-            const val = f.evaluate({x:x0});
-            evalAt = `<div>f'( ${x0} ) = <b>${round(val)}</b></div>`;
-          }
-          setCalcOut(`<div>f'(x) = <b>${esc(d)}</b></div>${evalAt}`);
-        }catch(e){ setCalcOut("<div class='err'>Bad function</div>"); }
-      };
+        const catalogByGroup = unitGroups();
+        const catalogByDim = unitCatalogByDim(catalogByGroup);
+        let currentFromList=[];
 
-      $('#integrateBtn').onclick=()=>{
-        const fx=$('#fx').value.trim(); const a=parseFloat($('#a').value); const b=parseFloat($('#b').value); let n=parseInt($('#n').value||200,10);
-        if(!fx||Number.isNaN(a)||Number.isNaN(b)) return setCalcOut("<div class='err'>Enter f(x), a, b</div>");
-        if(n%2===1) n+=1; // Simpson needs even
-        try{
-          const f = math.parse(fx).compile();
-          const F = x=>{ const v=f.evaluate({x}); if(!Number.isFinite(v)) throw 0; return v; };
-          const h=(b-a)/n; let s=F(a)+F(b);
-          for(let i=1;i<n;i++){ const x=a+i*h; s += (i%2? 4:2)*F(x); }
-          const I = (h/3)*s;
-          setCalcOut(`<div>∫<sub>${a}</sub><sup>${b}</sup> f(x) dx ≈ <b>${round(I)}</b> (n=${n})</div>`);
-        }catch(e){ setCalcOut("<div class='err'>Numerical integration failed</div>"); }
-      };
+        function populateFrom(filter=''){
+          const q=filter.trim().toLowerCase();
+          fromSel.innerHTML = Object.entries(catalogByGroup)
+            .map(([group, units])=>{
+              const items=units.filter(u=>u.toLowerCase().includes(q));
+              if(!items.length) return '';
+              return `<optgroup label="${group}">${items.map(u=>`<option value="${u}">${u}</option>`).join('')}</optgroup>`;
+            }).join('');
+        }
 
-      $('#limitBtn').onclick=()=>{
-        const ex=$('#limExpr').value.trim(); const a=parseFloat($('#limA').value);
-        if(!ex||Number.isNaN(a)) return setLimitOut("<div class='err'>Enter expression and a</div>");
-        try{
-          const f = math.parse(ex).compile();
-          const lim = numericLimit(x=>f.evaluate({x}), a);
-          setLimitOut(`<div>lim<sub>x→${a}</sub> ${esc(ex)} = <b>${round(lim)}</b></div>`);
-        }catch(e){ setLimitOut("<div class='err'>Limit failed</div>"); }
-      };
+        const saved = loadTab('units', {val:'1', from:'m', to:'km', out:'', search:''});
+        populateFrom(saved.search||'');
+        fromSel.value = saved.from || 'm';
+        $('#uVal').value = saved.val || '1';
+        searchEl.value = saved.search || '';
 
-      function numericLimit(F,a){ const eps=1e-6; const left=F(a-eps); const right=F(a+eps); return (left+right)/2; }
-      function setCalcOut(html){ $('#calcOut').innerHTML=html; }
-      function setLimitOut(html){ $('#limitOut').innerHTML=html; }
-      function round(x){ return +(+x).toPrecision(12); }
-    }
+        function persist(){ const state={ val:$('#uVal').value, from:fromSel.value, to:$('#uTo').value, out:$('#uOut').innerHTML, search:searchEl.value }; saveTab('units', state); }
 
-    /* =================
-       3) Graphing
-    =================== */
-    function renderGraph(){
-      const view=$('#view');
-      view.innerHTML=`
-        <section class="surface">
-          <div class="row">
-            <label><div class="note">y =</div><input id="gx" class="input" placeholder="e.g. sin(x) + x^2"></label>
-            <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
-            <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
-            <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
-          </div>
-          <div style="display:flex;gap:8px;margin:10px 0"><button class="btn primary" id="plotBtn">Plot</button><button class="btn" id="clearBtn">Clear</button><button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button></div>
-          <div id="chart" class="chart"></div>
-          <div class="note">Pan/zoom with mouse or touch. Use reasonable domains for wild functions.</div>
-        </section>`;
+        function refreshTargets(){
+          const from = fromSel.value.trim();
+          try{
+            const u = math.unit(1, from);
+            const dimKey = JSON.stringify(u.dimensions);
+            currentFromList = (catalogByDim[dimKey]||[]).sort();
+            toSel.innerHTML = currentFromList.map(x=>`<option value="${x}">${x}</option>`).join('');
+            if(!currentFromList.length){ toSel.innerHTML='<option>(no compatible units)</option>'; }
+          }catch(e){ toSel.innerHTML='<option>(invalid unit)</option>'; currentFromList=[]; }
+        }
 
-      // restore saved
-      const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
-      $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
-      function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
-      $$('.input').forEach(el=> el.addEventListener('input', persist));
-      $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value=''); Plotly.purge('chart'); };
+        function smartSuggest(){
+          const v = parseFloat($('#uVal').value); const from = fromSel.value.trim();
+          try{
+            const q=math.unit(v,from);
+            const dimKey = JSON.stringify(q.dimensions);
+            const list = (catalogByDim[dimKey]||[]);
+            if(!list.length) return setOut('(no match)');
+            let best = from; let bestDelta = 1e9;
+            for(const cand of list){ const conv = q.to(cand).toNumber(cand); const d = score(conv); if(d<bestDelta){ best=cand; bestDelta=d; } }
+            toSel.value = best; convert();
+          }catch(e){ setOut('Invalid'); }
+        }
 
-      $('#plotBtn').onclick=()=>{
-        const ex=$('#gx').value.trim(); if(!ex) return;
-        const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-        try{
-          const f = math.parse(ex).compile();
-          const xs = linspace(xmin,xmax,n);
-          const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
-          const trace={x:xs,y:ys,mode:'lines',name:ex};
-          Plotly.newPlot('chart',[trace],{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
-          persist();
-        }catch(e){ alert('Parse error'); }
-      };
-      $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
-      function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
-    }
+        function convert(){
+          const v=parseFloat($('#uVal').value); const from=fromSel.value.trim(); const to=toSel.value;
+          try{ const out = math.unit(v,from).to(to); const num = out.toNumber(to); const txt = `${v} ${from} = <b>${format(num)}</b> ${to}`; setOut(txt); return txt; }
+          catch(e){ setOut('<span class="err">Incompatible or invalid units</span>'); }
+        }
 
-    /* =================
-       4) Unit Converter (dropdown from + auto target)
-    =================== */
-    function renderUnits(){
-      const view=$('#view');
-      view.innerHTML=`
-        <section class="surface">
-          <div class="row">
-            <label><div class="note">Value</div><input id="uVal" class="input" type="number" value="1"></label>
-            <label><div class="note">From</div>
-              <select id="uFromSel" class="input"></select>
-            </label>
-            <label><div class="note">To</div>
-              <select id="uTo" class="input"></select>
-            </label>
-          </div>
-          <div style="display:flex;gap:8px;margin:10px 0"><button class="btn primary" id="uConvert">Convert</button><button class="btn" id="uSmart">Smart Suggest</button><button class="btn" id="clearSavedUnits" title="Forget saved inputs">Clear Saved</button></div>
-          <div id="uOut" class="section-title"></div>
-          <div class="note">Dropdown uses categories; only compatible targets are shown. "Smart Suggest" auto-picks a human-friendly unit (e.g., 1600 m → 1.6 km). No miles → cups.</div>
-        </section>`;
+        function score(x){ const ax=Math.abs(x); if(ax===0) return 0; const k=Math.log10(ax); return Math.abs(k-1.5); }
+        function format(x){ const a=Math.abs(x); if(a>=1e6||a<1e-3) return x.toExponential(6); return (+x.toPrecision(12)).toString(); }
 
-      const toSel=$('#uTo');
-      const fromSel=$('#uFromSel');
-      const setOut = (html)=>{ $('#uOut').innerHTML = html; };
+        function unitGroups(){
+          return {
+            Length:['mm','cm','m','km','in','ft','yd','mi','nmi'],
+            Mass:['mg','g','kg','lb','oz'],
+            Time:['ms','s','min','hour','day'],
+            Area:['mm^2','cm^2','m^2','km^2','in^2','ft^2','yd^2','acre','ha'],
+            Volume:['mL','L','cm^3','m^3','in^3','ft^3','gal','qt','pt','cup','tbsp','tsp'],
+            Speed:['m/s','km/h','mph','ft/s','kt'],
+            Acceleration:['m/s^2','ft/s^2','g'],
+            Force:['N','lbf','kip'],
+            Energy:['J','kJ','cal','kcal','Wh','kWh','BTU'],
+            Power:['W','kW','hp','BTU/h'],
+            Pressure:['Pa','kPa','bar','psi','inHg','mmHg','atm'],
+            Temperature:['degC','degF','K','degR'],
+            Density:['kg/m^3','g/cm^3','lb/ft^3'],
+            Torque:['N m','lbf ft']
+          };
+        }
+        function unitCatalogByDim(groups){ const map={}; for(const arr of Object.values(groups)){ for(const u of arr){ try{ const dim = JSON.stringify(math.unit(1,u).dimensions); if(!map[dim]) map[dim]=new Set(); arr.forEach(x=>map[dim].add(x)); }catch(e){} } } for(const d in map){ map[d]=[...map[d]]; } return map; }
 
-      // Build the catalog once
-      const catalogByGroup = unitGroups();
-      const catalogByDim = unitCatalogByDim(catalogByGroup);
-
-      // Populate FROM select with optgroups
-      fromSel.innerHTML = Object.entries(catalogByGroup)
-        .map(([group, units])=>`<optgroup label="${group}">${units.map(u=>`<option value="${u}">${u}</option>`).join('')}</optgroup>`)
-        .join('');
-
-      // Restore saved
-      const saved = loadTab('units', {val:'1', from:'m', to:'km', out:''});
-      fromSel.value = saved.from || 'm';
-      $('#uVal').value = saved.val || '1';
-
-      // Wire events
-      fromSel.addEventListener('change', ()=>{ refreshTargets(); smartSuggest(); persist(); });
-      $('#uVal').addEventListener('input', ()=> { smartSuggest(); persist(); });
-      $('#uSmart').onclick = ()=>{ smartSuggest(); persist(); };
-      $('#uConvert').onclick = ()=>{ const r=convert(); persist(); };
-      $('#clearSavedUnits').onclick = ()=>{ clearTab('units'); $('#uVal').value='1'; fromSel.value='m'; refreshTargets(); smartSuggest(); };
-
-      // initial
-      refreshTargets();
-      // set saved TO if compatible
-      if(saved.to){ try{ const u = math.unit(1, fromSel.value); const dimKey=JSON.stringify(u.dimensions); const list=(catalogByDim[dimKey]||[]); if(list.includes(saved.to)) $('#uTo').value=saved.to; }catch(e){} }
-      if(saved.out){ setOut(saved.out); }
-      else { smartSuggest(); }
-
-      function persist(){ const state={ val:$('#uVal').value, from:fromSel.value, to:$('#uTo').value, out:$('#uOut').innerHTML }; saveTab('units', state); }
-
-      function refreshTargets(){
-        const from = fromSel.value.trim();
-        try{
-          const u = math.unit(1, from); // throws if invalid
-          const dimKey = JSON.stringify(u.dimensions);
-          const list = (catalogByDim[dimKey]||[]).sort();
-          toSel.innerHTML = list.map(x=>`<option value="${x}">${x}</option>`).join('');
-          if(!list.length){ toSel.innerHTML='<option>(no compatible units)</option>'; }
-        }catch(e){ toSel.innerHTML='<option>(invalid unit)</option>'; }
-      }
-
-      function smartSuggest(){
-        const v = parseFloat($('#uVal').value);
-        const from = fromSel.value.trim();
-        try{
-          const q=math.unit(v,from);
-          const dimKey = JSON.stringify(q.dimensions);
-          const list = (catalogByDim[dimKey]||[]);
-          if(!list.length) return setOut('(no match)');
-          let best = from; let bestDelta = 1e9;
-          for(const cand of list){
-            const conv = q.to(cand).toNumber(cand);
-            const d = score(conv); if(d<bestDelta){ best=cand; bestDelta=d; }
-          }
-          toSel.value = best;
-          convert();
-        }catch(e){ setOut('Invalid'); }
-      }
-
-      function convert(){
-        const v=parseFloat($('#uVal').value); const from=fromSel.value.trim(); const to=toSel.value;
-        try{
-          const out = math.unit(v,from).to(to); const num = out.toNumber(to);
-          const txt = `${v} ${from} = <b>${format(num)}</b> ${to}`;
-          setOut(txt); return txt;
-        }catch(e){ setOut('<span class="err">Incompatible or invalid units</span>'); }
-      }
-
-      function score(x){ // closer to [1,1000)
-        const ax=Math.abs(x); if(ax===0) return 0; const k=Math.log10(ax); // prefer 0..3
-        return Math.abs(k-1.5);
-      }
-      function format(x){ const a=Math.abs(x); if(a>=1e6||a<1e-3) return x.toExponential(6); return (+x.toPrecision(12)).toString(); }
-
-      // Returns a map of group -> array of units
-      function unitGroups(){
-        return {
-          Length:['mm','cm','m','km','in','ft','yd','mi','nmi'],
-          Mass:['mg','g','kg','lb','oz'],
-          Time:['ms','s','min','hour','day'],
-          Area:['mm^2','cm^2','m^2','km^2','in^2','ft^2','yd^2','acre','ha'],
-          Volume:['mL','L','cm^3','m^3','in^3','ft^3','gal','qt','pt','cup','tbsp','tsp'],
-          Speed:['m/s','km/h','mph','ft/s','kt'],
-          Acceleration:['m/s^2','ft/s^2','g'],
-          Force:['N','lbf','kip'],
-          Energy:['J','kJ','cal','kcal','Wh','kWh','BTU'],
-          Power:['W','kW','hp','BTU/h'],
-          Pressure:['Pa','kPa','bar','psi','inHg','mmHg','atm'],
-          Temperature:['degC','degF','K','degR'],
-          Density:['kg/m^3','g/cm^3','lb/ft^3'],
-          Torque:['N m','lbf ft']
+        fromSel.addEventListener('change', ()=>{ refreshTargets(); smartSuggest(); persist(); });
+        $('#uVal').addEventListener('input', ()=> { smartSuggest(); persist(); });
+        $('#uSmart').onclick = ()=>{ smartSuggest(); persist(); };
+        $('#uConvert').onclick = ()=>{ convert(); persist(); };
+        $('#clearSavedUnits').onclick = ()=>{ clearTab('units'); $('#uVal').value='1'; searchEl.value=''; populateFrom(''); fromSel.value='m'; refreshTargets(); smartSuggest(); };
+        $('#uSwap').onclick = ()=>{ const f=fromSel.value; const t=toSel.value;
+          if(currentFromList.includes(f) && currentFromList.includes(t)) { fromSel.value=t; refreshTargets(); toSel.value=f; smartSuggest(); persist(); } else {
+            const temp=f; fromSel.value=t; refreshTargets(); toSel.value=temp; smartSuggest(); persist(); }
         };
+        searchEl.addEventListener('input', ()=>{ populateFrom(searchEl.value);
+          if(![...fromSel.options].some(o=>o.value===saved.from)) fromSel.selectedIndex=0; refreshTargets(); smartSuggest(); persist(); });
+
+        refreshTargets();
+        if(saved.to){ try{ const u = math.unit(1, fromSel.value); const dimKey=JSON.stringify(u.dimensions); const list=(catalogByDim[dimKey]||[]); if(list.includes(saved.to)) $('#uTo').value=saved.to; }catch(e){} }
+        if(saved.out){ setOut(saved.out); } else { smartSuggest(); }
       }
 
-      // Build a catalog of dimension-signature -> units[] from groups
-      function unitCatalogByDim(groups){
-        const map={};
-        for(const arr of Object.values(groups)){
-          for(const u of arr){
-            try{
-              const dim = JSON.stringify(math.unit(1,u).dimensions);
-              if(!map[dim]) map[dim]=new Set();
-              arr.forEach(x=>map[dim].add(x));
-            }catch(e){}
-          }
+      /* ---------- Time Clock (with OCU presets) ---------- */
+      function renderTime(){
+        const view=$('#view');
+        const PREFS = loadPrefs();
+        const time12 = !!PREFS.time12;
+        const ocuPref = (typeof PREFS.ocuMode === 'boolean') ? (PREFS.ocuMode ? '7a7p' : 'off') : (PREFS.ocuMode || 'off');
+        const customs = Array.isArray(PREFS.ocuCustoms)? PREFS.ocuCustoms : [];
+
+        view.innerHTML=`
+          <section class="surface">
+            <div class="row">
+              <label><div class="note">Goal hours today</div><input id="goalH" class="input" type="number" step="0.25" value="8"></label>
+              <label><div class="note">Paid lunch</div>
+                <select id="paidL" class="input">
+                  <option value="0">Unpaid</option>
+                  <option value="0.3333333">20 min paid</option>
+                  <option value="0.5">30 min paid</option>
+                  <option value="1">1 hour paid</option>
+                </select>
+              </label>
+              <label><div class="note">🕒 Time format</div>
+                <select id="timeFmt" class="input">
+                  <option value="24">24-hour</option>
+                  <option value="12">12-hour (AM/PM)</option>
+                </select>
+              </label>
+              <label><div class="note">🏷️ OCU rounding</div>
+                <select id="ocuMode" class="input"></select>
+              </label>
+            </div>
+
+            <div class="section-title">Custom OCU preset</div>
+            <div class="row">
+              <label><div class="note">Name</div><input id="ocuName" class="input" placeholder="e.g., My 5a–1p"></label>
+              <label><div class="note">IN time</div><input id="ocuIn" class="input" type="time" value="07:00"></label>
+              <label><div class="note">OUT time</div><input id="ocuOut" class="input" type="time" value="19:00"></label>
+              <label><div class="note">Window ± (min)</div><input id="ocuWin" class="input" type="number" value="10"></label>
+              <div style="display:flex;align-items:end"><button class="btn" id="saveOcu">Save preset</button></div>
+            </div>
+
+            <div class="section-title">Shifts</div>
+            <div id="rows"></div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="addRow">+ Add Interval</button><button class="btn" id="nowIn">Clock In Now</button><button class="btn" id="nowOut">Clock Out Now</button><button class="btn" id="clearSavedTime" title="Forget saved inputs">Clear Saved</button></div>
+
+            <div class="two-col" style="margin-top:16px">
+              <div class="surface">
+                <div class="section-title">Today Summary</div>
+                <div id="todayOut"></div>
+              </div>
+              <div class="surface">
+                <div class="section-title">Guidance</div>
+                <div id="guide"></div>
+              </div>
+            </div>
+
+            <div class="surface" style="margin-top:16px">
+              <div class="section-title">Week Summary (by date)</div>
+              <div id="week"></div>
+            </div>
+          </section>`;
+
+        const rowsEl=$('#rows');
+        const fmtSel=$('#timeFmt');
+        const ocuSel=$('#ocuMode');
+
+        const builtIns=[
+          {id:'off', label:'Off'},
+          {id:'7a7p', label:'7a/7p ±10m', inTarget:7*60, outTarget:19*60, win:10},
+          {id:'6a4p', label:'6a/4p ±10m', inTarget:6*60, outTarget:16*60, win:10},
+          {id:'7a3p', label:'7a/3p ±10m', inTarget:7*60, outTarget:15*60, win:10},
+        ];
+        function renderOcuOptions(){
+          const PREFS=loadPrefs();
+          const customs = Array.isArray(PREFS.ocuCustoms)? PREFS.ocuCustoms : [];
+          const customOpts = customs.map((c,i)=>`<option value="custom:${i}">${esc(c.name)} (${minutesToClock(c.inTarget)}–${minutesToClock(c.outTarget)} ±${c.win}m)</option>`).join('');
+          ocuSel.innerHTML = builtIns.map(b=>`<option value="${b.id}">${b.label}</option>`).join('') + (customOpts? `<optgroup label="Custom">${customOpts}</optgroup>`:'');
+          ocuSel.value = (PREFS.ocuMode ?? 'off');
         }
-        for(const d in map){ map[d]=[...map[d]]; }
-        return map;
-      }
-    }
+        renderOcuOptions();
 
-    /* =================
-       5) Time Clock
-    =================== */
-    function renderTime(){
-      const view=$('#view');
-      // Persisted prefs
-      const PREFS = JSON.parse(localStorage.getItem('legendcalc_prefs')||'{}');
-      const time12 = !!PREFS.time12; // default 24h off
-      // Back-compat: old boolean true -> '7a7p'
-      const ocuPref = (typeof PREFS.ocuMode === 'boolean') ? (PREFS.ocuMode ? '7a7p' : 'off') : (PREFS.ocuMode || 'off');
+        fmtSel.value = time12 ? '12' : '24';
 
-      view.innerHTML=`
-        <section class="surface">
-          <div class="row">
-            <label><div class="note">Goal hours today</div><input id="goalH" class="input" type="number" step="0.25" value="8"></label>
-            <label><div class="note">Paid lunch</div>
-              <select id="paidL" class="input">
-                <option value="0">Unpaid</option>
-                <option value="0.3333333">20 min paid</option>
-                <option value="0.5">30 min paid</option>
-                <option value="1">1 hour paid</option>
-              </select>
-            </label>
-            <label><div class="note">🕒 Time format</div>
-              <select id="timeFmt" class="input">
-                <option value="24">24-hour</option>
-                <option value="12">12-hour (AM/PM)</option>
-              </select>
-            </label>
-            <label><div class="note">🏷️ OCU rounding</div>
-              <select id="ocuMode" class="input">
-                <option value="off">Off</option>
-                <option value="7a7p">7a/7p ±10m</option>
-                <option value="6a4p">6a/4p ±10m</option>
-                <option value="7a3p">7a/3p ±10m</option>
-              </select>
-            </label>
-          </div>
+        const todayStr = toLocalDate(new Date());
+        const saved = loadTab('time', {goalH:'8', paidL:'0', rows:[{date:todayStr,in:'',out:''}]});
+        $('#goalH').value = saved.goalH || '8';
+        $('#paidL').value = saved.paidL || '0';
 
-          <div class="section-title">Shifts</div>
-          <div id="rows"></div>
-          <div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" id="addRow">+ Add Interval</button><button class="btn" id="nowIn">Clock In Now</button><button class="btn" id="nowOut">Clock Out Now</button><button class="btn" id="clearSavedTime" title="Forget saved inputs">Clear Saved</button></div>
+        rowsEl.addEventListener('input', ()=>{ recompute(); persist(); });
+        rowsEl.addEventListener('click', e=>{
+          const id=e.target.getAttribute('data-del');
+          if(id){ const row=e.target.closest('.row'); if(row) row.remove(); recompute(); persist(); }
+        });
 
-          <div class="two-col" style="margin-top:16px">
-            <div class="surface">
-              <div class="section-title">Today Summary</div>
-              <div id="todayOut"></div>
-            </div>
-            <div class="surface">
-              <div class="section-title">Guidance</div>
-              <div id="guide"></div>
-            </div>
-          </div>
-        </section>`;
+        fmtSel.addEventListener('change',()=>{ savePrefs({...loadPrefs(), time12: ($('#timeFmt').value==='12')}); recompute(); });
+        ocuSel.addEventListener('change',()=>{ savePrefs({...loadPrefs(), ocuMode: ($('#ocuMode').value)}); recompute(); });
 
-      const rowsEl=$('#rows');
-      const fmtSel=$('#timeFmt');
-      const ocuSel=$('#ocuMode');
-
-      // initialize persisted UI
-      fmtSel.value = time12 ? '12' : '24';
-      ocuSel.value = ocuPref;
-
-      // Restore saved time data
-      const saved = loadTab('time', {goalH:'8', paidL:'0', rows:[{in:'',out:''}]});
-      $('#goalH').value = saved.goalH || '8';
-      $('#paidL').value = saved.paidL || '0';
-
-      // Event delegation (single listeners) for auto-update as you type
-      rowsEl.addEventListener('input', ()=>{ recompute(); persist(); });
-      rowsEl.addEventListener('click', e=>{
-        const id=e.target.getAttribute('data-del');
-        if(id){ const row=e.target.closest('.row'); if(row) row.remove(); recompute(); persist(); }
-      });
-
-      fmtSel.addEventListener('change',()=>{ savePrefs(); recompute(); });
-      ocuSel.addEventListener('change',()=>{ savePrefs(); recompute(); });
-
-      $('#clearSavedTime').onclick=()=>{ clearTab('time'); rowsEl.innerHTML=''; addRow(); recompute(); };
-
-      function savePrefs(){
-        const next = {
-          ...(JSON.parse(localStorage.getItem('legendcalc_prefs')||'{}')),
-          time12: ($('#timeFmt').value==='12'),
-          ocuMode: ($('#ocuMode').value) // store string
+        $('#saveOcu').onclick=()=>{
+          const name=$('#ocuName').value.trim()||'Custom'; const i=$('#ocuIn').value, o=$('#ocuOut').value, w=parseInt($('#ocuWin').value||'10',10);
+          if(!i||!o||Number.isNaN(w)) return alert('Fill name, in, out, window');
+          const entry={name, inTarget:toMin(i), outTarget:toMin(o), win:Math.max(0,Math.min(60,w))};
+          const prefs=loadPrefs(); const arr=Array.isArray(prefs.ocuCustoms)? prefs.ocuCustoms:[]; arr.push(entry); prefs.ocuCustoms=arr; savePrefs(prefs);
+          renderOcuOptions(); $('#ocuMode').value=`custom:${arr.length-1}`; savePrefs({...loadPrefs(), ocuMode:$('#ocuMode').value}); recompute();
         };
-        localStorage.setItem('legendcalc_prefs', JSON.stringify(next));
-      }
 
-      function persist(){
-        const rows = $$('input[data-in]').map(inp=>{
-          const id=inp.getAttribute('data-in'); const out=$(`input[data-out="${id}"]`);
-          return {in: inp.value||'', out: (out&&out.value)||''};
-        });
-        saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', rows});
-      }
+        $('#clearSavedTime').onclick=()=>{ clearTab('time'); rowsEl.innerHTML=''; addRow(); recompute(); };
 
-      function addRow(initial){
-        const id=Math.random().toString(36).slice(2,7);
-        const row=document.createElement('div');
-        row.className='row';
-        row.innerHTML=`
-          <label><div class="note">In</div><input class="input" type="time" data-in="${id}"></label>
-          <label><div class="note">Out</div><input class="input" type="time" data-out="${id}"></label>
-          <div style="display:flex;align-items:end"><button class="btn" data-del="${id}">Delete</button></div>`;
-        rowsEl.appendChild(row);
-        if(initial){ const ins=$(`[data-in="${id}"]`), outs=$(`[data-out="${id}"]`); ins.value=initial.in; outs.value=initial.out||''; }
-      }
-
-      function recompute(){
-        const prefs = JSON.parse(localStorage.getItem('legendcalc_prefs')||'{}');
-        const use12 = !!prefs.time12; const ocu = (typeof prefs.ocuMode==='boolean') ? (prefs.ocuMode? '7a7p':'off') : (prefs.ocuMode||'off');
-        const paid = parseFloat($('#paidL').value)||0; // hours
-        const segs=[]; $$('input[data-in]').forEach(inp=>{
-          const id=inp.getAttribute('data-in'); const o=$(`input[data-out="${id}"]`);
-          if(inp.value){ segs.push({in:inp.value, out:o&&o.value||null}); }
-        });
-
-        const preset = getOcuPreset(ocu);
-
-        // Sum fully-closed segments and remember the currently-open segment start
-        let minutesClosed=0; let openIn=null; let openInRounded=null;
-        segs.forEach(s=>{
-          let i=toMin(s.in);
-          if(preset) i = roundInToPreset(i, preset);
-          if(s.out){ let o=toMin(s.out); if(preset) o = roundOutToPreset(o, preset); minutesClosed += Math.max(0,o-i); }
-          else { openIn = toMin(s.in); openInRounded = i; }
-        });
-
-        const paidMin = paid*60; // paid lunch does NOT subtract
-        const goalH=parseFloat($('#goalH').value)||8; const goalMin=goalH*60;
-        const workedMin = minutesClosed + paidMin + (openIn!==null ? 0 : 0);
-        const remainingToGoal = clamp(goalMin - workedMin, 0, 24*60);
-
-        // Suggest OUT based on open (rounded if preset active)
-        let suggested='—';
-        if(openIn!==null){
-          const need = clamp(goalMin - (minutesClosed + paidMin), 0, 24*60);
-          const base = preset ? openInRounded : openIn; // respect OCU rounding on IN
-          let outMin = base + need;
-          if(preset) outMin = roundOutToPreset(outMin, preset); // snap to preset out if within window
-          suggested = formatClock(outMin, use12);
+        function persist(){
+          const rows = $$('input[data-in]').map(inp=>{
+            const id=inp.getAttribute('data-in'); const out=$(`input[data-out="${id}"]`); const date=$(`input[data-date="${id}"]`);
+            return {date: (date&&date.value)||todayStr, in: inp.value||'', out: (out&&out.value)||''};
+          });
+          saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', rows});
         }
 
-        const inProgText = openIn!==null ? ` • In-progress from <b>${formatClock(preset?openInRounded:openIn, use12)}</b>` : '';
-        $('#todayOut').innerHTML = `Worked: <b>${fmtH(minutesClosed + paidMin)}</b>${inProgText} • Remaining to goal (excluding current segment): <b>${fmtH(remainingToGoal)}</b>`;
-        $('#guide').innerHTML = openIn!==null
-          ? `Clocked in since <b>${formatClock(preset?openInRounded:openIn, use12)}</b> — to hit <b>${goalH}h</b>, clock out at <b>${suggested}</b>${preset? ' <span class="note">(OCU rounding applied)</span>':''}.`
-          : `Not currently clocked in. To hit <b>${goalH}h</b>, you need <b>${fmtH(remainingToGoal)}</b> more.`;
-      }
-
-      function getOcuPreset(mode){
-        const win=10; // minutes
-        switch(mode){
-          case '7a7p': return {inTarget:7*60, outTarget:19*60, win};
-          case '6a4p': return {inTarget:6*60, outTarget:16*60, win};
-          case '7a3p': return {inTarget:7*60, outTarget:15*60, win};
-          default: return null;
+        function addRow(initial){
+          const id=Math.random().toString(36).slice(2,7);
+          const row=document.createElement('div');
+          row.className='row';
+          row.innerHTML=`
+            <label><div class="note">Date</div><input class="input" type="date" data-date="${id}"></label>
+            <label><div class="note">In</div><input class="input" type="time" data-in="${id}"></label>
+            <label><div class="note">Out</div><input class="input" type="time" data-out="${id}"></label>
+            <div style="display:flex;align-items:end"><button class="btn" data-del="${id}">Delete</button></div>`;
+          rowsEl.appendChild(row);
+          const dEl=$(`[data-date="${id}"]`), ins=$(`[data-in="${id}"]`), outs=$(`[data-out="${id}"]`);
+          dEl.value = (initial&&initial.date) || toLocalDate(new Date());
+          if(initial){ ins.value=initial.in||''; outs.value=initial.out||''; }
         }
+
+        function recompute(){
+          const prefs = loadPrefs();
+          const use12 = !!prefs.time12;
+          const mode = (typeof prefs.ocuMode==='boolean') ? (prefs.ocuMode? '7a7p':'off') : (prefs.ocuMode||'off');
+          const preset = getOcuPreset(mode);
+          const paid = parseFloat($('#paidL').value)||0;
+
+          const segs=[]; $$('input[data-in]').forEach(inp=>{
+            const id=inp.getAttribute('data-in'); const o=$(`input[data-out="${id}"]`); const d=$(`input[data-date="${id}"]`);
+            if(inp.value){ segs.push({date:(d&&d.value)||toLocalDate(new Date()), in:inp.value, out:o&&o.value||null}); }
+          });
+
+          const today = toLocalDate(new Date());
+          let minutesClosed=0; let openIn=null; let openInRounded=null;
+          segs.filter(s=>s.date===today).forEach(s=>{
+            let i=toMin(s.in); if(preset) i = roundInToPreset(i, preset);
+            if(s.out){ let o=toMin(s.out); if(preset) o = roundOutToPreset(o, preset); minutesClosed += Math.max(0,o-i); }
+            else { openIn = toMin(s.in); openInRounded = preset? roundInToPreset(openIn, preset): openIn; }
+          });
+
+          const paidMin = paid*60;
+          const goalH=parseFloat($('#goalH').value)||8; const goalMin=goalH*60;
+          const workedMin = minutesClosed + paidMin + (openIn!==null ? 0 : 0);
+          const remainingToGoal = clamp(goalMin - workedMin, 0, 24*60);
+
+          let suggested='—';
+          if(openIn!==null){
+            const need = clamp(goalMin - (minutesClosed + paidMin), 0, 24*60);
+            let outMin = (preset? openInRounded: openIn) + need;
+            if(preset) outMin = roundOutToPreset(outMin, preset);
+            suggested = formatClock(outMin, use12);
+          }
+
+          const inProgText = openIn!==null ? ` • In-progress from <b>${formatClock(preset?openInRounded:openIn, use12)}</b>` : '';
+          $('#todayOut').innerHTML = `Worked: <b>${fmtH(minutesClosed + paidMin)}</b>${inProgText} • Remaining to goal: <b>${fmtH(remainingToGoal)}</b>`;
+          $('#guide').innerHTML = openIn!==null
+            ? `Clocked in since <b>${formatClock(preset?openInRounded:openIn, use12)}</b> — to hit <b>${goalH}h</b>, clock out at <b>${suggested}</b>${preset? ' <span class="note">(OCU rounding)</span>':''}.`
+            : `Not currently clocked in for today.`;
+
+          // Week summary
+          const byDay=new Map();
+          segs.forEach(s=>{
+            let i=toMin(s.in); let o = s.out? toMin(s.out): null; if(preset){ i=roundInToPreset(i,preset); if(o!==null) o=roundOutToPreset(o,preset); }
+            const mins = (o!==null? Math.max(0,o-i): 0);
+            byDay.set(s.date, (byDay.get(s.date)||0)+mins);
+          });
+          const days = [...byDay.keys()].sort();
+          const paidMinPerDay = paid*60;
+          let weekHTML = `<table><thead><tr><th>Date</th><th>Worked</th><th>+ Paid Lunch</th><th>Total</th></tr></thead><tbody>`;
+          let grand=0;
+          days.forEach(d=>{ const w=byDay.get(d); const lunch = (w>0? paidMinPerDay:0); const tot=w+lunch; grand+=tot; weekHTML+=`<tr><td>${d}</td><td>${fmtH(w)}</td><td>${lunch?fmtH(lunch):'—'}</td><td><b>${fmtH(tot)}</b></td></tr>`; });
+          weekHTML += `</tbody></table><div class="note">Grand total (listed days): <b>${fmtH(grand)}</b></div>`;
+          $('#week').innerHTML = weekHTML;
+        }
+
+        function getOcuPreset(mode){
+          const win=10;
+          if(mode==='7a7p') return {inTarget:7*60, outTarget:19*60, win};
+          if(mode==='6a4p') return {inTarget:6*60, outTarget:16*60, win};
+          if(mode==='7a3p') return {inTarget:7*60, outTarget:15*60, win};
+          if(mode && mode.startsWith('custom:')){
+            const prefs=loadPrefs(); const customs=prefs.ocuCustoms||[]; const i=parseInt(mode.split(':')[1],10); const c=customs[i]; if(c) return c;
+          }
+          return null;
+        }
+        function withinWindow(min,target,win){ return Math.abs(min - target) <= win; }
+        function roundInToPreset(min,p){ return withinWindow(min,p.inTarget,p.win)? p.inTarget : min; }
+        function roundOutToPreset(min,p){ return withinWindow(min,p.outTarget,p.win)? p.outTarget : min; }
+
+        function toMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+        function minutesToClock(min){ const m=((min%1440)+1440)%1440; const h=Math.floor(m/60); const mm=String(Math.round(m%60)).padStart(2,'0'); return `${h}:${mm}`; }
+        function formatClock(min,use12){ const t=minutesToClock(min); if(!use12) return t; const [hh,mm]=t.split(':').map(Number); const ampm = hh>=12? 'PM':'AM'; const h12 = (hh%12)||12; return `${h12}:${String(mm).padStart(2,'0')} ${ampm}`; }
+        function fmtH(min){ const h=Math.floor(min/60); const m=Math.round(min%60); return `${h}h ${String(m).padStart(2,'0')}m`; }
+
+        $('#addRow').onclick=()=>{ addRow(); persist(); };
+        $('#nowIn').onclick=()=>{ const now=new Date(); addRow({date:toLocalDate(now), in: toLocalTime(now)}); persist(); };
+        $('#nowOut').onclick=()=>{ const inputs=$$('input[data-out]'); const open=[...inputs].find(i=>!i.value); if(open){ open.value=toLocalTime(new Date()); recompute(); persist(); } };
+        $('#goalH').addEventListener('input',()=>{ recompute(); persist(); });
+        $('#paidL').addEventListener('change',()=>{ recompute(); persist(); });
+
+        if(saved.rows && saved.rows.length){ saved.rows.forEach(r=>addRow(r)); } else { addRow(); }
+        recompute();
+
+        function toLocalTime(d){ const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${hh}:${mm}`; }
+        function toLocalDate(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
       }
-      function withinWindow(min,target,win){ return Math.abs(min - target) <= win; }
-      function roundInToPreset(min,p){ return withinWindow(min,p.inTarget,p.win)? p.inTarget : min; }
-      function roundOutToPreset(min,p){ return withinWindow(min,p.outTarget,p.win)? p.outTarget : min; }
 
-      function toMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
-      function minutesToClock(min){ const m=((min%1440)+1440)%1440; const h=Math.floor(m/60); const mm=String(Math.round(m%60)).padStart(2,'0'); return `${h}:${mm}`; }
-      function formatClock(min,use12){ const t=minutesToClock(min); if(!use12) return t; const [hh,mm]=t.split(':').map(Number); const ampm = hh>=12? 'PM':'AM'; const h12 = (hh%12)||12; return `${h12}:${String(mm).padStart(2,'0')} ${ampm}`; }
-      function fmtH(min){ const h=Math.floor(min/60); const m=Math.round(min%60); return `${h}h ${String(m).padStart(2,'0')}m`; }
+      /* ---------- Self-tests ---------- */
+      function runSelfTests(){
+        const results=[];
+        const pass=(name)=>{ results.push(`<div class='pass'>✔ ${name}</div>`); };
+        const fail=(name,msg)=>{ results.push(`<div class='fail'>✖ ${name} — ${msg||''}</div>`); };
 
-      $('#addRow').onclick=()=>{ addRow(); persist(); };
-      $('#nowIn').onclick=()=>{ const now=new Date(); addRow({in: toLocalTime(now)}); persist(); };
-      $('#nowOut').onclick=()=>{ const inputs=$$('input[data-out]'); const open=[...inputs].find(i=>!i.value); if(open){ open.value=toLocalTime(new Date()); recompute(); persist(); } };
-      $('#goalH').addEventListener('input',()=>{ recompute(); persist(); });
-      $('#paidL').addEventListener('change',()=>{ recompute(); persist(); });
+        try{ const v=math.evaluate('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
+        try{ const d=math.derivative('x^2','x').toString(); const f=math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val); }catch(e){ fail('Calculus derivative',e.message); }
+        try{ const q=math.unit(1600,'m').to('km').toNumber('km'); (Math.abs(q-1.6)<1e-12)?pass('Units: 1600 m → 1.6 km'):fail('Units convert','got '+q); }catch(e){ fail('Units convert',e.message); }
+        try{ const dimMi = JSON.stringify(math.unit(1,'mi').dimensions); const dimCup = JSON.stringify(math.unit(1,'cup').dimensions); (dimMi!==dimCup)?pass('Units: miles not compatible with cups'):fail('Units: miles vs cups dimension check'); }catch(e){ fail('Units incompatibility check',e.message); }
+        try{ const f=math.parse('(sin(x))/x').compile(); const lim=(()=>{const eps=1e-6; return (f.evaluate({x:0+eps})+f.evaluate({x:0-eps}))/2;})(); (Math.abs(lim-1)<1e-3)?pass('Limit: sin(x)/x → 1 at 0'):fail('Limit numeric','got '+lim); }catch(e){ fail('Limit numeric',e.message); }
+        try{ const tape = [{e:'1+1',v:2},{e:'2*3',v:6}]; const str = tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'); (str.includes('\n') && str.split('\n').length===2)?pass('Tape: newline join works'):fail('Tape join','got '+str); }catch(e){ fail('Tape join test',e.message); }
+        try{ const cToF = math.unit(100, 'degC').to('degF').toNumber('degF'); (Math.abs(cToF - 212) < 1e-9) ? pass('Temp: 100°C → 212°F') : fail('Temp conversion','got '+cToF); }catch(e){ fail('Temp conversion test', e.message); }
+        try{ const t24 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); return `${h}:${mm}`; })(); const t12 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); const ampm=h>=12?'PM':'AM'; const h12=(h%12)||12; return `${h12}:${mm} ${ampm}`; })(); (t24==='13:05' && t12==='1:05 PM') ? pass('Time format: 24h/12h formatting') : fail('Time format','24='+t24+', 12='+t12); }catch(e){ fail('Time format test', e.message); }
 
-      // seed with saved rows or one row
-      if(saved.rows && saved.rows.length){ saved.rows.forEach(r=>addRow(r)); } else { addRow(); }
-      recompute();
+        document.getElementById('selfTests').innerHTML = `<div class='section-title'>Self-Tests</div>${results.join('')}`;
+      }
 
-      function toLocalTime(d){ const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${hh}:${mm}`; }
+      render('calc');
+      runSelfTests();
     }
-
-    /* =====================
-       Self-tests (basic)
-       These run on load & print to UI + console
-    ====================== */
-    function runSelfTests(){
-      const results=[];
-      const pass=(name)=>{ results.push(`<div class='pass'>✔ ${name}</div>`); console.log('PASS:',name); };
-      const fail=(name,msg)=>{ results.push(`<div class='fail'>✖ ${name} — ${msg||''}</div>`); console.warn('FAIL:',name,msg); };
-
-      try{ const v=math.evaluate('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
-
-      try{
-        const d=math.derivative('x^2','x').toString(); // string may vary; evaluate at a point
-        const f=math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val);
-      }catch(e){ fail('Calculus derivative',e.message); }
-
-      try{
-        const q=math.unit(1600,'m').to('km').toNumber('km'); (Math.abs(q-1.6)<1e-12)?pass('Units: 1600 m → 1.6 km'):fail('Units convert','got '+q);
-      }catch(e){ fail('Units convert',e.message); }
-
-      try{
-        // Ensure miles and cups are incompatible by dimension
-        const dimMi = JSON.stringify(math.unit(1,'mi').dimensions);
-        const dimCup = JSON.stringify(math.unit(1,'cup').dimensions);
-        (dimMi!==dimCup)?pass('Units: miles not compatible with cups'):fail('Units: miles vs cups dimension check');
-      }catch(e){ fail('Units incompatibility check',e.message); }
-
-      try{
-        const f=math.parse('(sin(x))/x').compile(); const lim=(()=>{const eps=1e-6; return (f.evaluate({x:0+eps})+f.evaluate({x:0-eps}))/2;})();
-        (Math.abs(lim-1)<1e-3)?pass('Limit: sin(x)/x → 1 at 0'):fail('Limit numeric','got '+lim);
-      }catch(e){ fail('Limit numeric',e.message); }
-
-      try{
-        const tape = [{e:'1+1',v:2},{e:'2*3',v:6}];
-        const str = tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n');
-        (str.includes('\n') && str.split('\n').length===2)?pass('Tape: newline join works'):fail('Tape join','got '+str);
-      }catch(e){ fail('Tape join test',e.message); }
-
-      // Added tests for OCU rounding edges
-      try{
-        const sevenA=7*60, sevenP=19*60;
-        const nearIn=7*60+8; const farIn=7*60+15;
-        const nearOut=19*60-6; const farOut=19*60+15;
-        const rnInNear = (Math.abs(nearIn-sevenA)<=10)? sevenA: nearIn;
-        const rnInFar = (Math.abs(farIn-sevenA)<=10)? sevenA: farIn;
-        const rnOutNear = (Math.abs(nearOut-sevenP)<=10)? sevenP: nearOut;
-        const rnOutFar = (Math.abs(farOut-sevenP)<=10)? sevenP: farOut;
-        (rnInNear===sevenA && rnInFar===farIn && rnOutNear===sevenP && rnOutFar===farOut)
-          ? pass('OCU rounding: near snaps, far does not (7a/7p)')
-          : fail('OCU rounding logic 7a/7p','edge cases failed');
-      }catch(e){ fail('OCU rounding tests 7a/7p',e.message); }
-
-      // New presets tests (6a/4p and 7a/3p)
-      try{
-        const sixA=6*60, fourP=16*60, sevenA2=7*60, threeP=15*60, win=10;
-        const inNear6 = sixA+9, inFar6 = sixA+12;
-        const outNear4 = fourP-10, outFar4 = fourP+11;
-        const inNear7 = sevenA2-7, inFar7 = sevenA2-14;
-        const outNear3 = threeP+8, outFar3 = threeP+14;
-        const snap = (m,t)=> (Math.abs(m-t)<=win? t:m);
-        const ok = (
-          snap(inNear6,sixA)===sixA && snap(inFar6,sixA)===inFar6 &&
-          snap(outNear4,fourP)===fourP && snap(outFar4,fourP)===outFar4 &&
-          snap(inNear7,sevenA2)===sevenA2 && snap(inFar7,sevenA2)===inFar7 &&
-          snap(outNear3,threeP)===threeP && snap(outFar3,threeP)===outFar3
-        );
-        ok? pass('OCU rounding presets: 6a/4p and 7a/3p windows work') : fail('OCU rounding presets','edge mismatch');
-      }catch(e){ fail('OCU presets tests',e.message); }
-
-      // Extra tests added
-      try{
-        const cToF = math.unit(100, 'degC').to('degF').toNumber('degF');
-        (Math.abs(cToF - 212) < 1e-9) ? pass('Temp: 100°C → 212°F') : fail('Temp conversion','got '+cToF);
-      }catch(e){ fail('Temp conversion test', e.message); }
-
-      try{
-        const t24 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); return `${h}:${mm}`; })();
-        const t12 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); const ampm=h>=12?'PM':'AM'; const h12=(h%12)||12; return `${h12}:${mm} ${ampm}`; })();
-        (t24==='13:05' && t12==='1:05 PM') ? pass('Time format: 24h/12h formatting') : fail('Time format','24='+t24+', 12='+t12);
-      }catch(e){ fail('Time format test', e.message); }
-
-      // Write results
-      $('#selfTests').innerHTML = `<div class='section-title'>Self-Tests</div>${results.join('')}`;
-    }
-
-    // init
-    render('calc');
-    runSelfTests();
+  })();
   </script>
 </body>
 </html>

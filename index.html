@@ -19,7 +19,7 @@
       --bg:#f7f9ff; --card:#ffffff; --screen:#eef3ff; --ink:#0b1020; --muted:#49556c;
       --accent:#205fbe; --accent-2:#205fbe;
 
-      --key:#f0f4ff;       /* lighter key */
+      --key:#f0f4ff;
       --key-op:#e8eefc;
       --key-fn:#e6f0ff;
       --key-eq:#205fbe;
@@ -27,13 +27,13 @@
       --tab-bg:#e7eefc; --tab-fg:#1a3358; --tab-active-bg:#205fbe; --tab-active-fg:#ffffff;
       --control-bg:#ffffff; --control-bd:#c9d7ef;
     }
-    /* TI-Nspire themed */
+    /* TI-Nspire themed (tighter contrast + LCD vibe) */
     .theme-inspire{
-      --bg:#171a1e; --card:#0e1114; --screen:#091018; --ink:#e9f1ff; --muted:#9fb2c9;
-      --accent:#00f09a; --accent-2:#008cff;
-      --key:#0f141a; --key-op:#131a21; --key-fn:#0e151c; --key-eq:#008cff;
-      --tab-bg:#0f1722; --tab-fg:#b8c7dd; --tab-active-bg:#008cff; --tab-active-fg:#ffffff;
-      --control-bg:#0f141a; --control-bd:#283a4a;
+      --bg:#14171b; --card:#0c0f12; --screen:#081017; --ink:#e8f2ff; --muted:#a7bad1;
+      --accent:#00e38f; --accent-2:#00a2ff;
+      --key:#0e141b; --key-op:#141b23; --key-fn:#0b1218; --key-eq:#00a2ff;
+      --tab-bg:#0d1622; --tab-fg:#c1d2e6; --tab-active-bg:#00a2ff; --tab-active-fg:#ffffff;
+      --control-bg:#0f141a; --control-bd:#2c3c4c;
     }
 
     *{box-sizing:border-box}
@@ -104,11 +104,11 @@
     #diag.warn{display:block;background:#2a2a0f;color:#f8ffb3;border:1px solid #f5e160}
     #diag.err{display:block;background:#3b1116;color:#ffd5d5;border:1px solid #ff6b6b}
 
-    /* TI-Nspire vibe: LCD grid and beveled keys */
+    /* TI-Nspire vibe: LCD grid and beveled keys (stronger contrast) */
     .theme-inspire .screen{
-      background:linear-gradient(180deg,#0c121a,#0a0f15);
-      border:1px solid #1f2a34;
-      box-shadow:inset 0 1px 0 #253444, inset 0 -1px 0 #070a0e;
+      background:linear-gradient(180deg,#0b1016,#090e14);
+      border:1px solid #23303b;
+      box-shadow:inset 0 1px 0 #2b3f50, inset 0 -1px 0 #070a0e;
     }
     .theme-inspire .screen::before{
       content:"";
@@ -116,24 +116,24 @@
       background-image:
         linear-gradient(#1f2a34 1px, transparent 1px),
         linear-gradient(90deg,#1f2a34 1px, transparent 1px);
-      background-size: 24px 24px, 24px 24px;
-      opacity:.14; pointer-events:none;
+      background-size: 22px 22px, 22px 22px;
+      opacity:.22; pointer-events:none;
     }
     .theme-inspire .key{
-      background:#0f141a; border:1px solid #1f2a34; border-radius:10px; color:#e7f5ff;
+      background:#0f141a; border:1px solid #253342; border-radius:10px; color:#e7f5ff;
       box-shadow:inset 0 -2px 0 #0008, 0 1px 0 #0a0d10;
     }
-    .theme-inspire .key.op{ background:#131a21; }
-    .theme-inspire .key.fn{ background:#0e151c; }
+    .theme-inspire .key.op{ background:#121923; }
+    .theme-inspire .key.fn{ background:#0d141c; }
     .theme-inspire .key.eq{
-      background:#008cff; border-color:#0b5fb8; color:#fff;
+      background:#00a2ff; border-color:#0b5fb8; color:#fff;
       box-shadow:inset 0 -2px 0 #064b91, 0 1px 0 #0a0d10;
     }
     .theme-inspire .key:active{ transform:none; box-shadow:inset 0 2px 0 #0006; }
 
     /* Focus rings per theme */
     .theme-light :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #205fbe; outline-offset:2px; }
-    .theme-inspire :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #00f09a; outline-offset:2px; }
+    .theme-inspire :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #00e38f; outline-offset:2px; }
     :root :is(.btn,.key,.input,select,textarea,.tab):focus-visible{ outline:2px solid #5bd38e; outline-offset:2px; }
   </style>
 </head>
@@ -368,7 +368,7 @@
         function round(x){ return +(+x).toPrecision(12); }
       }
 
-      /* ---------- Graphing ---------- */
+      /* ---------- Graphing (with hotkeys) ---------- */
       function renderGraph(){
         const view=$('#view');
         view.innerHTML=`
@@ -388,7 +388,7 @@
               <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
             </div>
             <div id="chart" class="chart"></div>
-            <div class="note">Tip: Press <b>Enter</b> in the box to add a new line and auto-plot.</div>
+            <div class="note">Hotkeys: <b>Enter</b> new line + plot, <b>Shift+Enter</b> new line (no plot), <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.</div>
           </section>`;
 
         const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
@@ -420,10 +420,26 @@
         };
         function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
 
-        // NEW: Enter inserts newline and auto-plots
+        // Hotkeys on textarea
         const gx = $('#gx');
         gx.addEventListener('keydown', (e)=>{
-          if(e.key==='Enter' && !e.shiftKey){
+          const meta = e.ctrlKey || e.metaKey;
+          if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
+            e.preventDefault();
+            Plotly.purge('chart');
+            return;
+          }
+          if(meta && e.key==='Enter'){ // plot only
+            e.preventDefault();
+            doPlot();
+            return;
+          }
+          if(e.key==='Enter' && e.shiftKey){ // newline, no plot
+            // allow default newline insertion
+            setTimeout(()=>{ persist(); },0);
+            return;
+          }
+          if(e.key==='Enter' && !e.shiftKey && !meta){ // newline + plot
             e.preventDefault();
             const start = gx.selectionStart, end = gx.selectionEnd;
             const val = gx.value;
@@ -434,7 +450,6 @@
           }
         });
 
-        // Initial render if content exists
         if(($('#gx').value||'').trim()) doPlot();
       }
 

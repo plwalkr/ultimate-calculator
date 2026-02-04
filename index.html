@@ -286,6 +286,36 @@ button{
 
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
+
+
+/* v1.3.2: calculator settings bar */
+.calcSettings{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin: 10px 0 12px 0;
+  padding: 10px 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+}
+.setItem{display:flex; flex-direction:column; gap:6px; min-width: 140px}
+.setLbl{font-size:.78rem; font-weight:700; opacity:.8}
+.setSel{
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+}
+@media (max-width: 520px){
+  .setItem{flex:1; min-width: 0}
+  .setSel{width:100%}
+}
+
+/* v1.3.2: full-width equals on phones */
+.span4{grid-column: span 4;}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -293,7 +323,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.1 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.2 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -397,6 +427,24 @@ button{
                 <div class="expr" id="expr"></div>
                 <div class="result" id="res">0</div>
               </div>
+
+              <div class="calcSettings">
+                <label class="setItem">
+                  <span class="setLbl">Mode</span>
+                  <select id="modeSel" class="setSel">
+                    <option value="basic">Basic</option>
+                    <option value="sci">Sci</option>
+                  </select>
+                </label>
+                <label class="setItem">
+                  <span class="setLbl">Sound</span>
+                  <select id="sfxSel" class="setSel">
+                    <option value="off">Off</option>
+                    <option value="beep">Clicks</option>
+                    <option value="fanfare">Fanfare</option>
+                  </select>
+                </label>
+              </div>
               <div class="keys" id="keys"></div>
             </div>
             <div>
@@ -412,10 +460,46 @@ button{
             </div>
           </section>`;
 
+
+// v1.3.2 settings (persisted)
+let calcMode = localStorage.getItem('calcMode') || 'basic'; // basic | sci
+let sfxMode  = localStorage.getItem('sfxMode')  || 'off';   // off | beep | fanfare
+
+const isPhone = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches);
+
+const BASIC_PHONE = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','='];
+const SCI_PHONE   = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','=',
+                     '(',')','sin','cos','tan','^','√','π','e'];
+
+const BASIC_DESK  = ['7','8','9','/','4','5','6','*','1','2','3','-','0','.','ANS','+','C','⌫','%','='];
+const SCI_DESK    = ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
+
+const K = (calcMode === 'sci')
+          ? (isPhone ? SCI_PHONE : SCI_DESK)
+          : (isPhone ? BASIC_PHONE : BASIC_DESK);
+
         const K = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches)
           ? ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','(',')','sin','cos','tan','^','√','π','e','ANS','=']
           : ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
         const keysEl=$('#keys');
+
+// Initialize selects
+const modeSel = $('#modeSel');
+const sfxSel  = $('#sfxSel');
+if (modeSel) modeSel.value = calcMode;
+if (sfxSel)  sfxSel.value  = sfxMode;
+
+modeSel?.addEventListener('change', () => {
+  calcMode = modeSel.value;
+  localStorage.setItem('calcMode', calcMode);
+  renderCalc(); // rerender only calculator
+  bindNav();    // keep nav behavior intact
+});
+
+sfxSel?.addEventListener('change', () => {
+  sfxMode = sfxSel.value;
+  localStorage.setItem('sfxMode', sfxMode);
+});
         K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq');
             if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) b.classList.add('span4');
             else b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
@@ -975,42 +1059,63 @@ button{
 
 /* ---------- Touch feedback helpers ---------- */
 (function(){
-  // Some platforms support Vibration API; iOS Safari generally does NOT.
   function tryVibrate(ms){
     try{
       if (navigator && typeof navigator.vibrate === "function") navigator.vibrate(ms);
     }catch(_){}
   }
 
-  // Subtle click using WebAudio (works broadly). Respects reduced motion.
   let audioCtx = null;
-  function clickSound(){
+  function ctx(){
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, gain=0.02, type="square", when=0){
     try{
-      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = "square";
-      o.frequency.value = 220;
-      g.gain.value = 0.02;
-      o.connect(g); g.connect(audioCtx.destination);
-      const t = audioCtx.currentTime;
+      const c = ctx();
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = gain;
+      o.connect(g); g.connect(c.destination);
+      const t = c.currentTime + when;
       o.start(t);
-      o.stop(t + 0.015);
+      o.stop(t + duration);
     }catch(_){}
   }
 
-  // Global pointer feedback for on-screen buttons
+  function clickSound(){
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    playTone(220, 0.015, 0.02, "square", 0);
+  }
+
+  // "Zelda-ish" tiny fanfare: simple 3-tone upward arpeggio (no sampled audio).
+  function fanfareSound(){
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    playTone(440, 0.06, 0.015, "triangle", 0.00);
+    playTone(554.37, 0.06, 0.015, "triangle", 0.07);
+    playTone(659.25, 0.10, 0.015, "triangle", 0.14);
+  }
+
+  function getSfxMode(){
+    try{ return localStorage.getItem('sfxMode') || 'off'; }catch(_){ return 'off'; }
+  }
+
   document.addEventListener("pointerdown", (e)=>{
     const btn = e.target.closest("button");
     if(!btn) return;
-    tryVibrate(8);
-    clickSound();
-  }, {passive:true});
-})();
 
-</script>
+    tryVibrate(8);
+
+    const mode = getSfxMode();
+    if (mode === 'beep') clickSound();
+    else if (mode === 'fanfare') fanfareSound();
+  }, {passive:true});
+})();</script>
 </body>
 </html>
 

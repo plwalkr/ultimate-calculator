@@ -282,14 +282,18 @@ button{
 @media (max-width: 820px) and (orientation: landscape){
   .wrap{padding:0 12px}
   .keys{grid-template-columns:repeat(6, minmax(0,1fr))}
-}</style>
+}
+
+/* v1.3.1: full-width equals on phones */
+.span4{grid-column: span 4;}
+</style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.0 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.1 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -408,9 +412,13 @@ button{
             </div>
           </section>`;
 
-        const K=['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
+        const K = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches)
+          ? ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','(',')','sin','cos','tan','^','√','π','e','ANS','=']
+          : ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
         const keysEl=$('#keys');
-        K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq'); b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
+        K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq');
+            if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) b.classList.add('span4');
+            else b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
 
         const saved = loadTab('calc', {tape:[], ans:0});
         let expr=''; let ans=saved.ans||0; const tape=[...(saved.tape||[])]; const exprEl=$('#expr'); const resEl=$('#res');

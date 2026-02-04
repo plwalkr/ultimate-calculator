@@ -318,6 +318,58 @@ button{
 .span4{grid-column: span 4;}
 
 #diag{pointer-events:none;}
+
+
+/* v1.3.4: debug UI */
+#dbgBtn{
+  position:fixed;
+  right:12px;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  z-index:9999;
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.22);
+  background:rgba(15,17,21,0.55);
+  color:var(--ink);
+  font-weight:800;
+  font-size:.85rem;
+  letter-spacing:.02em;
+  backdrop-filter: blur(10px);
+}
+#dbgPanel{
+  position:fixed;
+  left:10px; right:10px;
+  bottom:calc(60px + env(safe-area-inset-bottom));
+  max-height:45vh;
+  z-index:9999;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(10,12,16,0.85);
+  color:var(--ink);
+  display:none;
+  overflow:hidden;
+  backdrop-filter: blur(10px);
+}
+#dbgPanel.show{display:block;}
+#dbgPanel .dbgHead{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.14);
+}
+#dbgClose{
+  padding:6px 10px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.06);
+  color:inherit; font-weight:900;
+}
+#dbgLog{
+  margin:0;
+  padding:10px 12px;
+  font-size:.82rem;
+  line-height:1.25;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -325,7 +377,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.3 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.4 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -345,6 +397,8 @@ button{
     <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
     <div id="selfTests" class="tests"></div>
+    <button id="dbgBtn" title="Debug">DBG</button>
+    <div id="dbgPanel" aria-hidden="true"><div class="dbgHead"><strong>Debug</strong><button id="dbgClose" aria-label="Close">×</button></div><pre id="dbgLog"></pre></div>
   </div>
 
   <script>
@@ -371,7 +425,8 @@ button{
         startApp();
       }catch(e){
         console.error(e);
-        note('err','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs and reload.');
+        note('warn','Offline/blocked libs: running in fallback mode. (Basic calc works; plots may be disabled.)');
+        try{ startApp(); }catch(e2){ console.error(e2); note('err','App failed to start: '+(e2 && e2.message ? e2.message : e2)); }
       }
     })();
 
@@ -380,6 +435,49 @@ button{
       const $ = (s, r=document)=> r.querySelector(s);
       const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
       const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+/* ---------- Debug + fallback eval ---------- */
+const debugLog = [];
+      window.debugLog = debugLog;
+function dlog(level, msg){
+  const line = `[${new Date().toLocaleTimeString()}] ${level.toUpperCase()}: ${msg}`;
+  debugLog.push(line);
+  if (debugLog.length > 200) debugLog.shift();
+  const el = document.getElementById('dbgLog');
+  if (el && document.getElementById('dbgPanel')?.classList.contains('show')) el.textContent = debugLog.slice(-120).join("\n");
+}
+['log','warn','error'].forEach(k=>{
+  const orig = console[k].bind(console);
+  console[k] = (...args)=>{ try{ dlog(k, args.map(a=> (typeof a==='string'?a:JSON.stringify(a))).join(' ')); }catch(_){}
+    orig(...args);
+  };
+});
+
+function safeEval(expr, ans=0){
+  // Very small whitelist-based evaluator for offline mode
+  // Supports: + - * / % ** (^) parentheses, decimals, constants pi/e, functions sin cos tan sqrt
+  let s = String(expr).trim();
+  if (!s) return 0;
+
+  s = s.replace(/ANS/g, String(ans));
+  s = s.replace(/π/g, "PI");
+  s = s.replace(/√/g, "sqrt");
+  s = s.replace(/\^/g, "**");
+
+  // allow digits, operators, parens, dot, commas, spaces, and letters used in functions/constants
+  const ok = /^[0-9+\-*/%().,\sA-Za-z_*]*$/.test(s);
+  if (!ok) throw new Error("Unsupported characters");
+
+  // only allow specific identifiers
+  const allowed = new Set(['sin','cos','tan','sqrt','PI','E']);
+  const ids = s.match(/[A-Za-z_]+/g) || [];
+  for (const id of ids){
+    if (!allowed.has(id)) throw new Error("Unsupported token: "+id);
+  }
+
+  const fn = Function("sin","cos","tan","sqrt","PI","E", `"use strict"; return (${s});`);
+  return fn(Math.sin, Math.cos, Math.tan, Math.sqrt, Math.PI, Math.E);
+}
       const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
       function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
@@ -513,7 +611,7 @@ sfxSel?.addEventListener('change', () => {
         function renderExpr(){ exprEl.textContent=expr||'\u00A0'; }
         function renderTape(){ $('#tape').innerHTML=tape.map(t=>`<div class='trow'><div class='l'>${esc(t.e)}</div><div class='r'>${t.v}</div></div>`).join(''); }
 
-        function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=math.evaluate(sanitized,scope); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
+        function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=(window.math && math.evaluate) ? math.evaluate(sanitized,scope) : safeEval(sanitized, ans); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
         function press(k){ switch(k){ case 'C': expr=''; setRes(0); break; case '⌫': expr=expr.slice(0,-1); break; case '=': evalExpr(); break; case '√': expr+='sqrt('; break; case 'π': expr+=Math.PI.toString(); break; case 'e': expr+=Math.E.toString(); break; case 'ANS': expr+=String(ans); break; case 'sin': case 'cos': case 'tan': expr+=k+'('; break; default: expr+=k; } renderExpr(); }
         window.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); evalExpr(); } else if(e.key==='Backspace'){ press('⌫'); } else if(e.key==='Escape'){ press('C'); } else if(/[0-9.()+\-/*^%]/.test(e.key)){ press(e.key); } });
         $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
@@ -1040,7 +1138,7 @@ sfxSel?.addEventListener('change', () => {
         const pass=(name)=>{ results.push(`<div class='pass'>✔ ${name}</div>`); };
         const fail=(name,msg)=>{ results.push(`<div class='fail'>✖ ${name} — ${msg||''}</div>`); };
 
-        try{ const v=math.evaluate('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
+        try{ const v=(window.math && math.evaluate) ? math.evaluate('2+2') : safeEval('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
         try{ const d=math.derivative('x^2','x').toString(); const f=math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val); }catch(e){ fail('Calculus derivative',e.message); }
         try{ const q=math.unit(1600,'m').to('km').toNumber('km'); (Math.abs(q-1.6)<1e-12)?pass('Units: 1600 m → 1.6 km'):fail('Units convert','got '+q); }catch(e){ fail('Units convert',e.message); }
         try{ const dimMi = JSON.stringify(math.unit(1,'mi').dimensions); const dimCup = JSON.stringify(math.unit(1,'cup').dimensions); (dimMi!==dimCup)?pass('Units: miles not compatible with cups'):fail('Units: miles vs cups dimension check'); }catch(e){ fail('Units incompatibility check',e.message); }
@@ -1053,6 +1151,19 @@ sfxSel?.addEventListener('change', () => {
       }
 
       render('calc');
+
+// Hide library banner once UI is up (still visible in Debug if needed)
+try{ document.getElementById('diag').style.display='none'; }catch(e){}
+// DBG wiring
+try{
+  const b=document.getElementById('dbgBtn');
+  const p=document.getElementById('dbgPanel');
+  const c=document.getElementById('dbgClose');
+  const logEl=document.getElementById('dbgLog');
+  const refresh=()=>{ if(logEl) logEl.textContent=(window.debugLog||[]).slice(-120).join("\n"); };
+  b && b.addEventListener('click', ()=>{ p.classList.toggle('show'); p.setAttribute('aria-hidden', p.classList.contains('show') ? 'false' : 'true'); refresh(); });
+  c && c.addEventListener('click', ()=>{ p.classList.remove('show'); p.setAttribute('aria-hidden','true'); });
+}catch(e){ console.error(e); }
       try{ document.getElementById('diag').style.display='none'; }catch(e){}
 
       runSelfTests();

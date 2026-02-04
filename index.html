@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LegendCalc Suite (Math + Time Clock) — Unzipped</title>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LegendCalc">
+    <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
+<title>LegendCalc Suite (Math + Time Clock) — Unzipped</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -182,8 +187,67 @@ body{
   body{ min-height: 100dvh; }
 }
 
+
+
+/* ---------- iPhone polish pack (safe for desktop) ---------- */
+/* Auto light/dark */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1a12;
+    --fg: #e9f0ea;
+    --card: rgba(255,255,255,0.06);
+    --card2: rgba(255,255,255,0.10);
+    --shadow: rgba(0,0,0,0.35);
+  }
+  body{ background: var(--bg); color: var(--fg); }
+  .panel, .card, .calc, #app, .container{
+    background: var(--card);
+    box-shadow: 0 10px 30px var(--shadow);
+  }
+}
+
+@media (prefers-color-scheme: light){
+  :root{
+    --bg: #f6f5ef;
+    --fg: #0b1a12;
+    --card: rgba(0,0,0,0.05);
+    --card2: rgba(0,0,0,0.08);
+    --shadow: rgba(0,0,0,0.12);
+  }
+  body{ background: var(--bg); color: var(--fg); }
+  .panel, .card, .calc, #app, .container{
+    background: rgba(255,255,255,0.75);
+    box-shadow: 0 10px 30px var(--shadow);
+  }
+}
+
+/* Thumb-friendly spacing (right-hand bias) */
+@media (max-width: 520px){
+  /* If you're using a grid wrapper for keys, widen the right side slightly */
+  .keys, .grid, .pad{
+    padding-right: 10px;
+    padding-left: 4px;
+  }
+
+  /* Make operator keys stand out slightly without forcing colors */
+  .op, .operator, [data-op="true"]{
+    font-weight: 700;
+  }
+
+  /* Prevent text selection while tapping */
+  body, button{
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Standalone (Add to Home Screen) better spacing */
+@media (display-mode: standalone){
+  body{ padding-top: calc(14px + var(--safe-top)); }
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
@@ -862,7 +926,46 @@ body{
       runSelfTests();
     }
   })();
-  </script>
+  
+
+/* ---------- Touch feedback helpers ---------- */
+(function(){
+  // Some platforms support Vibration API; iOS Safari generally does NOT.
+  function tryVibrate(ms){
+    try{
+      if (navigator && typeof navigator.vibrate === "function") navigator.vibrate(ms);
+    }catch(_){}
+  }
+
+  // Subtle click using WebAudio (works broadly). Respects reduced motion.
+  let audioCtx = null;
+  function clickSound(){
+    try{
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return;
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 220;
+      g.gain.value = 0.02;
+      o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+      o.start(t);
+      o.stop(t + 0.015);
+    }catch(_){}
+  }
+
+  // Global pointer feedback for on-screen buttons
+  document.addEventListener("pointerdown", (e)=>{
+    const btn = e.target.closest("button");
+    if(!btn) return;
+    tryVibrate(8);
+    clickSound();
+  }, {passive:true});
+})();
+
+</script>
 </body>
 </html>
 

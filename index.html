@@ -370,14 +370,71 @@ button{
   white-space:pre-wrap;
   word-break:break-word;
 }
+
+
+/* v1.3.5: always-available debug UI */
+#dbgBtn{
+  position: fixed;
+  right: 10px;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 99999;
+  opacity: 0.6;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  pointer-events: auto;
+}
+#dbgPanel{
+  position: fixed;
+  inset: 10px 10px calc(10px + env(safe-area-inset-bottom)) 10px;
+  z-index: 99998;
+  display: none;
+  pointer-events: auto;
+}
+#dbgPanel.open{ display:block; }
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
+<script>
+/* v1.3.5: ultra-early debug + error capture (survives partial boot) */
+(function(){
+  function qs(id){ return document.getElementById(id); }
+  function now(){ try{ return new Date().toISOString().slice(11,19);}catch(_){return "";} }
+  function append(line){
+    try{
+      var pre = qs('dbgLog');
+      if(!pre) return;
+      pre.textContent += (pre.textContent ? "\n" : "") + "["+now()+"] " + line;
+    }catch(_){}
+  }
+  window.__DBG = {
+    log: append,
+    show: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','false'); p.classList.add('open'); } }catch(_){} },
+    hide: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','true'); p.classList.remove('open'); } }catch(_){} },
+    toggle: function(){ try{ var p=qs('dbgPanel'); if(!p) return; var open=p.classList.contains('open'); open?window.__DBG.hide():window.__DBG.show(); }catch(_){} }
+  };
+  // Capture runtime errors
+  window.addEventListener('error', function(e){
+    try{ append("ERROR: " + (e.message||"") + " @ " + (e.filename||"") + ":" + (e.lineno||"") ); }catch(_){}
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    try{ append("PROMISE: " + (e.reason && (e.reason.message||e.reason) || "unhandled rejection")); }catch(_){}
+  });
+  // Proxy console errors to debug panel
+  try{
+    var oldErr = console.error;
+    console.error = function(){
+      try{ append("console.error: " + Array.prototype.join.call(arguments," ")); }catch(_){}
+      try{ oldErr && oldErr.apply(console, arguments); }catch(_){}
+    };
+  }catch(_){}
+})();
+</script>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.4 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.5 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -397,8 +454,8 @@ button{
     <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
     <div id="selfTests" class="tests"></div>
-    <button id="dbgBtn" title="Debug">DBG</button>
-    <div id="dbgPanel" aria-hidden="true"><div class="dbgHead"><strong>Debug</strong><button id="dbgClose" aria-label="Close">×</button></div><pre id="dbgLog"></pre></div>
+    <button id="dbgBtn" title="Debug" onclick="window.__DBG&&window.__DBG.toggle()">DBG</button>
+    <div id="dbgPanel" aria-hidden="true"><div class="dbgHead"><strong>Debug</strong><button id="dbgClose" aria-label="Close" onclick="window.__DBG&&window.__DBG.hide()">×</button></div><pre id="dbgLog"></pre></div>
   </div>
 
   <script>
@@ -411,10 +468,24 @@ button{
       {global:'math', local:'./libs/math.min.js', cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
       {global:'Plotly', local:'./libs/plotly.min.js', cdn:'https://cdn.plot.ly/plotly-2.35.2.min.js', name:'Plotly'}
     ];
-    function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load failed: '+src)); document.head.appendChild(s); }); }
+    function loadScript(src, timeoutMs=3500){
+      return new Promise((res,rej)=>{
+        try{
+          const s=document.createElement('script');
+          let done=false;
+          const t=setTimeout(()=>{ if(done) return; done=true; try{ s.remove(); }catch(_){}; rej(new Error('timeout: '+src)); }, timeoutMs);
+          s.src=src;
+          s.onload=()=>{ if(done) return; done=true; clearTimeout(t); res(); };
+          s.onerror=()=>{ if(done) return; done=true; clearTimeout(t); rej(new Error('load failed: '+src)); };
+          document.head.appendChild(s);
+        }catch(e){ rej(e); }
+      });
+    }); }
 
     (async function ensureLibs(){
+      /* v1.3.5: ensure boot even if libs fail */
       try{
+
         for(const L of libs){
           if(!(L.global in window)){
             try{ await loadScript(L.local); if(!(L.global in window)) throw new Error('local missing'); }
@@ -424,13 +495,17 @@ button{
         note('ok','Libraries loaded ✔ Local if present, otherwise CDN.');
         startApp();
       }catch(e){
+
         console.error(e);
         note('warn','Offline/blocked libs: running in fallback mode. (Basic calc works; plots may be disabled.)');
         try{ startApp(); }catch(e2){ console.error(e2); note('err','App failed to start: '+(e2 && e2.message ? e2.message : e2)); }
+        try{ window.__DBG && window.__DBG.log('Lib load failed: ' + (e && (e.message||e) )); }catch(_){}
+      }finally{
+        try{ render('calc'); }catch(err){ try{ window.__DBG && window.__DBG.log('Render failed: ' + (err && (err.message||err))); }catch(_){} }
+        try{ const d=document.getElementById('diag'); if(d){ d.className='warn'; d.textContent='Offline mode (no external libs)'; setTimeout(()=>{ try{ d.style.display='none'; }catch(_){} }, 1200); } }catch(_){}
       }
     })();
-
-    function startApp(){
+function startApp(){
       /* ---------- Utils & persistence ---------- */
       const $ = (s, r=document)=> r.querySelector(s);
       const $$ = (s, r=document)=> [...r.querySelectorAll(s)];

@@ -434,7 +434,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.9 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.0 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -698,9 +698,12 @@ sfxSel?.addEventListener('change', () => {
   sfxMode = sfxSel.value;
   localStorage.setItem('sfxMode', sfxMode);
 });
+        const keysEl = $('#keys');
+        if(keysEl) keysEl.innerHTML='';
+
         K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq');
             if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) b.classList.add('span4');
-            else b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
+            else b.classList.add('span2'); } b.onclick=()=>press(k); if(keysEl) keysEl.appendChild(b); });
 
         const saved = loadTab('calc', {tape:[], ans:0});
         let expr=''; let ans=saved.ans||0; const tape=[...(saved.tape||[])]; const exprEl=$('#expr'); const resEl=$('#res');

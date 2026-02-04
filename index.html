@@ -316,6 +316,8 @@ button{
 
 /* v1.3.2: full-width equals on phones */
 .span4{grid-column: span 4;}
+
+#diag{pointer-events:none;}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -323,7 +325,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.2 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.3 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -493,7 +495,6 @@ modeSel?.addEventListener('change', () => {
   calcMode = modeSel.value;
   localStorage.setItem('calcMode', calcMode);
   renderCalc(); // rerender only calculator
-  bindNav();    // keep nav behavior intact
 });
 
 sfxSel?.addEventListener('change', () => {
@@ -1052,6 +1053,8 @@ sfxSel?.addEventListener('change', () => {
       }
 
       render('calc');
+      try{ document.getElementById('diag').style.display='none'; }catch(e){}
+
       runSelfTests();
     }
   })();

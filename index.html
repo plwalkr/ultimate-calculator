@@ -418,6 +418,38 @@ button{
 }
 .theme-inspire .expr{ color: rgba(220,235,255,0.90); }
 .theme-inspire .result{ color: #f5fbff; text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+
+
+/* v1.4.4: iPhone-first layout fixes (mobile only; PC unchanged) */
+@media (max-width: 520px){
+  /* Header stacking + no collisions */
+  header{flex-direction:column;align-items:stretch;gap:12px}
+  .titleline{justify-content:center}
+  h1{text-align:center;font-size:1.45rem}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:2px}
+  .tab{white-space:nowrap}
+
+  .theme-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:flex-start}
+  .theme-picker .note{display:block;width:100%;opacity:.75}
+  .theme-select{flex:1;min-width:150px}
+
+  /* Prevent grid overlap in tab content */
+  .row{grid-template-columns:1fr !important}
+  .two-col{grid-template-columns:1fr !important}
+  label{min-width:0}
+  .input, textarea, select{width:100%;box-sizing:border-box}
+
+  /* Button bars: stack cleanly */
+  #view div[style*="display:flex"]{flex-direction:column;align-items:stretch}
+  #view div[style*="display:flex"] > button,
+  #view div[style*="display:flex"] > .btn{width:100%}
+
+  /* Chart sizing */
+  .chart{height:280px}
+
+  /* Reduce section title collisions */
+  .section-title{margin-top:14px;margin-bottom:6px}
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -460,7 +492,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.3 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.4 • 2026-02-05</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>

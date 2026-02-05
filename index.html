@@ -400,63 +400,24 @@ button{
 }
 
 
-/* v1.4.2: Mobile layout + tap spacing across all tabs */
+/* v1.4.3: iPhone spacing pass for all tabs (mobile only) */
 @media (max-width: 520px){
-  #view button, #view .btn, #view input, #view select, #view textarea{
-    min-height: 48px;
-    font-size: 16px;
-    line-height: 1.2;
-    border-radius: 14px;
-  }
-
-  #view input, #view select, #view textarea{
-    padding: 12px 12px;
-  }
-
-  #view button, #view .btn{
-    padding: 12px 14px;
-  }
-
-  #view .surface{ padding: 12px; }
-  #view .section-title{ margin-top: 14px; }
-
-  #view [style*="display:flex"]{
-    flex-wrap: wrap;
-    row-gap: 10px;
-  }
-
-  #view [style*="display:flex"] > *{
-    margin-top: 6px;
-  }
-
-  #view table{ width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-  #view td, #view th{ padding: 6px 6px; }
-
-  #view .calc-grid{ grid-template-columns: 1fr !important; }
+  .row{ gap: 14px; }
+  .btn{ padding: 14px 16px; min-height: 48px; }
+  .input, select, textarea{ padding: 12px; min-height: 48px; font-size: 16px; }
+  .surface{ padding: 14px; }
+  /* Buttons grouped in inline flex toolbars inside tabs */
+  #view [style*="display:flex"]{ flex-wrap: wrap; gap: 10px !important; }
 }
 
 
-/* v1.4.2: Improve contrast for TI-Inspire theme */
-body.theme-inspire{
-  --bg: #0a0f14;
-  --panel: rgba(255,255,255,0.08);
-  --key: rgba(255,255,255,0.10);
+/* v1.4.3: TI-Inspire readability boost (result + screen) */
+.theme-inspire .screen{
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.35));
+  border-color: rgba(255,255,255,0.14);
 }
-
-body.theme-inspire .screen{
-  background: rgba(255,255,255,0.10) !important;
-  border: 1px solid rgba(255,255,255,0.14);
-}
-
-body.theme-inspire .expr{
-  opacity: 0.90;
-  color: rgba(235,245,255,0.92);
-}
-
-body.theme-inspire .result{
-  color: #f2f7ff;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
-}
+.theme-inspire .expr{ color: rgba(220,235,255,0.90); }
+.theme-inspire .result{ color: #f5fbff; text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -499,7 +460,7 @@ body.theme-inspire .result{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.2 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.3 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -513,6 +474,12 @@ body.theme-inspire .result{
           <option value="dark">Dark</option>
           <option value="light">Light</option>
           <option value="inspire">TI-Inspire</option>
+        </select>
+        <span class="note">Sound</span>
+        <select id="globalSfx" class="theme-select">
+          <option value="off">Off</option>
+          <option value="beep">Clicks</option>
+          <option value="fanfare">Fanfare</option>
         </select>
       </div>
     </header>
@@ -687,17 +654,16 @@ function safeEval(expr, ans=0){
         document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
       })();
 
-      /* v1.4.2: Initialize global sound selector */
+      /* v1.4.3: global sound selector */
       (function initSound(){
         try{
           const sel = $('#globalSfx');
-          const stored = localStorage.getItem('sfxMode') || 'off';
-          if (sel) sel.value = stored;
-          sel?.addEventListener('change', ()=>{
-            const v = sel.value;
-            localStorage.setItem('sfxMode', v);
+          if(!sel) return;
+          sel.value = localStorage.getItem('sfxMode') || 'off';
+          sel.addEventListener('change', ()=>{
+            localStorage.setItem('sfxMode', sel.value);
             const calcSel = document.getElementById('sfxSel');
-            if (calcSel) calcSel.value = v;
+            if(calcSel) calcSel.value = sel.value;
           });
         }catch(e){ console.error(e); }
       })();
@@ -795,8 +761,25 @@ sfxSel?.addEventListener('change', () => {
 
         function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=(window.math && math.evaluate) ? math.evaluate(sanitized,scope) : safeEval(sanitized, ans); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
         function press(k){ switch(k){ case 'C': expr=''; setRes(0); break; case '⌫': expr=expr.slice(0,-1); break; case '=': evalExpr(); break; case '√': expr+='sqrt('; break; case 'π': expr+=Math.PI.toString(); break; case 'e': expr+=Math.E.toString(); break; case 'ANS': expr+=String(ans); break; case 'sin': case 'cos': case 'tan': expr+=k+'('; break; default: expr+=k; } renderExpr(); }
-        window.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); evalExpr(); } else if(e.key==='Backspace'){ press('⌫'); } else if(e.key==='Escape'){ press('C'); } else if(/[0-9.()+\-/*^%]/.test(e.key)){ press(e.key); } });
-        $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
+        
+// v1.4.3: don't hijack keyboard when typing in inputs or on other tabs
+window.__calcPress = press;
+window.__calcEval  = evalExpr;
+if(!window.__calcKeyHandler){
+  window.__calcKeyHandler = (e)=>{
+    const ae = document.activeElement;
+    if(ae && (ae.tagName==='INPUT' || ae.tagName==='TEXTAREA' || ae.tagName==='SELECT' || ae.isContentEditable)) return;
+
+    const active = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
+    if(active !== 'calc') return;
+
+    if(e.key==='Enter'){ e.preventDefault(); window.__calcEval && window.__calcEval(); }
+    else if(e.key==='Backspace'){ window.__calcPress && window.__calcPress('⌫'); }
+    else if(e.key==='Escape'){ window.__calcPress && window.__calcPress('C'); }
+    else if(/[0-9.()+\-/*^%]/.test(e.key)){ window.__calcPress && window.__calcPress(e.key); }
+  };
+  window.addEventListener('keydown', window.__calcKeyHandler);
+}        $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
         $('#clearTape').onclick=()=>{ tape.length=0; renderTape(); persist(); };
         $('#clearSavedCalc').onclick=()=>{ clearTab('calc'); tape.length=0; ans=0; renderTape(); setRes(0); };
 

@@ -398,6 +398,65 @@ button{
 @media (min-width: 521px){
   .keys{ grid-template-columns: repeat(4, minmax(60px, 1fr)); }
 }
+
+
+/* v1.4.2: Mobile layout + tap spacing across all tabs */
+@media (max-width: 520px){
+  #view button, #view .btn, #view input, #view select, #view textarea{
+    min-height: 48px;
+    font-size: 16px;
+    line-height: 1.2;
+    border-radius: 14px;
+  }
+
+  #view input, #view select, #view textarea{
+    padding: 12px 12px;
+  }
+
+  #view button, #view .btn{
+    padding: 12px 14px;
+  }
+
+  #view .surface{ padding: 12px; }
+  #view .section-title{ margin-top: 14px; }
+
+  #view [style*="display:flex"]{
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  #view [style*="display:flex"] > *{
+    margin-top: 6px;
+  }
+
+  #view table{ width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+  #view td, #view th{ padding: 6px 6px; }
+
+  #view .calc-grid{ grid-template-columns: 1fr !important; }
+}
+
+
+/* v1.4.2: Improve contrast for TI-Inspire theme */
+body.theme-inspire{
+  --bg: #0a0f14;
+  --panel: rgba(255,255,255,0.08);
+  --key: rgba(255,255,255,0.10);
+}
+
+body.theme-inspire .screen{
+  background: rgba(255,255,255,0.10) !important;
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+body.theme-inspire .expr{
+  opacity: 0.90;
+  color: rgba(235,245,255,0.92);
+}
+
+body.theme-inspire .result{
+  color: #f2f7ff;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -440,7 +499,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.1 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.2 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -626,6 +685,21 @@ function safeEval(expr, ans=0){
           document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
         });
         document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+      })();
+
+      /* v1.4.2: Initialize global sound selector */
+      (function initSound(){
+        try{
+          const sel = $('#globalSfx');
+          const stored = localStorage.getItem('sfxMode') || 'off';
+          if (sel) sel.value = stored;
+          sel?.addEventListener('change', ()=>{
+            const v = sel.value;
+            localStorage.setItem('sfxMode', v);
+            const calcSel = document.getElementById('sfxSel');
+            if (calcSel) calcSel.value = v;
+          });
+        }catch(e){ console.error(e); }
       })();
 
       /* ---------- Calculator ---------- */

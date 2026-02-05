@@ -392,6 +392,12 @@ button{
   pointer-events: auto;
 }
 #dbgPanel.open{ display:block; }
+
+
+/* v1.4.1: desktop keypad uses 4 columns so number order matches expectations */
+@media (min-width: 521px){
+  .keys{ grid-template-columns: repeat(4, minmax(60px, 1fr)); }
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -434,7 +440,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.0 • 2026-02-04</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.1 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -676,8 +682,8 @@ const BASIC_PHONE = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','
 const SCI_PHONE   = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','=',
                      '(',')','sin','cos','tan','^','√','π','e'];
 
-const BASIC_DESK  = ['7','8','9','/','4','5','6','*','1','2','3','-','0','.','ANS','+','C','⌫','%','='];
-const SCI_DESK    = ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
+const BASIC_DESK  = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','='];
+const SCI_DESK    = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','=','(',')','sin','cos','tan','^','√','π','e'];
 
 const K = (calcMode === 'sci')
           ? (isPhone ? SCI_PHONE : SCI_DESK)
@@ -1282,6 +1288,7 @@ try{
   let audioCtx = null;
   function ctx(){
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    try{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }catch(_){ }
     return audioCtx;
   }
 
@@ -1320,11 +1327,21 @@ try{
   }
 
   document.addEventListener("pointerdown", (e)=>{
+
     const btn = e.target.closest("button");
     if(!btn) return;
 
     tryVibrate(8);
 
+    const mode = getSfxMode();
+    if (mode === 'beep') clickSound();
+    else if (mode === 'fanfare') fanfareSound();
+  }, {passive:true});
+
+  // Fallback for browsers that don't fire pointer events as expected
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
     const mode = getSfxMode();
     if (mode === 'beep') clickSound();
     else if (mode === 'fanfare') fanfareSound();

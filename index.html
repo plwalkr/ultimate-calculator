@@ -556,7 +556,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.2 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.3 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -836,6 +836,49 @@ function safeEval(expr, ans=0){
         });
         document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
       })();
+
+/* v1.5.3: sound setting wiring (global + drawer + calc) */
+(function initSoundWiring(){
+  const get = ()=>{
+    try{
+      // prefer existing localStorage key used by audio helper
+      return localStorage.getItem('sfxMode') || 'off';
+    }catch(_){ return 'off'; }
+  };
+  const set = (v)=>{
+    try{ localStorage.setItem('sfxMode', v); }catch(_){}
+    try{
+      // also keep your prefs blob in sync if present
+      const raw = localStorage.getItem('legendcalc_prefs');
+      if(raw){
+        const p = JSON.parse(raw);
+        p.sfxMode = v;
+        localStorage.setItem('legendcalc_prefs', JSON.stringify(p));
+      }
+    }catch(_){}
+    // sync all UI controls
+    try{ const a=document.getElementById('globalSfx'); if(a) a.value=v; }catch(_){}
+    try{ const b=document.getElementById('drawerSfx'); if(b) b.value=v; }catch(_){}
+    try{ const c=document.getElementById('sfxSel'); if(c) c.value=v; }catch(_){}
+  };
+
+  // initialize from storage/prefs
+  let v = get();
+  try{
+    const raw = localStorage.getItem('legendcalc_prefs');
+    if(raw){
+      const p = JSON.parse(raw);
+      if(p && p.sfxMode) v = p.sfxMode;
+    }
+  }catch(_){}
+  set(v);
+
+  // listeners
+  const g = document.getElementById('globalSfx');
+  const d = document.getElementById('drawerSfx');
+  g?.addEventListener('change', ()=> set(g.value));
+  d?.addEventListener('change', ()=> set(d.value));
+})();
 
       /* v1.4.3+: global sound selector (synced across header, calculator, and mobile drawer) */
       (function initSound(){

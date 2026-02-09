@@ -633,7 +633,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.0 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.1 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -1210,10 +1210,8 @@ if(!window.__calcKeyHandler){
         renderExpr(); renderTape(); setRes(ans||0);
       }
 
-      /* ---------- Calculus ---------- */
-            setCalcOut(`<div>f'(x) = <b>${esc(d)}</b></div>${evalAt}`);
-          }catch(e){ setCalcOut("<div class='err'>Bad function</div>"); }
-        };
+      /* ---------- Calculus (legacy disabled: GraphLab replaces this) ---------- */
+      /* legacy calculus UI disabled */
 
         $('#integrateBtn').onclick=()=>{
           const fx=$('#fx').value.trim(); const a=parseFloat($('#a').value); const b=parseFloat($('#b').value); let n=parseInt($('#n').value||200,10);

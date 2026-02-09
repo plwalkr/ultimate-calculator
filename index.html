@@ -514,6 +514,48 @@ button{
   body.bigui .input{ min-height: 52px; font-size: 17px; }
   body.bigui .key{ min-height: 58px; font-size: 1.15rem; }
 }
+
+
+/* v1.5.4: iPhone top tabs fit screen (no scrolling) + settings drawer */
+@media (max-width: 520px){
+  /* no bottom nav, so no extra padding needed */
+  body{ padding-bottom: env(safe-area-inset-bottom); }
+
+  /* Tabs wrap into 2 rows and share width */
+  .tabs{
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tab{
+    flex: 1 1 calc(33.333% - 10px);
+    min-width: 96px;
+    text-align: center;
+    padding: 12px 12px;
+  }
+
+  /* Settings drawer sits above safe area */
+  .drawer{
+    position: fixed;
+    left: 10px; right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    max-height: 65vh;
+    z-index: 20001;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(10,12,16,0.86);
+    backdrop-filter: blur(12px);
+    display: none;
+    overflow: hidden;
+  }
+  .drawer.open{ display:block; }
+  .drawerHead{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .drawerTitle{ font-weight: 900; letter-spacing: .02em; }
+  .drawerBody{ padding: 12px; }
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -556,7 +598,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.3 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.4 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -565,6 +607,7 @@ button{
         <button class="tab" data-tab="time">Time Clock</button>
       </div>
       <div class="theme-picker">
+        <button class="btn" id="hdrSettingsBtn" title="Settings" style="padding:10px 12px;min-height:44px">⚙︎</button>
         <span class="note">Theme</span>
         <select id="themeSel" class="theme-select">
           <option value="dark">Dark</option>
@@ -580,14 +623,6 @@ button{
       </div>
     </header>
 <!-- v1.5.1: mobile bottom nav (iPhone-first) -->
-<nav class="mnav" aria-label="Primary">
-  <button class="mnavbtn" data-tab="calc">Calc</button>
-  <button class="mnavbtn" data-tab="units">Units</button>
-  <button class="mnavbtn" data-tab="time">Time</button>
-  <button class="mnavbtn" data-tab="graph">Graph</button>
-  <button class="mnavbtn" data-tab="calculus">Calcus</button>
-  <button class="mnavbtn" id="mSettingsBtn" title="Settings">⚙︎</button>
-</nav>
 
 <!-- v1.5.1: settings drawer (mobile-friendly) -->
 <div id="settingsDrawer" class="drawer" aria-hidden="true">
@@ -879,6 +914,25 @@ function safeEval(expr, ans=0){
   g?.addEventListener('change', ()=> set(g.value));
   d?.addEventListener('change', ()=> set(d.value));
 })();
+
+
+/* v1.5.4: settings drawer wiring */
+(function initDrawer(){
+  const drawer = document.getElementById('settingsDrawer');
+  const openBtn = document.getElementById('hdrSettingsBtn');
+  const closeBtn = document.getElementById('drawerClose');
+  const show = ()=>{ if(!drawer) return; drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); };
+  const hide = ()=>{ if(!drawer) return; drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
+  openBtn?.addEventListener('click', (e)=>{ e.preventDefault(); show(); });
+  closeBtn?.addEventListener('click', (e)=>{ e.preventDefault(); hide(); });
+  // close drawer if you tap outside it
+  document.addEventListener('pointerdown', (e)=>{
+    if(!drawer || !drawer.classList.contains('open')) return;
+    const inside = drawer.contains(e.target) || openBtn?.contains(e.target);
+    if(!inside) hide();
+  }, {passive:true});
+})();
+
 
       /* v1.4.3+: global sound selector (synced across header, calculator, and mobile drawer) */
       (function initSound(){

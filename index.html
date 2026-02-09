@@ -633,7 +633,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.4 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.5 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -838,7 +838,7 @@ function safeEval(expr, ans=0){
 
   const fn = Function("sin","cos","tan","sqrt","PI","E", `"use strict"; return (${s});`);
   return fn(Math.sin, Math.cos, Math.tan, Math.sqrt, Math.PI, Math.E);
-}
+
       const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
       function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
@@ -856,7 +856,7 @@ function safeEval(expr, ans=0){
       // Global sound mode (single source of truth stored in localStorage)
       sfxMode = localStorage.getItem('sfxMode') || 'off'; /* ---------- Router & theme ---------- */
       const tabs = $$('.tab');
-      const mnavBtns = $$('.mnavbtn[data-tab]');
+      const mnavBtns = [];
       let currentTab = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
 
       function syncActive(tab){
@@ -894,9 +894,8 @@ function safeEval(expr, ans=0){
       // Desktop tabs
       tabs.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
-      // Mobile bottom nav
-      mnavBtns.forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
-      $('#mSettingsBtn')?.addEventListener('click', toggleDrawer);
+      // Mobile: Settings drawer only (no bottom nav)
+      $('#hdrSettingsBtn')?.addEventListener('click', toggleDrawer);
       $('#drawerClose')?.addEventListener('click', closeDrawer);
 
       function render(which){
@@ -1910,7 +1909,6 @@ function renderCalculus(){ return renderGraphLab('analyze'); }
       }
 
       activateTab('calc');
-      syncActive(currentTab);
 
 // Hide library banner once UI is up (still visible in Debug if needed)
 try{ document.getElementById('diag').style.display='none'; }catch(e){}
@@ -1920,11 +1918,16 @@ try{
   const p=document.getElementById('dbgPanel');
   const c=document.getElementById('dbgClose');
   const logEl=document.getElementById('dbgLog');
-  const refresh=()=>{ if(logEl) logEl.textContent=(window.debugLog||[]).slice(-120).join("\n"); };
-  b && b.addEventListener('click', ()=>{ p.classList.toggle('show'); p.setAttribute('aria-hidden', p.classList.contains('show') ? 'false' : 'true'); refresh(); });
-  c && c.addEventListener('click', ()=>{ p.classList.remove('show'); p.setAttribute('aria-hidden','true'); });
-}catch(e){ console.error(e); }
-      try{ document.getElementById('diag').style.display='none'; }catch(e){}
+  if(b && p){
+    b.onclick=()=>{ p.classList.add('open'); };
+  }
+  if(c && p){
+    c.onclick=()=>{ p.classList.remove('open'); };
+  }
+  if(logEl){
+    window.__dbgLogEl = logEl;
+  }
+}catch(e){}
 
       runSelfTests();
 

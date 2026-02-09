@@ -633,7 +633,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.6 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.0 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -1211,57 +1211,6 @@ if(!window.__calcKeyHandler){
       }
 
       /* ---------- Calculus ---------- */
-      function renderCalculus(){
-        const view=$('#view');
-        view.innerHTML=`
-          <section class="surface two-col">
-            <div>
-              <div class="section-title">Symbolic</div>
-              <div class="row">
-                <label><div class="note">f(x)</div><input id="fx" class="input" placeholder="e.g. x^3 - 4x + 1"></label>
-                <label><div class="note">Point (x = …) for f'(x)</div><input id="x0" class="input" type="number" placeholder="optional"></label>
-              </div>
-              <div style="display:flex;gap:8px;margin:10px 0">
-                <button class="btn primary" id="diffBtn">Differentiate</button>
-                <button class="btn" id="integrateBtn">Definite Integral</button>
-                <button class="btn" id="clearSavedCalcus" title="Forget saved inputs">Clear Saved</button>
-              </div>
-              <div class="note">Integration supports numeric definite integrals (Simpson) — enter bounds below.</div>
-              <div class="row" style="margin-top:8px">
-                <label><div class="note">Lower bound a</div><input id="a" class="input" type="number" placeholder="e.g. 0"></label>
-                <label><div class="note">Upper bound b</div><input id="b" class="input" type="number" placeholder="e.g. 2"></label>
-                <label><div class="note">Subdivisions (even)</div><input id="n" class="input" type="number" value="200"></label>
-              </div>
-              <div id="calcOut" style="margin-top:12px"></div>
-            </div>
-            <div>
-              <div class="section-title">Quick Checks</div>
-              <div class="row">
-                <label><div class="note">Limit x → a</div><input id="limExpr" class="input" placeholder="e.g. (sin(x))/x"></label>
-                <label><div class="note">a</div><input id="limA" class="input" type="number" placeholder="0"></label>
-              </div>
-              <div style="display:flex;gap:8px;margin:10px 0"><button class="btn" id="limitBtn">Compute Limit (numeric)</button></div>
-              <div id="limitOut"></div>
-            </div>
-          </section>`;
-
-        const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
-        $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
-        function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
-        $$('.input').forEach(el=> el.addEventListener('input', persist));
-        $('#clearSavedCalcus').onclick=()=>{ clearTab('calculus'); ['fx','x0','a','b','n','limExpr','limA'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; }); };
-
-        $('#diffBtn').onclick=()=>{
-          const fx=$('#fx').value.trim(); if(!fx){ return setCalcOut("<div class='err'>Enter f(x)</div>"); }
-          try{
-            const d = math.derivative(fx,'x').toString();
-            const x0 = parseFloat($('#x0').value);
-            let evalAt='';
-            if(!Number.isNaN(x0)){
-              const f = math.parse(d).compile();
-              const val = f.evaluate({x:x0});
-              evalAt = `<div>f'( ${x0} ) = <b>${round(val)}</b></div>`;
-            }
             setCalcOut(`<div>f'(x) = <b>${esc(d)}</b></div>${evalAt}`);
           }catch(e){ setCalcOut("<div class='err'>Bad function</div>"); }
         };
@@ -1297,49 +1246,6 @@ if(!window.__calcKeyHandler){
       }
 
       /* ---------- Graphing (with hotkeys) ---------- */
-      function renderGraph(){
-        const view=$('#view');
-        view.innerHTML=`
-          <section class="surface">
-            <div class="row">
-              <label style="grid-column:1/-1"><div class="note">Functions (one per line)</div>
-                <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
-              </label>
-              <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
-              <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
-              <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
-            </div>
-            <div style="display:flex;gap:8px;margin:10px 0">
-              <button class="btn primary" id="plotBtn">Plot</button>
-              <button class="btn" id="clearBtn">Clear</button>
-              <button class="btn" id="exportBtn">Export PNG</button>
-              <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
-            </div>
-            <div id="chart" class="chart"></div>
-            <div class="note">Hotkeys: <b>Enter</b> new line + plot, <b>Shift+Enter</b> new line (no plot), <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.</div>
-          </section>`;
-
-        const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
-        $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
-        function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
-        $$('.input').forEach(el=> el.addEventListener('input', persist));
-        $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value=''); Plotly.purge('chart'); };
-
-        function doPlot(){
-          const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
-          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length){ Plotly.purge('chart'); return; }
-          try{
-            const xs = linspace(xmin,xmax,n);
-            const traces = lines.map((ex,i)=>{
-              const f = math.parse(ex).compile();
-              const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
-              return {x:xs,y:ys,mode:'lines',name:ex};
-            });
-            Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
-            persist();
-          }catch(e){ alert('Parse error in one of the functions'); }
-        }
 
         $('#plotBtn').onclick=doPlot;
         $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
@@ -1382,6 +1288,315 @@ if(!window.__calcKeyHandler){
       }
 
       /* ---------- Unit Converter ---------- */
+/* ---------- GraphLab (Graph + Calculus) ---------- */
+function getGraphLab(){
+  try{
+    const raw=localStorage.getItem('legendcalc_graphlab');
+    if(raw) return Object.assign({
+      lines: ['sin(x)'],
+      xmin:-10,xmax:10,n:400,
+      sel:0,
+      showDeriv:false,
+      showTangent:false,
+      x0:0,
+      showArea:false,
+      a:0,b:1,
+      showRoots:false
+    }, JSON.parse(raw));
+  }catch(_){}
+  return {lines:['sin(x)'],xmin:-10,xmax:10,n:400,sel:0,showDeriv:false,showTangent:false,x0:0,showArea:false,a:0,b:1,showRoots:false};
+}
+function saveGraphLab(st){
+  try{ localStorage.setItem('legendcalc_graphlab', JSON.stringify(st)); }catch(_){}
+}
+function linspace(a,b,n){
+  const arr=new Array(n);
+  const step=(b-a)/(n-1);
+  for(let i=0;i<n;i++) arr[i]=a+i*step;
+  return arr;
+}
+function safeCompile(expr){
+  if(!window.math) throw new Error('math.js not loaded');
+  expr = String(expr||'').trim();
+  expr = expr.replace(/^\s*(y\s*=|f\s*\(\s*x\s*\)\s*=)\s*/i,'');
+  if(!expr) throw new Error('empty expression');
+  return {expr, compiled: window.math.compile(expr)};
+}
+function evalSeries(compiled, xs){
+  const ys=new Array(xs.length);
+  for(let i=0;i<xs.length;i++){
+    let y = compiled.evaluate({x: xs[i]});
+    y = (typeof y==='number') ? y : (y && y.re !== undefined ? y.re : NaN);
+    ys[i] = (Number.isFinite(y) ? y : null);
+  }
+  return ys;
+}
+function numericIntegrate(xs, ys, a, b){
+  let area=0;
+  for(let i=1;i<xs.length;i++){
+    const x1=xs[i-1], x2=xs[i];
+    if((x1<a && x2<a) || (x1>b && x2>b)) continue;
+    const y1=ys[i-1], y2=ys[i];
+    if(y1==null || y2==null) continue;
+    const xa=Math.max(a, x1);
+    const xb=Math.min(b, x2);
+    const tA = (x2-x1) ? (xa-x1)/(x2-x1) : 0;
+    const tB = (x2-x1) ? (xb-x1)/(x2-x1) : 1;
+    const ya = y1 + (y2-y1)*tA;
+    const yb = y1 + (y2-y1)*tB;
+    area += 0.5*(ya+yb)*(xb-xa);
+  }
+  return area;
+}
+function findRoots(xs, ys){
+  const roots=[];
+  for(let i=1;i<xs.length;i++){
+    const y1=ys[i-1], y2=ys[i];
+    if(y1==null || y2==null) continue;
+    if(y1===0) roots.push(xs[i-1]);
+    if(y1*y2<0){
+      let a=xs[i-1], b=xs[i];
+      let fa=y1, fb=y2;
+      for(let k=0;k<30;k++){
+        const m=0.5*(a+b);
+        const fm = fa + (fb-fa)*((m-a)/(b-a));
+        if(fa*fm<=0){ b=m; fb=fm; } else { a=m; fa=fm; }
+      }
+      roots.push(0.5*(a+b));
+    }
+  }
+  roots.sort((p,q)=>p-q);
+  const out=[];
+  for(const r of roots){
+    if(out.length===0 || Math.abs(r-out[out.length-1])>1e-3) out.push(r);
+  }
+  return out.slice(0,12);
+}
+
+function renderGraphLab(mode='graph'){
+  const st=getGraphLab();
+  const view=$('#view');
+  const lines = (st.lines && st.lines.length) ? st.lines : ['sin(x)'];
+  st.lines = lines;
+
+  view.innerHTML=`
+    <section class="surface two-col">
+      <div>
+        <div class="section-title">GraphLab</div>
+
+        <div class="row">
+          <label style="grid-column:1/-1">
+            <div class="note">Expressions (one per line)</div>
+            <textarea id="gl_lines" class="input" rows="6" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)">${lines.join('\n')}</textarea>
+          </label>
+
+          <label><div class="note">x-min</div><input id="gl_xmin" class="input" type="number" value="${st.xmin}"></label>
+          <label><div class="note">x-max</div><input id="gl_xmax" class="input" type="number" value="${st.xmax}"></label>
+          <label><div class="note">Samples</div><input id="gl_n" class="input" type="number" value="${st.n}" min="50" max="2000" step="50"></label>
+
+          <label style="grid-column:1/-1">
+            <div class="note">Analyze expression</div>
+            <select id="gl_sel" class="input">
+              ${lines.map((s,i)=>`<option value="${i}" ${i===st.sel?'selected':''}>${i+1}: ${String(s).trim().slice(0,38)||'(blank)'}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+
+        <div class="section-title">${mode==='analyze'?'Calculus Tools':'Analysis'}</div>
+        <div class="row">
+          <label><div class="note">Derivative overlay</div>
+            <select id="gl_deriv" class="input">
+              <option value="off" ${!st.showDeriv?'selected':''}>Off</option>
+              <option value="on" ${st.showDeriv?'selected':''}>On</option>
+            </select>
+          </label>
+
+          <label><div class="note">Tangent at x₀</div>
+            <select id="gl_tan" class="input">
+              <option value="off" ${!st.showTangent?'selected':''}>Off</option>
+              <option value="on" ${st.showTangent?'selected':''}>On</option>
+            </select>
+          </label>
+
+          <label><div class="note">x₀</div><input id="gl_x0" class="input" type="number" value="${st.x0}"></label>
+
+          <label><div class="note">Area a..b</div>
+            <select id="gl_area" class="input">
+              <option value="off" ${!st.showArea?'selected':''}>Off</option>
+              <option value="on" ${st.showArea?'selected':''}>On</option>
+            </select>
+          </label>
+          <label><div class="note">a</div><input id="gl_a" class="input" type="number" value="${st.a}"></label>
+          <label><div class="note">b</div><input id="gl_b" class="input" type="number" value="${st.b}"></label>
+
+          <label><div class="note">Roots in range</div>
+            <select id="gl_roots" class="input">
+              <option value="off" ${!st.showRoots?'selected':''}>Off</option>
+              <option value="on" ${st.showRoots?'selected':''}>On</option>
+            </select>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button class="btn" id="gl_plot">Plot</button>
+          <button class="btn" id="gl_copy" title="Copy summary">Copy</button>
+          <button class="btn" id="gl_reset">Reset</button>
+        </div>
+
+        <div id="gl_out" class="note" style="margin-top:10px"></div>
+      </div>
+
+      <div>
+        <div class="section-title">Plot</div>
+        <div id="gl_plotbox" class="chart"></div>
+      </div>
+    </section>
+  `;
+
+  // default toggles when coming from Calc+ tab
+  if(mode==='analyze' && !st.showDeriv && !st.showTangent && !st.showArea){
+    st.showDeriv = true;
+    saveGraphLab(st);
+    try{ $('#gl_deriv').value='on'; }catch(_){}
+  }
+
+  const readState = ()=>{
+    const L = $('#gl_lines').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    st.lines = L.length?L:['sin(x)'];
+    st.xmin = Number($('#gl_xmin').value);
+    st.xmax = Number($('#gl_xmax').value);
+    st.n    = Math.min(2000, Math.max(50, Number($('#gl_n').value)||400));
+    st.sel  = Math.max(0, Math.min(st.lines.length-1, Number($('#gl_sel').value)||0));
+    st.showDeriv   = ($('#gl_deriv').value==='on');
+    st.showTangent = ($('#gl_tan').value==='on');
+    st.x0   = Number($('#gl_x0').value||0);
+    st.showArea    = ($('#gl_area').value==='on');
+    st.a    = Number($('#gl_a').value||0);
+    st.b    = Number($('#gl_b').value||0);
+    st.showRoots   = ($('#gl_roots').value==='on');
+    saveGraphLab(st);
+    return st;
+  };
+
+  const plotNow = ()=>{
+    const s = readState();
+    const box = document.getElementById('gl_plotbox');
+    const out = document.getElementById('gl_out');
+
+    if(!window.Plotly){
+      out.textContent = 'Plotly not loaded (offline mode). GraphLab needs Plotly.';
+      return;
+    }
+    if(!window.math){
+      out.textContent = 'math.js not loaded. GraphLab needs math.js.';
+      return;
+    }
+
+    const xs = linspace(s.xmin, s.xmax, s.n);
+    const traces=[];
+    const summaries=[];
+
+    s.lines.forEach((expr, i)=>{
+      try{
+        const {expr: cleaned, compiled} = safeCompile(expr);
+        const ys = evalSeries(compiled, xs);
+        traces.push({x: xs, y: ys, mode:'lines', name: (i+1)+': '+cleaned});
+      }catch(e){
+        summaries.push(`Line ${i+1}: ${e.message}`);
+      }
+    });
+
+    let selExpr = s.lines[s.sel] || s.lines[0];
+    let selCompiled=null, selClean='';
+    let selYs=null;
+    try{
+      const t=safeCompile(selExpr);
+      selClean=t.expr; selCompiled=t.compiled;
+      selYs=evalSeries(selCompiled, xs);
+    }catch(e){
+      summaries.push('Analyze: '+e.message);
+    }
+
+    if(s.showDeriv && selCompiled){
+      try{
+        const dExpr = window.math.derivative(selClean, 'x').toString();
+        const dComp = window.math.compile(dExpr);
+        const dYs = evalSeries(dComp, xs);
+        traces.push({x: xs, y: dYs, mode:'lines', name: "f'(x): "+dExpr, line:{dash:'dot'}});
+        summaries.push(`Derivative: ${dExpr}`);
+      }catch(e){
+        summaries.push('Derivative failed: '+e.message);
+      }
+    }
+
+    if(s.showTangent && selCompiled){
+      try{
+        const x0=s.x0;
+        const y0=selCompiled.evaluate({x:x0});
+        const dExpr = window.math.derivative(selClean, 'x').toString();
+        const dComp = window.math.compile(dExpr);
+        const m = dComp.evaluate({x:x0});
+        const yLine = xs.map(x=> (Number.isFinite(m)&&Number.isFinite(y0)) ? (m*(x-x0)+y0) : null);
+        traces.push({x: xs, y: yLine, mode:'lines', name:`tangent @ ${x0}`, line:{dash:'dash'}});
+        traces.push({x:[x0], y:[y0], mode:'markers', name:'point', marker:{size:8}});
+        summaries.push(`Tangent slope ≈ ${m}`);
+      }catch(e){
+        summaries.push('Tangent failed: '+e.message);
+      }
+    }
+
+    if(s.showArea && selYs){
+      const a=Math.min(s.a,s.b), b=Math.max(s.a,s.b);
+      const area = numericIntegrate(xs, selYs, a, b);
+      const xFill=[], yFill=[];
+      for(let i=0;i<xs.length;i++){
+        const x=xs[i];
+        if(x<a || x>b) continue;
+        xFill.push(x); yFill.push(selYs[i]);
+      }
+      traces.push({x:xFill, y:yFill, type:'scatter', mode:'lines', fill:'tozeroy', name:`Area [${a},${b}]`});
+      summaries.push(`Area [${a}, ${b}] ≈ ${area}`);
+    }
+
+    if(s.showRoots && selYs){
+      const roots=findRoots(xs, selYs);
+      if(roots.length){
+        traces.push({x:roots, y:roots.map(()=>0), mode:'markers', name:'roots', marker:{size:9, symbol:'x'}});
+        summaries.push('Roots: '+roots.map(r=>Number(r).toFixed(6)).join(', '));
+      }else summaries.push('Roots: none detected');
+    }
+
+    const layout={
+      margin:{l:42,r:10,t:10,b:38},
+      paper_bgcolor:'rgba(0,0,0,0)',
+      plot_bgcolor:'rgba(0,0,0,0)',
+      xaxis:{title:'x', zeroline:true},
+      yaxis:{title:'y', zeroline:true},
+      legend:{orientation:'h', y:-0.2}
+    };
+
+    window.Plotly.react(box, traces, layout, {responsive:true, displaylogo:false});
+    out.textContent = summaries.join(' • ') || 'Ready';
+  };
+
+  $('#gl_plot').addEventListener('click', plotNow);
+  $('#gl_reset').addEventListener('click', ()=>{
+    try{ localStorage.removeItem('legendcalc_graphlab'); }catch(_){}
+    renderGraphLab(mode);
+    try{ showToast('GraphLab reset'); }catch(_){}
+  });
+  $('#gl_copy').addEventListener('click', async ()=>{
+    const s = readState();
+    const summary = `GraphLab\nLines:\n- ${s.lines.join('\n- ')}\nRange: [${s.xmin}, ${s.xmax}] samples=${s.n}`;
+    try{ await navigator.clipboard.writeText(summary); showToast('Copied'); }catch(_){ showToast('Copy failed'); }
+  });
+
+  setTimeout(plotNow, 20);
+}
+
+function renderGraph(){ return renderGraphLab('graph'); }
+function renderCalculus(){ return renderGraphLab('analyze'); }
+
       function renderUnits(){
         const view=$('#view');
         view.innerHTML=`

@@ -633,7 +633,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.1 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.2 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -1241,48 +1241,6 @@ if(!window.__calcKeyHandler){
         function setCalcOut(html){ $('#calcOut').innerHTML=html; }
         function setLimitOut(html){ $('#limitOut').innerHTML=html; }
         function round(x){ return +(+x).toPrecision(12); }
-      }
-
-      /* ---------- Graphing (with hotkeys) ---------- */
-
-        $('#plotBtn').onclick=doPlot;
-        $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
-        $('#exportBtn').onclick=async ()=>{
-          try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
-        };
-        function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
-
-        // Hotkeys on textarea
-        const gx = $('#gx');
-        gx.addEventListener('keydown', (e)=>{
-          const meta = e.ctrlKey || e.metaKey;
-          if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
-            e.preventDefault();
-            Plotly.purge('chart');
-            return;
-          }
-          if(meta && e.key==='Enter'){ // plot only
-            e.preventDefault();
-            doPlot();
-            return;
-          }
-          if(e.key==='Enter' && e.shiftKey){ // newline, no plot
-            // allow default newline insertion
-            setTimeout(()=>{ persist(); },0);
-            return;
-          }
-          if(e.key==='Enter' && !e.shiftKey && !meta){ // newline + plot
-            e.preventDefault();
-            const start = gx.selectionStart, end = gx.selectionEnd;
-            const val = gx.value;
-            gx.value = val.slice(0, start) + '\n' + val.slice(end);
-            gx.selectionStart = gx.selectionEnd = start + 1;
-            persist();
-            doPlot();
-          }
-        });
-
-        if(($('#gx').value||'').trim()) doPlot();
       }
 
       /* ---------- Unit Converter ---------- */

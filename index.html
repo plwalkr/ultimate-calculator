@@ -562,6 +562,35 @@ button{
 @media (max-width: 520px){
   .tab{ font-size: 0.92rem; letter-spacing: 0.01em; }
 }
+
+
+/* v1.5.6: toast notifications */
+.toast{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  z-index: 30000;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(10,12,16,0.82);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(-6px);
+}
+@media (max-width: 520px){
+  .toast{ bottom: calc(12px + env(safe-area-inset-bottom)); max-width: calc(100vw - 24px); text-align:center; }
+}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -604,7 +633,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.5 • 2026-02-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.6 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -751,6 +780,18 @@ button{
 })();
 
 function startApp(){
+
+/* v1.5.6: toast helper */
+function showToast(msg){
+  try{
+    const el = document.getElementById('toast');
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(()=>{ try{ el.classList.remove('show'); }catch(_){ } }, 1200);
+  }catch(_){}
+}
       /* ---------- Utils & persistence ---------- */
       const $ = (s, r=document)=> r.querySelector(s);
       const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
@@ -917,8 +958,8 @@ function safeEval(expr, ans=0){
   // listeners
   const g = document.getElementById('globalSfx');
   const d = document.getElementById('drawerSfx');
-  g?.addEventListener('change', ()=> set(g.value));
-  d?.addEventListener('change', ()=> set(d.value));
+  g?.addEventListener('change', ()=>{ set(g.value); showToast('Sound: ' + (g.value==='beep'?'Clicks':g.value==='fanfare'?'Fanfare':'Off')); });
+  d?.addEventListener('change', ()=>{ set(d.value); showToast('Sound: ' + (d.value==='beep'?'Clicks':d.value==='fanfare'?'Fanfare':'Off')); });
 })();
 
 

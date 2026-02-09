@@ -556,7 +556,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.1 • 2026-02-05</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.2 • 2026-02-08</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -867,6 +867,55 @@ function safeEval(expr, ans=0){
           drawerSel?.addEventListener('change', ()=> setSfxMode(drawerSel.value));
 
         }catch(e){ console.error(e); }
+      })();
+
+
+      /* v1.5.2: mobile drawer settings (One-hand + Bigger UI) */
+      (function initMobileDrawerSettings(){
+        try{
+          const prefs = loadPrefs();
+          const oneHandSel = document.getElementById('oneHand');
+          const bigUISel  = document.getElementById('bigUI');
+
+          function apply(){
+            const p = loadPrefs();
+            const oh = p.oneHand || 'off';
+            const bu = p.bigUI || 'off';
+
+            // Classes drive CSS (mobile-only selectors exist in CSS)
+            document.body.classList.remove('onehand-left','onehand-right','bigui');
+            if(oh === 'left')  document.body.classList.add('onehand-left');
+            if(oh === 'right') document.body.classList.add('onehand-right');
+            if(bu === 'on')    document.body.classList.add('bigui');
+
+            // Sync UI if present
+            if(oneHandSel && oneHandSel.value !== oh) oneHandSel.value = oh;
+            if(bigUISel && bigUISel.value !== bu) bigUISel.value = bu;
+          }
+
+          // Initialize UI values from prefs (or defaults)
+          if(!prefs.oneHand) prefs.oneHand = 'off';
+          if(!prefs.bigUI) prefs.bigUI = 'off';
+          savePrefs(prefs);
+          apply();
+
+          oneHandSel?.addEventListener('change', ()=>{
+            const v = oneHandSel.value || 'off';
+            savePrefs({...loadPrefs(), oneHand: v});
+            apply();
+          });
+
+          bigUISel?.addEventListener('change', ()=>{
+            const v = bigUISel.value || 'off';
+            savePrefs({...loadPrefs(), bigUI: v});
+            apply();
+          });
+
+          // Re-apply after tab renders (some tabs inject inputs/buttons)
+          window.__applyMobilePrefs = apply;
+        }catch(e){
+          console.error(e);
+        }
       })();
 
       /* ---------- Calculator ---------- */
@@ -1608,4 +1657,5 @@ try{
 })();</script>
 </body>
 </html>
+
 

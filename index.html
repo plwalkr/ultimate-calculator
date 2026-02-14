@@ -286,353 +286,14 @@ button{
 
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
-
-
-/* v1.3.2: calculator settings bar */
-.calcSettings{
-  display:flex;
-  gap:10px;
-  align-items:flex-end;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  margin: 10px 0 12px 0;
-  padding: 10px 10px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.06);
-}
-.setItem{display:flex; flex-direction:column; gap:6px; min-width: 140px}
-.setLbl{font-size:.78rem; font-weight:700; opacity:.8}
-.setSel{
-  padding: 10px 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.08);
-  color: inherit;
-}
-@media (max-width: 520px){
-  .setItem{flex:1; min-width: 0}
-  .setSel{width:100%}
-}
-
-/* v1.3.2: full-width equals on phones */
-.span4{grid-column: span 4;}
-
-#diag{pointer-events:none;}
-
-
-/* v1.3.4: debug UI */
-#dbgBtn{
-  position:fixed;
-  right:12px;
-  bottom:calc(12px + env(safe-area-inset-bottom));
-  z-index:9999;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.22);
-  background:rgba(15,17,21,0.55);
-  color:var(--ink);
-  font-weight:800;
-  font-size:.85rem;
-  letter-spacing:.02em;
-  backdrop-filter: blur(10px);
-}
-#dbgPanel{
-  position:fixed;
-  left:10px; right:10px;
-  bottom:calc(60px + env(safe-area-inset-bottom));
-  max-height:45vh;
-  z-index:9999;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.18);
-  background:rgba(10,12,16,0.85);
-  color:var(--ink);
-  display:none;
-  overflow:hidden;
-  backdrop-filter: blur(10px);
-}
-#dbgPanel.show{display:block;}
-#dbgPanel .dbgHead{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 12px;
-  border-bottom:1px solid rgba(255,255,255,0.14);
-}
-#dbgClose{
-  padding:6px 10px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.18);
-  background:rgba(255,255,255,0.06);
-  color:inherit; font-weight:900;
-}
-#dbgLog{
-  margin:0;
-  padding:10px 12px;
-  font-size:.82rem;
-  line-height:1.25;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-
-
-/* v1.3.5: always-available debug UI */
-#dbgBtn{
-  position: fixed;
-  right: 10px;
-  bottom: calc(10px + env(safe-area-inset-bottom));
-  z-index: 99999;
-  opacity: 0.6;
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  pointer-events: auto;
-}
-#dbgPanel{
-  position: fixed;
-  inset: 10px 10px calc(10px + env(safe-area-inset-bottom)) 10px;
-  z-index: 99998;
-  display: none;
-  pointer-events: auto;
-}
-#dbgPanel.open{ display:block; }
-
-
-/* v1.4.1: desktop keypad uses 4 columns so number order matches expectations */
-@media (min-width: 521px){
-  .keys{ grid-template-columns: repeat(4, minmax(60px, 1fr)); }
-}
-
-
-/* v1.4.3: iPhone spacing pass for all tabs (mobile only) */
-@media (max-width: 520px){
-  .row{ gap: 14px; }
-  .btn{ padding: 14px 16px; min-height: 48px; }
-  .input, select, textarea{ padding: 12px; min-height: 48px; font-size: 16px; }
-  .surface{ padding: 14px; }
-  /* Buttons grouped in inline flex toolbars inside tabs */
-  #view [style*="display:flex"]{ flex-wrap: wrap; gap: 10px !important; }
-}
-
-
-/* v1.4.3: TI-Inspire readability boost (result + screen) */
-.theme-inspire .screen{
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.35));
-  border-color: rgba(255,255,255,0.14);
-}
-.theme-inspire .expr{ color: rgba(220,235,255,0.90); }
-.theme-inspire .result{ color: #f5fbff; text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
-
-
-/* v1.4.4: iPhone-first layout fixes (mobile only; PC unchanged) */
-@media (max-width: 520px){
-  /* Header stacking + no collisions */
-  header{flex-direction:column;align-items:stretch;gap:12px}
-  .titleline{justify-content:center}
-  h1{text-align:center;font-size:1.45rem}
-  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:2px}
-  .tab{white-space:nowrap}
-
-  .theme-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:flex-start}
-  .theme-picker .note{display:block;width:100%;opacity:.75}
-  .theme-select{flex:1;min-width:150px}
-
-  /* Prevent grid overlap in tab content */
-  .row{grid-template-columns:1fr !important}
-  .two-col{grid-template-columns:1fr !important}
-  label{min-width:0}
-  .input, textarea, select{width:100%;box-sizing:border-box}
-
-  /* Button bars: stack cleanly */
-  #view div[style*="display:flex"]{flex-direction:column;align-items:stretch}
-  #view div[style*="display:flex"] > button,
-  #view div[style*="display:flex"] > .btn{width:100%}
-
-  /* Chart sizing */
-  .chart{height:280px}
-
-  /* Reduce section title collisions */
-  .section-title{margin-top:14px;margin-bottom:6px}
-}
-
-
-/* v1.5.1: iPhone bottom nav + drawer + ergonomics (mobile only) */
-@media (max-width: 520px){
-  body{ padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
-
-  .mnav{
-    position: fixed;
-    left: 10px; right: 10px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    z-index: 20000;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-    padding: 10px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(10,12,16,0.72);
-    backdrop-filter: blur(12px);
-  }
-  .mnavbtn{
-    border: 0;
-    border-radius: 14px;
-    padding: 12px 10px;
-    font-weight: 900;
-    color: var(--ink);
-    background: rgba(255,255,255,0.08);
-    min-height: 48px;
-  }
-  .mnavbtn.active{
-    background: rgba(255,255,255,0.16);
-    outline: 1px solid rgba(255,255,255,0.18);
-  }
-
-  .drawer{
-    position: fixed;
-    left: 10px; right: 10px;
-    bottom: calc(92px + env(safe-area-inset-bottom));
-    max-height: 60vh;
-    z-index: 20001;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(10,12,16,0.86);
-    backdrop-filter: blur(12px);
-    display: none;
-    overflow: hidden;
-  }
-  .drawer.open{ display:block; }
-  .drawerHead{
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 12px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-  }
-  .drawerTitle{ font-weight: 900; letter-spacing: .02em; }
-  .drawerBody{ padding: 12px; }
-
-  body.onehand-right .wrap{ padding-left: 6px; padding-right: 18px; }
-  body.onehand-left  .wrap{ padding-left: 18px; padding-right: 6px; }
-
-  body.bigui .tab{ padding: 12px 16px; }
-  body.bigui .btn{ padding: 16px 18px; }
-  body.bigui .input{ min-height: 52px; font-size: 17px; }
-  body.bigui .key{ min-height: 58px; font-size: 1.15rem; }
-}
-
-
-/* v1.5.4: iPhone top tabs fit screen (no scrolling) + settings drawer */
-@media (max-width: 520px){
-  /* no bottom nav, so no extra padding needed */
-  body{ padding-bottom: env(safe-area-inset-bottom); }
-
-  /* Tabs wrap into 2 rows and share width */
-  .tabs{
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .tab{
-    flex: 1 1 calc(33.333% - 10px);
-    min-width: 96px;
-    text-align: center;
-    padding: 12px 12px;
-  }
-
-  /* Settings drawer sits above safe area */
-  .drawer{
-    position: fixed;
-    left: 10px; right: 10px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    max-height: 65vh;
-    z-index: 20001;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(10,12,16,0.86);
-    backdrop-filter: blur(12px);
-    display: none;
-    overflow: hidden;
-  }
-  .drawer.open{ display:block; }
-  .drawerHead{
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 12px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-  }
-  .drawerTitle{ font-weight: 900; letter-spacing: .02em; }
-  .drawerBody{ padding: 12px; }
-}
-
-
-/* v1.5.5: tighter tab labels on iPhone */
-@media (max-width: 520px){
-  .tab{ font-size: 0.92rem; letter-spacing: 0.01em; }
-}
-
-
-/* v1.5.6: toast notifications */
-.toast{
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 14px;
-  z-index: 30000;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(10,12,16,0.82);
-  backdrop-filter: blur(10px);
-  color: var(--ink);
-  font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.01em;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
-}
-.toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(-6px);
-}
-@media (max-width: 520px){
-  .toast{ bottom: calc(12px + env(safe-area-inset-bottom)); max-width: calc(100vw - 24px); text-align:center; }
-}
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
-<script>
-/* v1.3.5: ultra-early debug + error capture (survives partial boot) */
-(function(){
-  function qs(id){ return document.getElementById(id); }
-  function now(){ try{ return new Date().toISOString().slice(11,19);}catch(_){return "";} }
-  function append(line){
-    try{
-      var pre = qs('dbgLog');
-      if(!pre) return;
-      pre.textContent += (pre.textContent ? "\n" : "") + "["+now()+"] " + line;
-    }catch(_){}
-  }
-  window.__DBG = {
-    log: append,
-    show: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','false'); p.classList.add('open'); } }catch(_){} },
-    hide: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','true'); p.classList.remove('open'); } }catch(_){} },
-    toggle: function(){ try{ var p=qs('dbgPanel'); if(!p) return; var open=p.classList.contains('open'); open?window.__DBG.hide():window.__DBG.show(); }catch(_){} }
-  };
-  // Capture runtime errors
-  window.addEventListener('error', function(e){
-    try{ append("ERROR: " + (e.message||"") + " @ " + (e.filename||"") + ":" + (e.lineno||"") ); }catch(_){}
-  });
-  window.addEventListener('unhandledrejection', function(e){
-    try{ append("PROMISE: " + (e.reason && (e.reason.message||e.reason) || "unhandled rejection")); }catch(_){}
-  });
-  // Proxy console errors to debug panel
-  try{
-    var oldErr = console.error;
-    console.error = function(){
-      try{ append("console.error: " + Array.prototype.join.call(arguments," ")); }catch(_){}
-      try{ oldErr && oldErr.apply(console, arguments); }catch(_){}
-    };
-  }catch(_){}
-})();</script>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.7 • 2026-02-11</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.1 • 2026-02-04</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -641,204 +302,52 @@ button{
         <button class="tab" data-tab="time">Time Clock</button>
       </div>
       <div class="theme-picker">
-        <button class="btn" id="hdrSettingsBtn" title="Settings" style="padding:10px 12px;min-height:44px">⚙︎</button>
         <span class="note">Theme</span>
         <select id="themeSel" class="theme-select">
           <option value="dark">Dark</option>
           <option value="light">Light</option>
           <option value="inspire">TI-Inspire</option>
         </select>
-        <span class="note">Sound</span>
-        <select id="globalSfx" class="theme-select">
-          <option value="off">Off</option>
-          <option value="beep">Clicks</option>
-          <option value="fanfare">Fanfare</option>
-        </select>
       </div>
     </header>
-<!-- v1.5.1: mobile bottom nav (iPhone-first) -->
-
-<!-- v1.5.1: settings drawer (mobile-friendly) -->
-<div id="settingsDrawer" class="drawer" aria-hidden="true">
-  <div class="drawerHead">
-    <div class="drawerTitle">Settings</div>
-    <button class="btn" id="drawerClose">Close</button>
-  </div>
-  <div class="drawerBody">
-    <div class="row">
-      <label>
-        <div class="note">Sound</div>
-        <select id="drawerSfx" class="input">
-          <option value="off">Off</option>
-          <option value="beep">Clicks</option>
-          <option value="fanfare">Fanfare</option>
-        </select>
-      </label>
-      <label>
-        <div class="note">One-hand</div>
-        <select id="oneHand" class="input">
-          <option value="off">Off</option>
-          <option value="right">Right</option>
-          <option value="left">Left</option>
-        </select>
-      </label>
-      <label>
-        <div class="note">Bigger UI</div>
-        <select id="bigUI" class="input">
-          <option value="off">Off</option>
-          <option value="on">On</option>
-        </select>
-      </label>
-    </div>
-    <div class="note" style="margin-top:8px">Tip: add this to your Home Screen in Safari for the best experience.</div>
-  </div>
-</div>
-
     <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
     <div id="selfTests" class="tests"></div>
-    <button id="dbgBtn" title="Debug" onclick="window.__DBG&&window.__DBG.toggle()">DBG</button>
-    <div id="dbgPanel" aria-hidden="true"><div class="dbgHead"><strong>Debug</strong><button id="dbgClose" aria-label="Close" onclick="window.__DBG&&window.__DBG.hide()">×</button></div><pre id="dbgLog"></pre></div>
   </div>
 
   <script>
-// v1.3.7: iOS-safe bootloader (no hanging, no syntax traps)
-(async function(){
-  const DI = document.getElementById('diag');
-  const note = (cls,msg)=>{
-    try{
-      DI.className = cls;
-      DI.textContent = msg;
-      DI.style.display = 'block';
-    }catch(_){}
-  };
+  // Prefer local libs in ./libs, fallback to CDN, then start app
+  (function(){
+    const DI = document.getElementById('diag');
+    const note=(cls,msg)=>{ DI.className=cls; DI.textContent=msg; DI.style.display='block'; };
 
-  const libs = [
-    {global:'math',   local:'./libs/math.min.js',   cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
-    {global:'Plotly', local:'./libs/plotly.min.js', cdn:'https://cdn.plot.ly/plotly-2.35.2.min.js',                   name:'Plotly'}
-  ];
+    const libs=[
+      {global:'math', local:'./libs/math.min.js', cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
+      {global:'Plotly', local:'./libs/plotly.min.js', cdn:'https://cdn.plot.ly/plotly-2.35.2.min.js', name:'Plotly'}
+    ];
+    function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load failed: '+src)); document.head.appendChild(s); }); }
 
-  function loadScript(src, timeoutMs=3500){
-    return new Promise((resolve, reject)=>{
+    (async function ensureLibs(){
       try{
-        const s = document.createElement('script');
-        let done = false;
-        const t = setTimeout(()=>{
-          if(done) return;
-          done = true;
-          try{ s.remove(); }catch(_){}
-          reject(new Error('timeout: ' + src));
-        }, timeoutMs);
-
-        s.src = src;
-        s.onload = ()=>{
-          if(done) return;
-          done = true;
-          clearTimeout(t);
-          resolve();
-        };
-        s.onerror = ()=>{
-          if(done) return;
-          done = true;
-          clearTimeout(t);
-          reject(new Error('load failed: ' + src));
-        };
-        document.head.appendChild(s);
+        for(const L of libs){
+          if(!(L.global in window)){
+            try{ await loadScript(L.local); if(!(L.global in window)) throw new Error('local missing'); }
+            catch(eLocal){ await loadScript(L.cdn); }
+          }
+        }
+        note('ok','Libraries loaded ✔ Local if present, otherwise CDN.');
+        startApp();
       }catch(e){
-        reject(e);
+        console.error(e);
+        note('err','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs and reload.');
       }
-    });
-  }
+    })();
 
-  async function ensureLibs(){
-    for(const L of libs){
-      if(window[L.global]) continue;
-      try{ await loadScript(L.local, 1200); }catch(_){
-        await loadScript(L.cdn, 3500);
-      }
-    }
-  }
-
-  try{
-    note('ok','Loading…');
-    await ensureLibs();
-    note('ok','Ready');
-  }catch(e){
-    try{ console.error(e); }catch(_){}
-    try{ window.__DBG && window.__DBG.log('Lib load failed: ' + (e && (e.message||e))); }catch(_){}
-    note('warn','Offline mode (no external libs)');
-  }finally{
-    try{ startApp(); }catch(e2){
-      try{ console.error(e2); }catch(_){}
-      try{ window.__DBG && window.__DBG.log('startApp failed: ' + (e2 && (e2.message||e2))); }catch(_){}
-      note('err','App failed to start');
-    }
-    // Always clear banner shortly after boot so it never blocks taps
-    setTimeout(()=>{ try{ DI.style.display='none'; }catch(_){} }, 900);
-  }
-})();
-
-function startApp(){
-
-/* v1.5.6: toast helper */
-function showToast(msg){
-  try{
-    const el = document.getElementById('toast');
-    if(!el) return;
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(()=>{ try{ el.classList.remove('show'); }catch(_){ } }, 1200);
-  }catch(_){}
-}
+    function startApp(){
       /* ---------- Utils & persistence ---------- */
       const $ = (s, r=document)=> r.querySelector(s);
       const $$ = (s, r=document)=> [...r.querySelectorAll(s)];
       const esc = s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-
-/* ---------- Debug + fallback eval ---------- */
-const debugLog = [];
-      window.debugLog = debugLog;
-function dlog(level, msg){
-  const line = `[${new Date().toLocaleTimeString()}] ${level.toUpperCase()}: ${msg}`;
-  debugLog.push(line);
-  if (debugLog.length > 200) debugLog.shift();
-  const el = document.getElementById('dbgLog');
-  if (el && document.getElementById('dbgPanel')?.classList.contains('show')) el.textContent = debugLog.slice(-120).join("\n");
-}
-['log','warn','error'].forEach(k=>{
-  const orig = console[k].bind(console);
-  console[k] = (...args)=>{ try{ dlog(k, args.map(a=> (typeof a==='string'?a:JSON.stringify(a))).join(' ')); }catch(_){}
-    orig(...args);
-  };
-});
-
-function safeEval(expr, ans=0){
-  // Very small whitelist-based evaluator for offline mode
-  // Supports: + - * / % ** (^) parentheses, decimals, constants pi/e, functions sin cos tan sqrt
-  let s = String(expr).trim();
-  if (!s) return 0;
-
-  s = s.replace(/ANS/g, String(ans));
-  s = s.replace(/π/g, "PI");
-  s = s.replace(/√/g, "sqrt");
-  s = s.replace(/\^/g, "**");
-
-  // allow digits, operators, parens, dot, commas, spaces, and letters used in functions/constants
-  const ok = /^[0-9+\-*/%().,\sA-Za-z_*]*$/.test(s);
-  if (!ok) throw new Error("Unsupported characters");
-
-  // only allow specific identifiers
-  const allowed = new Set(['sin','cos','tan','sqrt','PI','E']);
-  const ids = s.match(/[A-Za-z_]+/g) || [];
-  for (const id of ids){
-    if (!allowed.has(id)) throw new Error("Unsupported token: "+id);
-  }
-
-  const fn = Function("sin","cos","tan","sqrt","PI","E", `"use strict"; return (${s});`);
-  return fn(Math.sin, Math.cos, Math.tan, Math.sqrt, Math.PI, Math.E);
-}
-
       const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
       function saveTab(name, obj){ try{ localStorage.setItem('legendcalc_'+name, JSON.stringify(obj)); }catch(e){} }
@@ -853,50 +362,10 @@ function safeEval(expr, ans=0){
         if(name==='light') document.body.classList.add('theme-light');
         if(name==='inspire') document.body.classList.add('theme-inspire');
       }
-      // Global sound mode (single source of truth stored in localStorage)
-      let sfxMode = localStorage.getItem('sfxMode') || 'off'; /* ---------- Router & theme ---------- */
-      const tabs = $$('.tab');
-      const mnavBtns = [];
-      let currentTab = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
 
-      function syncActive(tab){
-        tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-        mnavBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-      }
-
-      function openDrawer(){
-        const d = $('#settingsDrawer');
-        if(!d) return;
-        d.classList.add('open');
-        d.setAttribute('aria-hidden','false');
-      }
-      function closeDrawer(){
-        const d = $('#settingsDrawer');
-        if(!d) return;
-        d.classList.remove('open');
-        d.setAttribute('aria-hidden','true');
-      }
-      function toggleDrawer(){
-        const d = $('#settingsDrawer');
-        if(!d) return;
-        const isOpen = d.classList.contains('open');
-        (isOpen ? closeDrawer : openDrawer)();
-      }
-
-      function activateTab(tab){
-        if(!tab) return;
-        currentTab = tab;
-        syncActive(tab);
-        closeDrawer(); // keep nav clean on mobile
-        render(tab);
-      }
-
-      // Desktop tabs
-      tabs.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
-
-      // Mobile: Settings drawer only (no bottom nav)
-      $('#hdrSettingsBtn')?.addEventListener('click', toggleDrawer);
-      $('#drawerClose')?.addEventListener('click', closeDrawer);
+      /* ---------- Router & theme ---------- */
+      const tabs=$$('.tab');
+      tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
 
       function render(which){
         if(which==='calculus') return renderCalculus();
@@ -918,178 +387,6 @@ function safeEval(expr, ans=0){
         document.querySelector('h1').style.color = getComputedStyle(document.body).getPropertyValue('--accent').trim();
       })();
 
-/* v1.5.3: sound setting wiring (global + drawer + calc) */
-(function initSoundWiring(){
-  const get = ()=>{
-    try{
-      // prefer existing localStorage key used by audio helper
-      return localStorage.getItem('sfxMode') || 'off';
-    }catch(_){ return 'off'; }
-  };
-  const set = (v)=>{
-    try{ localStorage.setItem('sfxMode', v); }catch(_){}
-    try{
-      // also keep your prefs blob in sync if present
-      const raw = localStorage.getItem('legendcalc_prefs');
-      if(raw){
-        const p = JSON.parse(raw);
-        p.sfxMode = v;
-        localStorage.setItem('legendcalc_prefs', JSON.stringify(p));
-      }
-    }catch(_){}
-    // sync all UI controls
-    try{ const a=document.getElementById('globalSfx'); if(a) a.value=v; }catch(_){}
-    try{ const b=document.getElementById('drawerSfx'); if(b) b.value=v; }catch(_){}
-    try{ const c=document.getElementById('sfxSel'); if(c) c.value=v; }catch(_){}
-  };
-
-  // initialize from storage/prefs
-  let v = get();
-  try{
-    const raw = localStorage.getItem('legendcalc_prefs');
-    if(raw){
-      const p = JSON.parse(raw);
-      if(p && p.sfxMode) v = p.sfxMode;
-    }
-  }catch(_){}
-  set(v);
-
-  // listeners
-  const g = document.getElementById('globalSfx');
-  const d = document.getElementById('drawerSfx');
-  g?.addEventListener('change', ()=>{ set(g.value); showToast('Sound: ' + (g.value==='beep'?'Clicks':g.value==='fanfare'?'Fanfare':'Off')); });
-  d?.addEventListener('change', ()=>{ set(d.value); showToast('Sound: ' + (d.value==='beep'?'Clicks':d.value==='fanfare'?'Fanfare':'Off')); });
-})();
-
-
-/* v1.5.4: settings drawer wiring */
-(function initDrawer(){
-  const drawer = document.getElementById('settingsDrawer');
-  const openBtn = document.getElementById('hdrSettingsBtn');
-  const closeBtn = document.getElementById('drawerClose');
-  const show = ()=>{ if(!drawer) return; drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); };
-  const hide = ()=>{ if(!drawer) return; drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
-  openBtn?.addEventListener('click', (e)=>{ e.preventDefault(); show(); });
-  closeBtn?.addEventListener('click', (e)=>{ e.preventDefault(); hide(); });
-  // close drawer if you tap outside it
-  document.addEventListener('pointerdown', (e)=>{
-    if(!drawer || !drawer.classList.contains('open')) return;
-    const inside = drawer.contains(e.target) || openBtn?.contains(e.target);
-    if(!inside) hide();
-  }, {passive:true});
-})();
-
-
-/* v1.5.5: mobile tab label cleanup (short labels on iPhone only) */
-(function initMobileTabLabels(){
-  const mq = window.matchMedia('(max-width: 520px)');
-  const map = {
-    calc: 'Calc',
-    calculus: 'Calc+',
-    graph: 'Graph',
-    units: 'Units',
-    time: 'Time'
-  };
-  const apply = (isMobile)=>{
-    document.querySelectorAll('.tab').forEach(t=>{
-      const key = t.dataset.tab;
-      if(!t.dataset.longLabel) t.dataset.longLabel = t.textContent.trim();
-      if(isMobile && map[key]) t.textContent = map[key];
-      if(!isMobile) t.textContent = t.dataset.longLabel;
-    });
-  };
-  apply(mq.matches);
-  try{
-    mq.addEventListener('change', e=> apply(e.matches));
-  }catch(_){
-    // iOS older fallback
-    mq.addListener(e=> apply(e.matches));
-  }
-})();
-
-
-
-      /* v1.4.3+: global sound selector (synced across header, calculator, and mobile drawer) */
-      (function initSound(){
-        try{
-          // One source of truth
-          function setSfxMode(mode){
-            const next = (mode || 'off');
-            sfxMode = next;
-            localStorage.setItem('sfxMode', next);
-
-            // Sync any UI selectors that exist right now
-            ['globalSfx','sfxSel','drawerSfx'].forEach(id=>{
-              const el = document.getElementById(id);
-              if(el && el.value !== next) el.value = next;
-            });
-          }
-          // Expose for dynamic renders (calculator rerenders create #sfxSel)
-          window.setSfxMode = setSfxMode;
-
-          // Initialize to stored mode
-          setSfxMode(localStorage.getItem('sfxMode') || 'off');
-
-          // Header selector
-          const headerSel = $('#globalSfx');
-          headerSel?.addEventListener('change', ()=> setSfxMode(headerSel.value));
-
-          // Mobile drawer selector
-          const drawerSel = $('#drawerSfx');
-          drawerSel?.addEventListener('change', ()=> setSfxMode(drawerSel.value));
-
-        }catch(e){ console.error(e); }
-      })();
-
-
-      /* v1.5.2: mobile drawer settings (One-hand + Bigger UI) */
-      (function initMobileDrawerSettings(){
-        try{
-          const prefs = loadPrefs();
-          const oneHandSel = document.getElementById('oneHand');
-          const bigUISel  = document.getElementById('bigUI');
-
-          function apply(){
-            const p = loadPrefs();
-            const oh = p.oneHand || 'off';
-            const bu = p.bigUI || 'off';
-
-            // Classes drive CSS (mobile-only selectors exist in CSS)
-            document.body.classList.remove('onehand-left','onehand-right','bigui');
-            if(oh === 'left')  document.body.classList.add('onehand-left');
-            if(oh === 'right') document.body.classList.add('onehand-right');
-            if(bu === 'on')    document.body.classList.add('bigui');
-
-            // Sync UI if present
-            if(oneHandSel && oneHandSel.value !== oh) oneHandSel.value = oh;
-            if(bigUISel && bigUISel.value !== bu) bigUISel.value = bu;
-          }
-
-          // Initialize UI values from prefs (or defaults)
-          if(!prefs.oneHand) prefs.oneHand = 'off';
-          if(!prefs.bigUI) prefs.bigUI = 'off';
-          savePrefs(prefs);
-          apply();
-
-          oneHandSel?.addEventListener('change', ()=>{
-            const v = oneHandSel.value || 'off';
-            savePrefs({...loadPrefs(), oneHand: v});
-            apply();
-          });
-
-          bigUISel?.addEventListener('change', ()=>{
-            const v = bigUISel.value || 'off';
-            savePrefs({...loadPrefs(), bigUI: v});
-            apply();
-          });
-
-          // Re-apply after tab renders (some tabs inject inputs/buttons)
-          window.__applyMobilePrefs = apply;
-        }catch(e){
-          console.error(e);
-        }
-      })();
-
       /* ---------- Calculator ---------- */
       function renderCalc(){
         const view=$('#view');
@@ -1099,24 +396,6 @@ function safeEval(expr, ans=0){
               <div class="screen">
                 <div class="expr" id="expr"></div>
                 <div class="result" id="res">0</div>
-              </div>
-
-              <div class="calcSettings">
-                <label class="setItem">
-                  <span class="setLbl">Mode</span>
-                  <select id="modeSel" class="setSel">
-                    <option value="basic">Basic</option>
-                    <option value="sci">Sci</option>
-                  </select>
-                </label>
-                <label class="setItem">
-                  <span class="setLbl">Sound</span>
-                  <select id="sfxSel" class="setSel">
-                    <option value="off">Off</option>
-                    <option value="beep">Clicks</option>
-                    <option value="fanfare">Fanfare</option>
-                  </select>
-                </label>
               </div>
               <div class="keys" id="keys"></div>
             </div>
@@ -1133,45 +412,13 @@ function safeEval(expr, ans=0){
             </div>
           </section>`;
 
-
-// v1.3.2 settings (persisted)
-let calcMode = localStorage.getItem('calcMode') || 'basic'; // basic | sci
-sfxMode = localStorage.getItem('sfxMode') || 'off';   // off | beep | fanfare
-
-const isPhone = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches);
-
-const BASIC_PHONE = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','='];
-const SCI_PHONE   = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','=',
-                     '(',')','sin','cos','tan','^','√','π','e'];
-
-const BASIC_DESK  = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','='];
-const SCI_DESK    = ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','ANS','=','(',')','sin','cos','tan','^','√','π','e'];
-
-const K = (calcMode === 'sci')
-          ? (isPhone ? SCI_PHONE : SCI_DESK)
-          : (isPhone ? BASIC_PHONE : BASIC_DESK);
-// Initialize selects
-const modeSel = $('#modeSel');
-const sfxSel  = $('#sfxSel');
-if (modeSel) modeSel.value = calcMode;
-if (sfxSel)  sfxSel.value  = sfxMode;
-
-modeSel?.addEventListener('change', () => {
-  calcMode = modeSel.value;
-  localStorage.setItem('calcMode', calcMode);
-  renderCalc(); // rerender only calculator
-});
-
-sfxSel?.addEventListener('change', () => {
-  if (window.setSfxMode) window.setSfxMode(sfxSel.value);
-  else { sfxMode = sfxSel.value; localStorage.setItem('sfxMode', sfxMode); }
-});
-        const keysEl = $('#keys');
-        if(keysEl) keysEl.innerHTML='';
-
+        const K = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches)
+          ? ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','(',')','sin','cos','tan','^','√','π','e','ANS','=']
+          : ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
+        const keysEl=$('#keys');
         K.forEach(k=>{ const b=document.createElement('button'); b.className='key'; b.textContent=k; if('/*-+^%'.includes(k)) b.classList.add('op'); if(['sin','cos','tan','√','π','e','ANS'].includes(k)) b.classList.add('fn'); if(k==='='){ b.classList.add('eq');
             if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) b.classList.add('span4');
-            else b.classList.add('span2'); } b.onclick=()=>press(k); if(keysEl) keysEl.appendChild(b); });
+            else b.classList.add('span2'); } b.onclick=()=>press(k); keysEl.appendChild(b); });
 
         const saved = loadTab('calc', {tape:[], ans:0});
         let expr=''; let ans=saved.ans||0; const tape=[...(saved.tape||[])]; const exprEl=$('#expr'); const resEl=$('#res');
@@ -1181,27 +428,10 @@ sfxSel?.addEventListener('change', () => {
         function renderExpr(){ exprEl.textContent=expr||'\u00A0'; }
         function renderTape(){ $('#tape').innerHTML=tape.map(t=>`<div class='trow'><div class='l'>${esc(t.e)}</div><div class='r'>${t.v}</div></div>`).join(''); }
 
-        function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=(window.math && math.evaluate) ? math.evaluate(sanitized,scope) : safeEval(sanitized, ans); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
+        function evalExpr(){ if(!expr) return; try{ const sanitized=expr.replace(/√/g,'sqrt'); const scope={sin:Math.sin,cos:Math.cos,tan:Math.tan,sqrt:Math.sqrt}; let val=math.evaluate(sanitized,scope); if(typeof val==='number'&&!Number.isFinite(val)) throw 0; ans=round(val); setRes(ans); tape.unshift({e:expr,v:ans}); if(tape.length>300) tape.pop(); expr=''; renderExpr(); renderTape(); persist(); }catch(e){ setRes('Error'); } }
         function press(k){ switch(k){ case 'C': expr=''; setRes(0); break; case '⌫': expr=expr.slice(0,-1); break; case '=': evalExpr(); break; case '√': expr+='sqrt('; break; case 'π': expr+=Math.PI.toString(); break; case 'e': expr+=Math.E.toString(); break; case 'ANS': expr+=String(ans); break; case 'sin': case 'cos': case 'tan': expr+=k+'('; break; default: expr+=k; } renderExpr(); }
-        
-// v1.4.3: don't hijack keyboard when typing in inputs or on other tabs
-window.__calcPress = press;
-window.__calcEval  = evalExpr;
-if(!window.__calcKeyHandler){
-  window.__calcKeyHandler = (e)=>{
-    const ae = document.activeElement;
-    if(ae && (ae.tagName==='INPUT' || ae.tagName==='TEXTAREA' || ae.tagName==='SELECT' || ae.isContentEditable)) return;
-
-    const active = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
-    if(active !== 'calc') return;
-
-    if(e.key==='Enter'){ e.preventDefault(); window.__calcEval && window.__calcEval(); }
-    else if(e.key==='Backspace'){ window.__calcPress && window.__calcPress('⌫'); }
-    else if(e.key==='Escape'){ window.__calcPress && window.__calcPress('C'); }
-    else if(/[0-9.()+\-/*^%]/.test(e.key)){ window.__calcPress && window.__calcPress(e.key); }
-  };
-  window.addEventListener('keydown', window.__calcKeyHandler);
-}        $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
+        window.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); evalExpr(); } else if(e.key==='Backspace'){ press('⌫'); } else if(e.key==='Escape'){ press('C'); } else if(/[0-9.()+\-/*^%]/.test(e.key)){ press(e.key); } });
+        $('#copyTape').onclick=()=>navigator.clipboard.writeText(tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'));
         $('#clearTape').onclick=()=>{ tape.length=0; renderTape(); persist(); };
         $('#clearSavedCalc').onclick=()=>{ clearTab('calc'); tape.length=0; ans=0; renderTape(); setRes(0); };
 
@@ -1209,8 +439,61 @@ if(!window.__calcKeyHandler){
         renderExpr(); renderTape(); setRes(ans||0);
       }
 
-      /* ---------- Calculus (legacy disabled: GraphLab replaces this) ---------- */
-      /* legacy calculus UI disabled */
+      /* ---------- Calculus ---------- */
+      function renderCalculus(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface two-col">
+            <div>
+              <div class="section-title">Symbolic</div>
+              <div class="row">
+                <label><div class="note">f(x)</div><input id="fx" class="input" placeholder="e.g. x^3 - 4x + 1"></label>
+                <label><div class="note">Point (x = …) for f'(x)</div><input id="x0" class="input" type="number" placeholder="optional"></label>
+              </div>
+              <div style="display:flex;gap:8px;margin:10px 0">
+                <button class="btn primary" id="diffBtn">Differentiate</button>
+                <button class="btn" id="integrateBtn">Definite Integral</button>
+                <button class="btn" id="clearSavedCalcus" title="Forget saved inputs">Clear Saved</button>
+              </div>
+              <div class="note">Integration supports numeric definite integrals (Simpson) — enter bounds below.</div>
+              <div class="row" style="margin-top:8px">
+                <label><div class="note">Lower bound a</div><input id="a" class="input" type="number" placeholder="e.g. 0"></label>
+                <label><div class="note">Upper bound b</div><input id="b" class="input" type="number" placeholder="e.g. 2"></label>
+                <label><div class="note">Subdivisions (even)</div><input id="n" class="input" type="number" value="200"></label>
+              </div>
+              <div id="calcOut" style="margin-top:12px"></div>
+            </div>
+            <div>
+              <div class="section-title">Quick Checks</div>
+              <div class="row">
+                <label><div class="note">Limit x → a</div><input id="limExpr" class="input" placeholder="e.g. (sin(x))/x"></label>
+                <label><div class="note">a</div><input id="limA" class="input" type="number" placeholder="0"></label>
+              </div>
+              <div style="display:flex;gap:8px;margin:10px 0"><button class="btn" id="limitBtn">Compute Limit (numeric)</button></div>
+              <div id="limitOut"></div>
+            </div>
+          </section>`;
+
+        const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
+        $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
+        function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
+        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $('#clearSavedCalcus').onclick=()=>{ clearTab('calculus'); ['fx','x0','a','b','n','limExpr','limA'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; }); };
+
+        $('#diffBtn').onclick=()=>{
+          const fx=$('#fx').value.trim(); if(!fx){ return setCalcOut("<div class='err'>Enter f(x)</div>"); }
+          try{
+            const d = math.derivative(fx,'x').toString();
+            const x0 = parseFloat($('#x0').value);
+            let evalAt='';
+            if(!Number.isNaN(x0)){
+              const f = math.parse(d).compile();
+              const val = f.evaluate({x:x0});
+              evalAt = `<div>f'( ${x0} ) = <b>${round(val)}</b></div>`;
+            }
+            setCalcOut(`<div>f'(x) = <b>${esc(d)}</b></div>${evalAt}`);
+          }catch(e){ setCalcOut("<div class='err'>Bad function</div>"); }
+        };
 
         $('#integrateBtn').onclick=()=>{
           const fx=$('#fx').value.trim(); const a=parseFloat($('#a').value); const b=parseFloat($('#b').value); let n=parseInt($('#n').value||200,10);
@@ -1242,316 +525,92 @@ if(!window.__calcKeyHandler){
         function round(x){ return +(+x).toPrecision(12); }
       }
 
+      /* ---------- Graphing (with hotkeys) ---------- */
+      function renderGraph(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface">
+            <div class="row">
+              <label style="grid-column:1/-1"><div class="note">Functions (one per line)</div>
+                <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
+              </label>
+              <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
+              <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
+              <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
+            </div>
+            <div style="display:flex;gap:8px;margin:10px 0">
+              <button class="btn primary" id="plotBtn">Plot</button>
+              <button class="btn" id="clearBtn">Clear</button>
+              <button class="btn" id="exportBtn">Export PNG</button>
+              <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
+            </div>
+            <div id="chart" class="chart"></div>
+            <div class="note">Hotkeys: <b>Enter</b> new line + plot, <b>Shift+Enter</b> new line (no plot), <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.</div>
+          </section>`;
+
+        const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
+        $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
+        function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
+        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value=''); Plotly.purge('chart'); };
+
+        function doPlot(){
+          const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
+          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
+          if(!lines.length){ Plotly.purge('chart'); return; }
+          try{
+            const xs = linspace(xmin,xmax,n);
+            const traces = lines.map((ex,i)=>{
+              const f = math.parse(ex).compile();
+              const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+              return {x:xs,y:ys,mode:'lines',name:ex};
+            });
+            Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
+            persist();
+          }catch(e){ alert('Parse error in one of the functions'); }
+        }
+
+        $('#plotBtn').onclick=doPlot;
+        $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
+        $('#exportBtn').onclick=async ()=>{
+          try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
+        };
+        function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
+
+        // Hotkeys on textarea
+        const gx = $('#gx');
+        gx.addEventListener('keydown', (e)=>{
+          const meta = e.ctrlKey || e.metaKey;
+          if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
+            e.preventDefault();
+            Plotly.purge('chart');
+            return;
+          }
+          if(meta && e.key==='Enter'){ // plot only
+            e.preventDefault();
+            doPlot();
+            return;
+          }
+          if(e.key==='Enter' && e.shiftKey){ // newline, no plot
+            // allow default newline insertion
+            setTimeout(()=>{ persist(); },0);
+            return;
+          }
+          if(e.key==='Enter' && !e.shiftKey && !meta){ // newline + plot
+            e.preventDefault();
+            const start = gx.selectionStart, end = gx.selectionEnd;
+            const val = gx.value;
+            gx.value = val.slice(0, start) + '\n' + val.slice(end);
+            gx.selectionStart = gx.selectionEnd = start + 1;
+            persist();
+            doPlot();
+          }
+        });
+
+        if(($('#gx').value||'').trim()) doPlot();
+      }
+
       /* ---------- Unit Converter ---------- */
-/* ---------- GraphLab (Graph + Calculus) ---------- */
-function getGraphLab(){
-  try{
-    const raw=localStorage.getItem('legendcalc_graphlab');
-    if(raw) return Object.assign({
-      lines: ['sin(x)'],
-      xmin:-10,xmax:10,n:400,
-      sel:0,
-      showDeriv:false,
-      showTangent:false,
-      x0:0,
-      showArea:false,
-      a:0,b:1,
-      showRoots:false
-    }, JSON.parse(raw));
-  }catch(_){}
-  return {lines:['sin(x)'],xmin:-10,xmax:10,n:400,sel:0,showDeriv:false,showTangent:false,x0:0,showArea:false,a:0,b:1,showRoots:false};
-}
-function saveGraphLab(st){
-  try{ localStorage.setItem('legendcalc_graphlab', JSON.stringify(st)); }catch(_){}
-}
-function linspace(a,b,n){
-  const arr=new Array(n);
-  const step=(b-a)/(n-1);
-  for(let i=0;i<n;i++) arr[i]=a+i*step;
-  return arr;
-}
-function safeCompile(expr){
-  if(!window.math) throw new Error('math.js not loaded');
-  expr = String(expr||'').trim();
-  expr = expr.replace(/^\s*(y\s*=|f\s*\(\s*x\s*\)\s*=)\s*/i,'');
-  if(!expr) throw new Error('empty expression');
-  return {expr, compiled: window.math.compile(expr)};
-}
-function evalSeries(compiled, xs){
-  const ys=new Array(xs.length);
-  for(let i=0;i<xs.length;i++){
-    let y = compiled.evaluate({x: xs[i]});
-    y = (typeof y==='number') ? y : (y && y.re !== undefined ? y.re : NaN);
-    ys[i] = (Number.isFinite(y) ? y : null);
-  }
-  return ys;
-}
-function numericIntegrate(xs, ys, a, b){
-  let area=0;
-  for(let i=1;i<xs.length;i++){
-    const x1=xs[i-1], x2=xs[i];
-    if((x1<a && x2<a) || (x1>b && x2>b)) continue;
-    const y1=ys[i-1], y2=ys[i];
-    if(y1==null || y2==null) continue;
-    const xa=Math.max(a, x1);
-    const xb=Math.min(b, x2);
-    const tA = (x2-x1) ? (xa-x1)/(x2-x1) : 0;
-    const tB = (x2-x1) ? (xb-x1)/(x2-x1) : 1;
-    const ya = y1 + (y2-y1)*tA;
-    const yb = y1 + (y2-y1)*tB;
-    area += 0.5*(ya+yb)*(xb-xa);
-  }
-  return area;
-}
-function findRoots(xs, ys){
-  const roots=[];
-  for(let i=1;i<xs.length;i++){
-    const y1=ys[i-1], y2=ys[i];
-    if(y1==null || y2==null) continue;
-    if(y1===0) roots.push(xs[i-1]);
-    if(y1*y2<0){
-      let a=xs[i-1], b=xs[i];
-      let fa=y1, fb=y2;
-      for(let k=0;k<30;k++){
-        const m=0.5*(a+b);
-        const fm = fa + (fb-fa)*((m-a)/(b-a));
-        if(fa*fm<=0){ b=m; fb=fm; } else { a=m; fa=fm; }
-      }
-      roots.push(0.5*(a+b));
-    }
-  }
-  roots.sort((p,q)=>p-q);
-  const out=[];
-  for(const r of roots){
-    if(out.length===0 || Math.abs(r-out[out.length-1])>1e-3) out.push(r);
-  }
-  return out.slice(0,12);
-}
-
-function renderGraphLab(mode='graph'){
-  const st=getGraphLab();
-  const view=$('#view');
-  const lines = (st.lines && st.lines.length) ? st.lines : ['sin(x)'];
-  st.lines = lines;
-
-  view.innerHTML=`
-    <section class="surface two-col">
-      <div>
-        <div class="section-title">GraphLab</div>
-
-        <div class="row">
-          <label style="grid-column:1/-1">
-            <div class="note">Expressions (one per line)</div>
-            <textarea id="gl_lines" class="input" rows="6" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)">${lines.join('\n')}</textarea>
-          </label>
-
-          <label><div class="note">x-min</div><input id="gl_xmin" class="input" type="number" value="${st.xmin}"></label>
-          <label><div class="note">x-max</div><input id="gl_xmax" class="input" type="number" value="${st.xmax}"></label>
-          <label><div class="note">Samples</div><input id="gl_n" class="input" type="number" value="${st.n}" min="50" max="2000" step="50"></label>
-
-          <label style="grid-column:1/-1">
-            <div class="note">Analyze expression</div>
-            <select id="gl_sel" class="input">
-              ${lines.map((s,i)=>`<option value="${i}" ${i===st.sel?'selected':''}>${i+1}: ${String(s).trim().slice(0,38)||'(blank)'}</option>`).join('')}
-            </select>
-          </label>
-        </div>
-
-        <div class="section-title">${mode==='analyze'?'Calculus Tools':'Analysis'}</div>
-        <div class="row">
-          <label><div class="note">Derivative overlay</div>
-            <select id="gl_deriv" class="input">
-              <option value="off" ${!st.showDeriv?'selected':''}>Off</option>
-              <option value="on" ${st.showDeriv?'selected':''}>On</option>
-            </select>
-          </label>
-
-          <label><div class="note">Tangent at x₀</div>
-            <select id="gl_tan" class="input">
-              <option value="off" ${!st.showTangent?'selected':''}>Off</option>
-              <option value="on" ${st.showTangent?'selected':''}>On</option>
-            </select>
-          </label>
-
-          <label><div class="note">x₀</div><input id="gl_x0" class="input" type="number" value="${st.x0}"></label>
-
-          <label><div class="note">Area a..b</div>
-            <select id="gl_area" class="input">
-              <option value="off" ${!st.showArea?'selected':''}>Off</option>
-              <option value="on" ${st.showArea?'selected':''}>On</option>
-            </select>
-          </label>
-          <label><div class="note">a</div><input id="gl_a" class="input" type="number" value="${st.a}"></label>
-          <label><div class="note">b</div><input id="gl_b" class="input" type="number" value="${st.b}"></label>
-
-          <label><div class="note">Roots in range</div>
-            <select id="gl_roots" class="input">
-              <option value="off" ${!st.showRoots?'selected':''}>Off</option>
-              <option value="on" ${st.showRoots?'selected':''}>On</option>
-            </select>
-          </label>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:10px">
-          <button class="btn" id="gl_plot">Plot</button>
-          <button class="btn" id="gl_copy" title="Copy summary">Copy</button>
-          <button class="btn" id="gl_reset">Reset</button>
-        </div>
-
-        <div id="gl_out" class="note" style="margin-top:10px"></div>
-      </div>
-
-      <div>
-        <div class="section-title">Plot</div>
-        <div id="gl_plotbox" class="chart"></div>
-      </div>
-    </section>
-  `;
-
-  // default toggles when coming from Calc+ tab
-  if(mode==='analyze' && !st.showDeriv && !st.showTangent && !st.showArea){
-    st.showDeriv = true;
-    saveGraphLab(st);
-    try{ $('#gl_deriv').value='on'; }catch(_){}
-  }
-
-  const readState = ()=>{
-    const L = $('#gl_lines').value.split('\n').map(s=>s.trim()).filter(Boolean);
-    st.lines = L.length?L:['sin(x)'];
-    st.xmin = Number($('#gl_xmin').value);
-    st.xmax = Number($('#gl_xmax').value);
-    st.n    = Math.min(2000, Math.max(50, Number($('#gl_n').value)||400));
-    st.sel  = Math.max(0, Math.min(st.lines.length-1, Number($('#gl_sel').value)||0));
-    st.showDeriv   = ($('#gl_deriv').value==='on');
-    st.showTangent = ($('#gl_tan').value==='on');
-    st.x0   = Number($('#gl_x0').value||0);
-    st.showArea    = ($('#gl_area').value==='on');
-    st.a    = Number($('#gl_a').value||0);
-    st.b    = Number($('#gl_b').value||0);
-    st.showRoots   = ($('#gl_roots').value==='on');
-    saveGraphLab(st);
-    return st;
-  };
-
-  const plotNow = ()=>{
-    const s = readState();
-    const box = document.getElementById('gl_plotbox');
-    const out = document.getElementById('gl_out');
-
-    if(!window.Plotly){
-      out.textContent = 'Plotly not loaded (offline mode). GraphLab needs Plotly.';
-      return;
-    }
-    if(!window.math){
-      out.textContent = 'math.js not loaded. GraphLab needs math.js.';
-      return;
-    }
-
-    const xs = linspace(s.xmin, s.xmax, s.n);
-    const traces=[];
-    const summaries=[];
-
-    s.lines.forEach((expr, i)=>{
-      try{
-        const {expr: cleaned, compiled} = safeCompile(expr);
-        const ys = evalSeries(compiled, xs);
-        traces.push({x: xs, y: ys, mode:'lines', name: (i+1)+': '+cleaned});
-      }catch(e){
-        summaries.push(`Line ${i+1}: ${e.message}`);
-      }
-    });
-
-    let selExpr = s.lines[s.sel] || s.lines[0];
-    let selCompiled=null, selClean='';
-    let selYs=null;
-    try{
-      const t=safeCompile(selExpr);
-      selClean=t.expr; selCompiled=t.compiled;
-      selYs=evalSeries(selCompiled, xs);
-    }catch(e){
-      summaries.push('Analyze: '+e.message);
-    }
-
-    if(s.showDeriv && selCompiled){
-      try{
-        const dExpr = window.math.derivative(selClean, 'x').toString();
-        const dComp = window.math.compile(dExpr);
-        const dYs = evalSeries(dComp, xs);
-        traces.push({x: xs, y: dYs, mode:'lines', name: "f'(x): "+dExpr, line:{dash:'dot'}});
-        summaries.push(`Derivative: ${dExpr}`);
-      }catch(e){
-        summaries.push('Derivative failed: '+e.message);
-      }
-    }
-
-    if(s.showTangent && selCompiled){
-      try{
-        const x0=s.x0;
-        const y0=selCompiled.evaluate({x:x0});
-        const dExpr = window.math.derivative(selClean, 'x').toString();
-        const dComp = window.math.compile(dExpr);
-        const m = dComp.evaluate({x:x0});
-        const yLine = xs.map(x=> (Number.isFinite(m)&&Number.isFinite(y0)) ? (m*(x-x0)+y0) : null);
-        traces.push({x: xs, y: yLine, mode:'lines', name:`tangent @ ${x0}`, line:{dash:'dash'}});
-        traces.push({x:[x0], y:[y0], mode:'markers', name:'point', marker:{size:8}});
-        summaries.push(`Tangent slope ≈ ${m}`);
-      }catch(e){
-        summaries.push('Tangent failed: '+e.message);
-      }
-    }
-
-    if(s.showArea && selYs){
-      const a=Math.min(s.a,s.b), b=Math.max(s.a,s.b);
-      const area = numericIntegrate(xs, selYs, a, b);
-      const xFill=[], yFill=[];
-      for(let i=0;i<xs.length;i++){
-        const x=xs[i];
-        if(x<a || x>b) continue;
-        xFill.push(x); yFill.push(selYs[i]);
-      }
-      traces.push({x:xFill, y:yFill, type:'scatter', mode:'lines', fill:'tozeroy', name:`Area [${a},${b}]`});
-      summaries.push(`Area [${a}, ${b}] ≈ ${area}`);
-    }
-
-    if(s.showRoots && selYs){
-      const roots=findRoots(xs, selYs);
-      if(roots.length){
-        traces.push({x:roots, y:roots.map(()=>0), mode:'markers', name:'roots', marker:{size:9, symbol:'x'}});
-        summaries.push('Roots: '+roots.map(r=>Number(r).toFixed(6)).join(', '));
-      }else summaries.push('Roots: none detected');
-    }
-
-    const layout={
-      margin:{l:42,r:10,t:10,b:38},
-      paper_bgcolor:'rgba(0,0,0,0)',
-      plot_bgcolor:'rgba(0,0,0,0)',
-      xaxis:{title:'x', zeroline:true},
-      yaxis:{title:'y', zeroline:true},
-      legend:{orientation:'h', y:-0.2}
-    };
-
-    window.Plotly.react(box, traces, layout, {responsive:true, displaylogo:false});
-    out.textContent = summaries.join(' • ') || 'Ready';
-  };
-
-  $('#gl_plot').addEventListener('click', plotNow);
-  $('#gl_reset').addEventListener('click', ()=>{
-    try{ localStorage.removeItem('legendcalc_graphlab'); }catch(_){}
-    renderGraphLab(mode);
-    try{ showToast('GraphLab reset'); }catch(_){}
-  });
-  $('#gl_copy').addEventListener('click', async ()=>{
-    const s = readState();
-    const summary = `GraphLab\nLines:\n- ${s.lines.join('\n- ')}\nRange: [${s.xmin}, ${s.xmax}] samples=${s.n}`;
-    try{ await navigator.clipboard.writeText(summary); showToast('Copied'); }catch(_){ showToast('Copy failed'); }
-  });
-
-  setTimeout(plotNow, 20);
-}
-
-function renderGraph(){ return renderGraphLab('graph'); }
-function renderCalculus(){ return renderGraphLab('analyze'); }
-
       function renderUnits(){
         const view=$('#view');
         view.innerHTML=`
@@ -1896,7 +955,7 @@ function renderCalculus(){ return renderGraphLab('analyze'); }
         const pass=(name)=>{ results.push(`<div class='pass'>✔ ${name}</div>`); };
         const fail=(name,msg)=>{ results.push(`<div class='fail'>✖ ${name} — ${msg||''}</div>`); };
 
-        try{ const v=(window.math && math.evaluate) ? math.evaluate('2+2') : safeEval('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
+        try{ const v=math.evaluate('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
         try{ const d=math.derivative('x^2','x').toString(); const f=math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val); }catch(e){ fail('Calculus derivative',e.message); }
         try{ const q=math.unit(1600,'m').to('km').toNumber('km'); (Math.abs(q-1.6)<1e-12)?pass('Units: 1600 m → 1.6 km'):fail('Units convert','got '+q); }catch(e){ fail('Units convert',e.message); }
         try{ const dimMi = JSON.stringify(math.unit(1,'mi').dimensions); const dimCup = JSON.stringify(math.unit(1,'cup').dimensions); (dimMi!==dimCup)?pass('Units: miles not compatible with cups'):fail('Units: miles vs cups dimension check'); }catch(e){ fail('Units incompatibility check',e.message); }
@@ -1908,100 +967,50 @@ function renderCalculus(){ return renderGraphLab('analyze'); }
         document.getElementById('selfTests').innerHTML = `<div class='section-title'>Self-Tests</div>${results.join('')}`;
       }
 
-      activateTab('calc');
-
-// Hide library banner once UI is up (still visible in Debug if needed)
-try{ document.getElementById('diag').style.display='none'; }catch(e){}
-// DBG wiring
-try{
-  const b=document.getElementById('dbgBtn');
-  const p=document.getElementById('dbgPanel');
-  const c=document.getElementById('dbgClose');
-  const logEl=document.getElementById('dbgLog');
-  if(b && p){
-    b.onclick=()=>{ p.classList.add('open'); };
-  }
-  if(c && p){
-    c.onclick=()=>{ p.classList.remove('open'); };
-  }
-  if(logEl){
-    window.__dbgLogEl = logEl;
-  }
-}catch(e){}
-
+      render('calc');
       runSelfTests();
+    }
+  })();
+  
 
 /* ---------- Touch feedback helpers ---------- */
 (function(){
+  // Some platforms support Vibration API; iOS Safari generally does NOT.
   function tryVibrate(ms){
     try{
       if (navigator && typeof navigator.vibrate === "function") navigator.vibrate(ms);
     }catch(_){}
   }
 
+  // Subtle click using WebAudio (works broadly). Respects reduced motion.
   let audioCtx = null;
-  function ctx(){
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    try{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }catch(_){ }
-    return audioCtx;
-  }
-
-  function playTone(freq, duration, gain=0.02, type="square", when=0){
+  function clickSound(){
     try{
-      const c = ctx();
-      const o = c.createOscillator();
-      const g = c.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = gain;
-      o.connect(g); g.connect(c.destination);
-      const t = c.currentTime + when;
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return;
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 220;
+      g.gain.value = 0.02;
+      o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
       o.start(t);
-      o.stop(t + duration);
+      o.stop(t + 0.015);
     }catch(_){}
   }
 
-  function clickSound(){
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
-    playTone(220, 0.015, 0.02, "square", 0);
-  }
-
-  // "Zelda-ish" tiny fanfare: simple 3-tone upward arpeggio (no sampled audio).
-  function fanfareSound(){
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
-    playTone(440, 0.06, 0.015, "triangle", 0.00);
-    playTone(554.37, 0.06, 0.015, "triangle", 0.07);
-    playTone(659.25, 0.10, 0.015, "triangle", 0.14);
-  }
-
-  function getSfxMode(){
-    try{ return localStorage.getItem('sfxMode') || 'off'; }catch(_){ return 'off'; }
-  }
-
+  // Global pointer feedback for on-screen buttons
   document.addEventListener("pointerdown", (e)=>{
-
     const btn = e.target.closest("button");
     if(!btn) return;
-
     tryVibrate(8);
-
-    const mode = getSfxMode();
-    if (mode === 'beep') clickSound();
-    else if (mode === 'fanfare') fanfareSound();
+    clickSound();
   }, {passive:true});
+})();
 
-  // Fallback for browsers that don't fire pointer events as expected
-  document.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button');
-    if(!btn) return;
-    const mode = getSfxMode();
-    if (mode === 'beep') clickSound();
-    else if (mode === 'fanfare') fanfareSound();
-  }, {passive:true});
-})();</script>
+</script>
 </body>
 </html>
-
 

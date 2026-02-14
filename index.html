@@ -611,6 +611,8 @@ button{
     hide: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','true'); p.classList.remove('open'); } }catch(_){} },
     toggle: function(){ try{ var p=qs('dbgPanel'); if(!p) return; var open=p.classList.contains('open'); open?window.__DBG.hide():window.__DBG.show(); }catch(_){} }
   };
+  try{ append('DBG ready'); }catch(_){}
+
   // Capture runtime errors
   window.addEventListener('error', function(e){
     try{ append("ERROR: " + (e.message||"") + " @ " + (e.filename||"") + ":" + (e.lineno||"") ); }catch(_){}
@@ -779,6 +781,8 @@ button{
 })();
 
 function startApp(){
+  try{ console.log('LegendCalc startApp() entered'); }catch(_){}
+
 
 /* v1.5.6: toast helper */
 function showToast(msg){

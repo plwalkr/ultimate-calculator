@@ -158,7 +158,6 @@ button{
 }
 
 @media (max-width: 520px){
-@media (max-width: 520px){
     body{
       padding: calc(8px + var(--safe-top)) calc(8px + var(--safe-right))
                calc(8px + var(--safe-bottom)) calc(8px + var(--safe-left));
@@ -593,7 +592,7 @@ button{
 }
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}' />
 <script>
 /* v1.3.5: ultra-early debug + error capture (survives partial boot) */
 (function(){
@@ -838,6 +837,7 @@ function safeEval(expr, ans=0){
 
   const fn = Function("sin","cos","tan","sqrt","PI","E", `"use strict"; return (${s});`);
   return fn(Math.sin, Math.cos, Math.tan, Math.sqrt, Math.PI, Math.E);
+}
 
       const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
@@ -854,7 +854,7 @@ function safeEval(expr, ans=0){
         if(name==='inspire') document.body.classList.add('theme-inspire');
       }
       // Global sound mode (single source of truth stored in localStorage)
-      sfxMode = localStorage.getItem('sfxMode') || 'off'; /* ---------- Router & theme ---------- */
+      let sfxMode = localStorage.getItem('sfxMode') || 'off'; window.sfxMode = sfxMode; /* ---------- Router & theme ---------- */
       const tabs = $$('.tab');
       const mnavBtns = [];
       let currentTab = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
@@ -1015,7 +1015,7 @@ function safeEval(expr, ans=0){
           // One source of truth
           function setSfxMode(mode){
             const next = (mode || 'off');
-            sfxMode = next;
+            sfxMode = next; window.sfxMode = next;
             localStorage.setItem('sfxMode', next);
 
             // Sync any UI selectors that exist right now
@@ -2003,5 +2003,6 @@ try{
 })();</script>
 </body>
 </html>
+
 
 

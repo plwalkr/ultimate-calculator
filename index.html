@@ -48,8 +48,6 @@
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
     h1{font-family:Ringbearer,Inter,serif;letter-spacing:1px;font-size:1.8rem;margin:0;color:var(--accent)}
     .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    /* bottom nav hidden by default; enabled in @media (max-width:520px) */
-    .mnav{display:none;}
     .tab{border:0;background:var(--tab-bg);color:var(--tab-fg);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
     .tab.active{background:var(--tab-active-bg);color:var(--tab-active-fg)}
     .surface{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
@@ -636,7 +634,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.1 • 2026-02-14</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.2 • 2026-02-14</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -661,14 +659,6 @@ button{
       </div>
     </header>
 <!-- v1.5.2: mobile bottom nav (iPhone-first) -->
-<div id="mnav" class="mnav" aria-label="Bottom Navigation" role="navigation">
-  <button class="mnavbtn active" data-tab="calc" type="button">Calc</button>
-  <button class="mnavbtn" data-tab="calculus" type="button">Calc II</button>
-  <button class="mnavbtn" data-tab="graph" type="button">Graph</button>
-  <button class="mnavbtn" data-tab="units" type="button">Units</button>
-  <button class="mnavbtn" data-tab="time" type="button">Time</button>
-  <button class="mnavbtn" data-action="settings" type="button">⚙︎</button>
-</div>
 
 <!-- v1.5.2: settings drawer (mobile-friendly) -->
 <div id="settingsDrawer" class="drawer" aria-hidden="true">
@@ -935,40 +925,6 @@ function safeEval(expr, ans=0){
       // Mobile: Settings drawer only (no bottom nav)
       $('#hdrSettingsBtn')?.addEventListener('click', toggleDrawer);
       $('#drawerClose')?.addEventListener('click', closeDrawer);
-
-      // Global sound wiring (works across all tabs)
-      document.getElementById('globalSfx')?.addEventListener('change', (e)=> setSfxMode(e.target.value));
-      document.getElementById('drawerSfx')?.addEventListener('change', (e)=> setSfxMode(e.target.value));
-
-      // Apply saved sound mode on boot
-      setSfxMode(sfxMode, {silent:true});
-
-      // Mobile bottom nav (only active on phones; PC layout untouched)
-      function setupMobileNav(){
-        const nav = document.getElementById('mnav');
-        if(!nav) return;
-        // Only enable on small screens
-        const isMobile = window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
-        if(!isMobile){ nav.style.display = 'none'; return; }
-        nav.style.display = ''; // CSS handles layout
-        const btns = Array.from(nav.querySelectorAll('.mnavbtn'));
-        btns.forEach(b=> mnavBtns.push(b));
-        btns.forEach(b=>{
-          b.addEventListener('click', ()=>{
-            const act = b.dataset.action;
-            if(act === 'settings') return toggleDrawer();
-            const tab = b.dataset.tab;
-            if(tab) activateTab(tab);
-          }, {passive:true});
-        });
-        // Keep active state in sync
-        syncActive(currentTab);
-      }
-      setupMobileNav();
-
-      // Re-evaluate nav on rotate / resize (mobile only)
-      window.addEventListener('resize', ()=>{ try{ setupMobileNav(); }catch(_){ } }, {passive:true});
-
 
       function render(which){
         try{

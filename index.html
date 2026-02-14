@@ -158,6 +158,7 @@ button{
 }
 
 @media (max-width: 520px){
+@media (max-width: 520px){
     body{
       padding: calc(8px + var(--safe-top)) calc(8px + var(--safe-right))
                calc(8px + var(--safe-bottom)) calc(8px + var(--safe-left));
@@ -451,7 +452,7 @@ button{
 }
 
 
-/* v1.5.2: iPhone bottom nav + drawer + ergonomics (mobile only) */
+/* v1.5.1: iPhone bottom nav + drawer + ergonomics (mobile only) */
 @media (max-width: 520px){
   body{ padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
 
@@ -592,7 +593,7 @@ button{
 }
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}' />
+    <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 <script>
 /* v1.3.5: ultra-early debug + error capture (survives partial boot) */
 (function(){
@@ -611,8 +612,6 @@ button{
     hide: function(){ try{ var p=qs('dbgPanel'); if(p){ p.setAttribute('aria-hidden','true'); p.classList.remove('open'); } }catch(_){} },
     toggle: function(){ try{ var p=qs('dbgPanel'); if(!p) return; var open=p.classList.contains('open'); open?window.__DBG.hide():window.__DBG.show(); }catch(_){} }
   };
-  try{ append('DBG ready'); }catch(_){}
-
   // Capture runtime errors
   window.addEventListener('error', function(e){
     try{ append("ERROR: " + (e.message||"") + " @ " + (e.filename||"") + ":" + (e.lineno||"") ); }catch(_){}
@@ -628,13 +627,12 @@ button{
       try{ oldErr && oldErr.apply(console, arguments); }catch(_){}
     };
   }catch(_){}
-}
 })();</script>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.2 • 2026-02-14</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.7 • 2026-02-11</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="calculus">Calculus</button>
@@ -658,9 +656,9 @@ button{
         </select>
       </div>
     </header>
-<!-- v1.5.2: mobile bottom nav (iPhone-first) -->
+<!-- v1.5.1: mobile bottom nav (iPhone-first) -->
 
-<!-- v1.5.2: settings drawer (mobile-friendly) -->
+<!-- v1.5.1: settings drawer (mobile-friendly) -->
 <div id="settingsDrawer" class="drawer" aria-hidden="true">
   <div class="drawerHead">
     <div class="drawerTitle">Settings</div>
@@ -781,8 +779,6 @@ button{
 })();
 
 function startApp(){
-  try{ console.log('LegendCalc startApp() entered'); }catch(_){}
-
 
 /* v1.5.6: toast helper */
 function showToast(msg){
@@ -808,32 +804,8 @@ function dlog(level, msg){
   debugLog.push(line);
   if (debugLog.length > 200) debugLog.shift();
   const el = document.getElementById('dbgLog');
-  if (el && document.getElementById('dbgPanel')?.classList.contains('open')) el.textContent = debugLog.slice(-120).join("\n");
+  if (el && document.getElementById('dbgPanel')?.classList.contains('show')) el.textContent = debugLog.slice(-120).join("\n");
 }
-
-// Debug panel controller (v1.5.2 fix)
-window.__DBG = {
-  show(){
-    const p = document.getElementById('dbgPanel');
-    if(p){ p.classList.add('open'); p.setAttribute('aria-hidden','false'); }
-    this.refresh();
-  },
-  hide(){
-    const p = document.getElementById('dbgPanel');
-    if(p){ p.classList.remove('open'); p.setAttribute('aria-hidden','true'); }
-  },
-  toggle(){
-    const p = document.getElementById('dbgPanel');
-    if(!p) return;
-    const isOpen = p.classList.contains('open');
-    if(isOpen) this.hide(); else this.show();
-  },
-  refresh(){
-    const el = document.getElementById('dbgLog');
-    if(!el) return;
-    el.textContent = (window.debugLog || []).slice(-120).join("\n");
-  }
-};
 ['log','warn','error'].forEach(k=>{
   const orig = console[k].bind(console);
   console[k] = (...args)=>{ try{ dlog(k, args.map(a=> (typeof a==='string'?a:JSON.stringify(a))).join(' ')); }catch(_){}
@@ -882,7 +854,7 @@ function safeEval(expr, ans=0){
         if(name==='inspire') document.body.classList.add('theme-inspire');
       }
       // Global sound mode (single source of truth stored in localStorage)
-      let sfxMode = localStorage.getItem('sfxMode') || 'off'; window.sfxMode = sfxMode; /* ---------- Router & theme ---------- */
+      let sfxMode = localStorage.getItem('sfxMode') || 'off'; /* ---------- Router & theme ---------- */
       const tabs = $$('.tab');
       const mnavBtns = [];
       let currentTab = document.querySelector('.tab.active')?.dataset?.tab || 'calc';
@@ -927,24 +899,11 @@ function safeEval(expr, ans=0){
       $('#drawerClose')?.addEventListener('click', closeDrawer);
 
       function render(which){
-        try{
-          if(which==='calculus') return renderCalculus();
-          if(which==='graph') return renderGraph();
-          if(which==='units') return renderUnits();
-          if(which==='time') return renderTime();
-          return renderCalc();
-        }catch(e){
-          console.error(e);
-          try{
-            const view = document.getElementById('view');
-            if(view){
-              view.innerHTML = `<section class="surface"><h2 style="margin:0 0 8px 0">Tab failed to render</h2>
-                <div class="note">An error occurred while loading <strong>${(which||'').toString()}</strong>. Open Debug (DBG) to see details.</div>
-                <div class="note" style="margin-top:8px">Tip: this is usually a missing element ID or a JS error inside that tab’s renderer.</div>
-              </section>`;
-            }
-          }catch(_){}
-        }
+        if(which==='calculus') return renderCalculus();
+        if(which==='graph') return renderGraph();
+        if(which==='units') return renderUnits();
+        if(which==='time') return renderTime();
+        return renderCalc();
       }
 
       (function initTheme(){
@@ -1056,7 +1015,7 @@ function safeEval(expr, ans=0){
           // One source of truth
           function setSfxMode(mode){
             const next = (mode || 'off');
-            sfxMode = next; window.sfxMode = next;
+            sfxMode = next;
             localStorage.setItem('sfxMode', next);
 
             // Sync any UI selectors that exist right now
@@ -1960,10 +1919,10 @@ try{
   const c=document.getElementById('dbgClose');
   const logEl=document.getElementById('dbgLog');
   if(b && p){
-    b.onclick=()=>{ window.__DBG && window.__DBG.toggle(); };
+    b.onclick=()=>{ p.classList.add('open'); };
   }
   if(c && p){
-    c.onclick=()=>{ window.__DBG && window.__DBG.hide(); };
+    c.onclick=()=>{ p.classList.remove('open'); };
   }
   if(logEl){
     window.__dbgLogEl = logEl;
@@ -2044,6 +2003,5 @@ try{
 })();</script>
 </body>
 </html>
-
 
 

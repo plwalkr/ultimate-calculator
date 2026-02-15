@@ -409,13 +409,21 @@ button{
       .onehand-left .keys{padding-right:24px}
       .onehand-right .keys{padding-left:24px}
     }
+
+/* v1.3.11 mobile polish: keep tab strip fully visible */
+@media (max-width: 520px){
+  .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
+  .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
+  .titleline{gap:8px}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.10 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.11 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
@@ -1420,7 +1428,7 @@ button{
   
   // Global pointer feedback for on-screen buttons
   document.addEventListener("pointerdown", (e)=>{
-    const btn = e.target.closest("button");
+    const btn = e.target.closest("button, input[type=\"button\"], input[type=\"submit\"], .tab, .key, .btn");
     if(!btn) return;
     tryVibrate(8);
         try{ if(window.__LC_clickSound) window.__LC_clickSound(); }catch(_){ }

@@ -410,7 +410,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.4 mobile polish: keep tab strip fully visible */
+/* v1.4.5 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -418,7 +418,7 @@ button{
 }
 
 
-/* v1.4.4 mobile spacing system + tab scroll hint */
+/* v1.4.5 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -453,7 +453,7 @@ button{
 }
 
 
-/* v1.4.4 mobile tap-target normalization */
+/* v1.4.5 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -488,7 +488,7 @@ button{
 }
 
 
-/* v1.4.4 TI-Nspire theme readability tweak */
+/* v1.4.5 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -498,7 +498,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.4 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.5 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -507,7 +507,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.4 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.5 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -521,7 +521,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.4 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.5 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -683,45 +683,16 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.4: helper so plotting code can report errors without crashing
+      // v1.4.5: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
-          const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
-          dbgLine('ERROR', msg);
-        }catch(_){
-          dbgLine('ERROR', 'Unknown error');
-        }
-      }
-
-window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.filename?` @ ${e.filename}:${e.lineno}`:'')); });
-      window.addEventListener('unhandledrejection', (e)=>{ dbgLine('PROMISE', (e.reason && (e.reason.message||String(e.reason))) || 'unhandled rejection'); });
-
-      function initDebugUI(){
-        const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
-        if(!btn || !panel) return;
-        const open=()=>{ panel.style.display='block'; panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened'); };
-        const shut=()=>{ panel.style.display='none'; panel.setAttribute('aria-hidden','true'); };
-        btn.addEventListener('click', open);
-        panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
-        close && close.addEventListener('click', shut);
-        copy && copy.addEventListener('click', async ()=>{
-          const text = (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)';
-          try{ await navigator.clipboard.writeText(text); toast('Debug log copied'); }
-          catch(_){
-            try{
-              const ta=document.createElement('textarea');
-              ta.value=text; document.body.appendChild(ta);
-              ta.select(); document.execCommand('copy');
-              document.body.removeChild(ta);
-              toast('Debug log copied');
-            }catch(__){ toast('Copy failed'); }
-          }
-          // visually select the log so it feels like a real copy
-          const pre=$('#dbgLog');
-          if(pre){
-            const r=document.createRange(); r.selectNodeContents(pre);
-            const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-            setTimeout(()=>{ try{ sel.removeAllRanges(); }catch(_){} }, 900);
+          const msg = (err && (err.message||err.toString())) ? (err.message||err.toString()) : 'Unknown error';
+          const st = (err && err.stack) ? String(err.stack) : '';
+          dbgAdd('ERROR', msg + (st?(' 
+'+st):''));
+          if(window.console && console.error) console.error(err);
+        }catch(_){ }
+      }, 900);
           }
         });
       }
@@ -1089,16 +1060,16 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0')});
         }
         $$('.input').forEach(el=> el.addEventListener('input', persist));
-        $('#d1').addEventListener('change', ()=>{ persist(); doPlot(); });
-        $('#tanOn').addEventListener('change', ()=>{ persist(); doPlot(); });
-        $('#intOn').addEventListener('change', ()=>{ persist(); doPlot(); });
-        $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) doPlot(); else updateReadout(); });
-        $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) doPlot(); else updateReadout(); });
-        $('#rootsOn').addEventListener('change', ()=>{ persist(); doPlot(); });
-        $('#x0').addEventListener('input', ()=>{ $('#x0r').value=$('#x0').value; persist(); if($('#tanOn').checked) doPlot(); else updateReadout(); });
-        $('#x0r').addEventListener('input', ()=>{ $('#x0').value=$('#x0r').value; persist(); if($('#tanOn').checked) doPlot(); else updateReadout(); });
-        $('#xmin').addEventListener('input', ()=>{ syncX0Bounds(); persist(); doPlot(); });
-        $('#xmax').addEventListener('input', ()=>{ syncX0Bounds(); persist(); doPlot(); });
+        $('#d1').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
+        $('#tanOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
+        $('#intOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
+        $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
+        $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
+        $('#rootsOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
+        $('#x0').addEventListener('input', ()=>{ $('#x0r').value=$('#x0').value; persist(); if($('#tanOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
+        $('#x0r').addEventListener('input', ()=>{ $('#x0').value=$('#x0r').value; persist(); if($('#tanOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
+        $('#xmin').addEventListener('input', ()=>{ syncX0Bounds(); persist(); waitForGraphLibs(doPlot); });
+        $('#xmax').addEventListener('input', ()=>{ syncX0Bounds(); persist(); waitForGraphLibs(doPlot); });
 
         $('#clearSavedGL').onclick=()=>{
           clearTab('graphlab');
@@ -1121,7 +1092,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 function doPlot(){
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length){ Plotly.purge('chart'); return; }
+          if(!lines.length){ try{ Plotly?.purge('chart'); }catch(_){ } return; }
 
           try{
             const xs = linspace(xmin,xmax,n);
@@ -1297,7 +1268,13 @@ function doPlot(){
               legend:{orientation:'h'}
             };
 
-            Plotly.newPlot('chart', traces, layout, {responsive:true, displaylogo:false});
+            try{
+              Plotly.newPlot('chart', traces, layout, {responsive:true, displaylogo:false});
+            }catch(err){
+              logErr(err);
+              toast('Plot render error');
+              return;
+            }
             persist();
           }catch(err){
             logErr(err);
@@ -1305,8 +1282,8 @@ function doPlot(){
           }
         }
 
-        $('#plotBtn').onclick=doPlot;
-        $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
+        $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
+        $('#clearBtn').onclick=()=>{ try{ Plotly?.purge('chart'); }catch(_){ } };
         $('#exportBtn').onclick=()=>{ try{ Plotly.downloadImage('chart',{format:'png',filename:'legendcalc-graphlab'}); }catch(e){ toast('Export blocked'); } };
 
         // hotkeys
@@ -1317,7 +1294,7 @@ function doPlot(){
         });
 
         // initial plot if saved content exists
-        if($('#gx').value.trim()) doPlot();
+        if($('#gx').value.trim()) waitForGraphLibs(doPlot);
       }
 
 
@@ -1363,7 +1340,7 @@ function renderGraph(){
 function doPlot(){
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length){ Plotly.purge('chart'); return; }
+          if(!lines.length){ try{ Plotly?.purge('chart'); }catch(_){ } return; }
           try{
             const xs = linspace(xmin,xmax,n);
             const traces = lines.map((ex,i)=>{
@@ -1376,8 +1353,8 @@ function doPlot(){
           }catch(e){ alert('Parse error in one of the functions'); }
         }
 
-        $('#plotBtn').onclick=doPlot;
-        $('#clearBtn').onclick=()=>{ Plotly.purge('chart'); };
+        $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
+        $('#clearBtn').onclick=()=>{ try{ Plotly?.purge('chart'); }catch(_){ } };
         $('#exportBtn').onclick=async ()=>{
           try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
         };

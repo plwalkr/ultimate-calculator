@@ -18,6 +18,11 @@
       --radius:16px;--shadow:0 20px 60px #0005;
       --tab-bg:#1a2030; --tab-fg:#9db0d0; --tab-active-bg:#2b78e4; --tab-active-fg:#fff;
       --control-bg:#0e131c; --control-bd:#263046;
+    
+      --panel:var(--card);
+      --border:var(--control-bd);
+      --toast-bg:#0b1410;
+      --toast-fg:#eafff3;
     }
     /* Light theme: higher contrast fixes */
     .theme-light{
@@ -31,6 +36,9 @@
 
       --tab-bg:#e7eefc; --tab-fg:#1a3358; --tab-active-bg:#205fbe; --tab-active-fg:#ffffff;
       --control-bg:#ffffff; --control-bd:#c9d7ef;
+    
+      --toast-bg:var(--card);
+      --toast-fg:var(--ink);
     }
     /* TI-Nspire themed (tighter contrast + LCD vibe) */
     .theme-inspire{
@@ -39,6 +47,9 @@
       --key:#0e141b; --key-op:#141b23; --key-fn:#0b1218; --key-eq:#00a2ff;
       --tab-bg:#0d1622; --tab-fg:#c1d2e6; --tab-active-bg:#00a2ff; --tab-active-fg:#ffffff;
       --control-bg:#0f141a; --control-bd:#2c3c4c;
+    
+      --toast-bg:var(--card);
+      --toast-fg:var(--ink);
     }
 
     *{box-sizing:border-box}
@@ -104,7 +115,7 @@
     .theme-light th{ color:#205fbe; }
     .theme-light td{ border-bottom-color:#d6e3fb; }
 
-    #diag{display:none;margin:10px 0;padding:10px;border-radius:10px;font-weight:800}
+    
     #diag.ok{display:block;background:#0f2a1c;color:#c6ffdf;border:1px solid #31c27c}
     #diag.warn{display:block;background:#2a2a0f;color:#f8ffb3;border:1px solid #f5e160}
     #diag.err{display:block;background:#3b1116;color:#ffd5d5;border:1px solid #ff6b6b}
@@ -232,6 +243,7 @@ button{
 }
 
 
+
 @supports (height: 100dvh){
   body{ min-height: 100dvh; }
 }
@@ -298,7 +310,7 @@ button{
 
 /* ---------- v1.3.5 Mobile layout upgrade (keeps desktop the same) ---------- */
 .titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.ver{font-size:.85rem;font-weight:700;opacity:.75;white-space:nowrap}
+.ver{font-size:.85rem;font-weight:800;opacity:1;color:var(--muted);white-space:nowrap}
 @media (max-width: 900px){
   .wrap{margin:0 auto; padding: 0 12px}
 }
@@ -339,6 +351,44 @@ button{
     .dbg-mini:hover{background:rgba(255,255,255,.05)}
     .dbg-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9999}
     .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:60vh;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
+    .gear-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
+    .gear-mini:hover{background:rgba(255,255,255,.06)}
+    .dbg-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
+    .dbg-mini:hover{background:rgba(255,255,255,.06)}
+
+    /* Debug log readability */
+    #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:48vh}
+
+    /* Settings drawer */
+    .settings-drawer{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9998}
+    .settings-drawer .sheet{position:absolute;right:12px;top:12px;bottom:12px;width:min(420px, calc(100vw - 24px));background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px}
+    .sheet-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .sheet-title{font-weight:900;font-size:1.05rem}
+    .set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}
+    .set-label{font-weight:900}
+    .set-sub{font-size:.85rem;color:var(--muted);margin-top:2px}
+    .switch{position:relative;display:inline-block;width:46px;height:26px}
+    .switch input{display:none}
+    .slider{position:absolute;cursor:not-allowed;top:0;left:0;right:0;bottom:0;background:#2a3346;border-radius:999px;opacity:.6}
+    .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:white;border-radius:999px;opacity:.8}
+
+    /* Diagnostics pill */
+    #diag{display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
+    #diag.ok{background:rgba(91,211,142,.14);border:1px solid rgba(91,211,142,.35);color:var(--ink)}
+    #diag.err{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:var(--ink)}
+    #diag .diag-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+    #diag .diag-x{border:0;background:transparent;color:var(--muted);font-size:1.1rem;font-weight:900;cursor:pointer;padding:2px 6px;border-radius:10px}
+    #diag .diag-x:hover{background:rgba(255,255,255,.08)}
+    #diag.expanded{border-radius:16px}
+    #diag.expanded .diag-msg{white-space:normal;overflow:visible}
+
+    /* Toast colors */
+    
+    @media (max-width:520px){
+      #diag{position:fixed;left:10px;right:10px;bottom:64px;margin:0;z-index:2000}
+      .settings-drawer .sheet{left:12px;right:12px;width:auto}
+    }
+
     .dbg-panel .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
     .dbg-panel pre{margin:0;white-space:pre-wrap;word-break:break-word;overflow:auto;background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:14px;padding:10px;flex:1}
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:9998;display:none;background:rgba(10,20,15,.92);border:1px solid var(--border);padding:10px 12px;border-radius:14px;color:var(--fg);font-weight:800;max-width:min(92vw,520px)}
@@ -352,10 +402,10 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.5 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.6 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
-        <button class="tab" data-tab="calculus">Calculus</button>
+        <button class="tab" data-tab="calculus">Calc+</button>
         <button class="tab" data-tab="graph">Graph</button>
         <button class="tab" data-tab="units">Units</button>
         <button class="tab" data-tab="time">Time</button>
@@ -369,12 +419,60 @@ button{
           <option value="inspire">TI-Inspire</option>
         </select>
         <button class="dbg-mini" id="dbgBtn" title="Debug">DBG</button>
+        <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
       </div>
     </header>
     <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
 
-    <div class="dbg-panel" id="dbgPanel" aria-hidden="true">
+    
+
+    <div class="settings-drawer" id="settingsDrawer" aria-hidden="true">
+      <div class="sheet" role="dialog" aria-label="Settings">
+        <div class="sheet-top">
+          <div class="sheet-title">Settings</div>
+          <button class="btn" id="setClose">Close</button>
+        </div>
+
+        <div class="set-row">
+          <div>
+            <div class="set-label">Sound</div>
+            <div class="set-sub">Applies across all tabs</div>
+          </div>
+          <select id="setSound" class="theme-select">
+            <option value="off">Off</option>
+            <option value="clicks">Clicks</option>
+            <option value="fanfare">Fanfare</option>
+          </select>
+        </div>
+
+        <div class="set-row">
+          <div>
+            <div class="set-label">Big UI</div>
+            <div class="set-sub">Larger tap targets (coming)</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="setBigUI" disabled><span class="slider"></span></label>
+        </div>
+
+        <div class="set-row">
+          <div>
+            <div class="set-label">One-hand mode</div>
+            <div class="set-sub">Left/right reach (coming)</div>
+          </div>
+          <select id="setOneHand" class="theme-select" disabled>
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+          </select>
+        </div>
+
+        <div class="set-row" style="justify-content:flex-end">
+          <button class="btn" id="setTestClick">Test Click</button>
+          <button class="btn" id="setTestFanfare">Test Fanfare</button>
+        </div>
+      </div>
+    </div>
+
+<div class="dbg-panel" id="dbgPanel" aria-hidden="true">
       <div class="card" role="dialog" aria-label="Debug panel">
         <div class="top">
           <div style="font-weight:900">Debug</div>
@@ -395,7 +493,19 @@ button{
   // Prefer local libs in ./libs, fallback to CDN, then start app
   (function(){
     const DI = document.getElementById('diag');
-    const note=(cls,msg)=>{ DI.className=cls; DI.textContent=msg; DI.style.display='block'; };
+    const note=(cls,msg,full)=>{
+        DI.className=cls;
+        DI.dataset.full = full || msg;
+        DI.classList.remove('expanded');
+        DI.innerHTML = `<span class="diag-msg">${msg}</span><button class="diag-x" aria-label="Close">×</button>`;
+        DI.style.display='flex';
+        if(cls==='ok'){ clearTimeout(note._t); note._t=setTimeout(()=>{ if(!DI.classList.contains('expanded')) DI.style.display='none'; }, 2500); }
+      };
+
+    DI.addEventListener('click',(e)=>{
+        if(e.target && e.target.classList.contains('diag-x')){ DI.style.display='none'; return; }
+        if(e.target && e.target.classList.contains('diag-msg')){ DI.classList.toggle('expanded'); if(DI.classList.contains('expanded')) DI.querySelector('.diag-msg').textContent = DI.dataset.full; else DI.querySelector('.diag-msg').textContent = DI.dataset.full.length>42 ? (DI.dataset.full.slice(0,42)+'…') : DI.dataset.full; }
+      });
 
     const libs=[
       {global:'math', local:'./libs/math.min.js', cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
@@ -411,11 +521,11 @@ button{
             catch(eLocal){ await loadScript(L.cdn); }
           }
         }
-        note('ok','Libraries loaded ✔ Local if present, otherwise CDN.');
+        note('ok','Libs ✔','Libraries loaded ✔ Local if present, otherwise CDN.');
         startApp();
       }catch(e){
         console.error(e);
-        note('err','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs and reload.');
+        note('err','Libs failed','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs and reload.');
       }
     })();
 
@@ -466,8 +576,48 @@ button{
         panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
-          try{ await navigator.clipboard.writeText(DBG.join('\n')); toast('Debug copied'); }
-          catch(_){ toast('Copy failed'); }
+          const text = (DBG && DBG.length) ? DBG.join('
+') : '(no errors yet)';
+          try{ await navigator.clipboard.writeText(text); toast('Debug log copied'); }
+          catch(_){
+            try{
+              const ta=document.createElement('textarea');
+              ta.value=text; document.body.appendChild(ta);
+              ta.select(); document.execCommand('copy');
+              document.body.removeChild(ta);
+              toast('Debug log copied');
+            }catch(__){ toast('Copy failed'); }
+          }
+          // visually select the log so it feels like a real copy
+          const pre=$('#dbgLog');
+          if(pre){
+            const r=document.createRange(); r.selectNodeContents(pre);
+            const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+            setTimeout(()=>{ try{ sel.removeAllRanges(); }catch(_){} }, 900);
+          }
+        });
+      }
+
+      
+      function initSettingsUI(){
+        const gear=$('#gearBtn'), drawer=$('#settingsDrawer'), close=$('#setClose');
+        if(!gear || !drawer) return;
+        const open=()=>{ drawer.style.display='block'; drawer.setAttribute('aria-hidden','false'); syncSoundUI(); };
+        const shut=()=>{ drawer.style.display='none'; drawer.setAttribute('aria-hidden','true'); };
+        gear.addEventListener('click', open);
+        drawer.addEventListener('click',(e)=>{ if(e.target===drawer) shut(); });
+        close && close.addEventListener('click', shut);
+
+        const sel=$('#setSound');
+        sel && sel.addEventListener('change', ()=>{ setSoundMode(sel.value); });
+
+        const tClick=$('#setTestClick');
+        tClick && tClick.addEventListener('click', ()=>{
+          try{ ensureAudio(); beep(220, 0.05, 'square', 0.02, 0); toast('Test: Click'); }catch(_){}
+        });
+        const tFan=$('#setTestFanfare');
+        tFan && tFan.addEventListener('click', ()=>{
+          try{ ensureAudio(); beep(392,0.12,'triangle',0.03,0.00); beep(494,0.12,'triangle',0.03,0.10); beep(587,0.16,'triangle',0.035,0.20); toast('Test: Fanfare'); }catch(_){}
         });
       }
 
@@ -528,6 +678,8 @@ button{
         const mode=getSoundMode();
         const radios=$$('input[name="soundMode"]');
         radios.forEach(r=>{ r.checked = (r.value===mode); });
+        const ss=$('#setSound');
+        if(ss) ss.value = mode;
       }
       function applyTheme(name){
         document.body.classList.remove('theme-light','theme-inspire');
@@ -1152,6 +1304,7 @@ button{
 
       armAudioUnlock();
       initDebugUI();
+      initSettingsUI();
       syncSoundUI();
 
       /* ---------- Sound ---------- */

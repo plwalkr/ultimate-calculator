@@ -410,7 +410,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.3.12 mobile polish: keep tab strip fully visible */
+/* v1.3.13 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -418,7 +418,7 @@ button{
 }
 
 
-/* v1.3.12 mobile spacing system + tab scroll hint */
+/* v1.3.13 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -452,13 +452,48 @@ button{
   }
 }
 
+
+/* v1.3.13 mobile tap-target normalization */
+@media (max-width: 520px){
+  /* minimum Apple-friendly tap size */
+  button, .btn, .key, .tab, a.btnlike,
+  input[type="button"], input[type="submit"]{
+    min-height:44px;
+    padding:10px 12px;
+    line-height:1.1;
+  }
+  /* form controls */
+  input, select, textarea{
+    min-height:44px;
+    padding:10px 12px;
+    font-size:16px; /* prevent iOS zoom */
+  }
+  /* small icon buttons (DBG, Gear, etc.) keep 44px hitbox but smaller visual */
+  .iconbtn{
+    min-width:44px;
+    min-height:44px;
+    padding:8px;
+  }
+  /* button rows wrap cleanly */
+  .btnbar, .rowbtns{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .btnbar > *, .rowbtns > *{
+    flex:1 1 auto;
+  }
+  /* tighter but readable small labels */
+  .muted, .subtle, .hint{font-size:.9rem;}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.12 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.13 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>

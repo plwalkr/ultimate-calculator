@@ -369,8 +369,11 @@ button{
     .set-sub{font-size:.85rem;color:var(--muted);margin-top:2px}
     .switch{position:relative;display:inline-block;width:46px;height:26px}
     .switch input{display:none}
-    .slider{position:absolute;cursor:not-allowed;top:0;left:0;right:0;bottom:0;background:#2a3346;border-radius:999px;opacity:.6}
+    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#2a3346;border-radius:999px;opacity:1;transition:background .18s ease}
     .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:white;border-radius:999px;opacity:.8}
+    .switch input:checked + .slider{background:var(--accent)}
+    .switch input:checked + .slider:before{transform:translateX(20px)}
+
 
     /* Diagnostics pill */
     #diag{display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
@@ -396,13 +399,23 @@ button{
 
     .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(255,255,255,.03);padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer}
     .pill input{accent-color: var(--accent);}
+
+    /* Big UI + One-hand mode (mobile-first only; desktop untouched) */
+    @media (max-width:520px){
+      .bigui .tab-btn{padding:14px 16px;font-size:1.02rem}
+      .bigui .btn{padding:14px 16px;font-size:1.02rem}
+      .bigui input,.bigui select,.bigui textarea{font-size:1.05rem}
+      .bigui .key{padding:16px 12px}
+      .onehand-left .keys{padding-right:24px}
+      .onehand-right .keys{padding-left:24px}
+    }
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.8 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.9 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
@@ -449,17 +462,17 @@ button{
         <div class="set-row">
           <div>
             <div class="set-label">Big UI</div>
-            <div class="set-sub">Larger tap targets (coming)</div>
+            <div class="set-sub">Larger tap targets</div>
           </div>
-          <label class="switch"><input type="checkbox" id="setBigUI" disabled><span class="slider"></span></label>
+          <label class="switch"><input type="checkbox" id="setBigUI"><span class="slider"></span></label>
         </div>
 
         <div class="set-row">
           <div>
             <div class="set-label">One-hand mode</div>
-            <div class="set-sub">Left/right reach (coming)</div>
+            <div class="set-sub">Left/right reach</div>
           </div>
-          <select id="setOneHand" class="theme-select" disabled>
+          <select id="setOneHand" class="theme-select">
             <option value="right">Right</option>
             <option value="left">Left</option>
           </select>
@@ -601,14 +614,20 @@ button{
       function initSettingsUI(){
         const gear=$('#gearBtn'), drawer=$('#settingsDrawer'), close=$('#setClose');
         if(!gear || !drawer) return;
-        const open=()=>{ drawer.style.display='block'; drawer.setAttribute('aria-hidden','false'); syncSoundUI(); };
+        const open=()=>{ drawer.style.display='block'; drawer.setAttribute('aria-hidden','false'); syncSettingsUI(); };
         const shut=()=>{ drawer.style.display='none'; drawer.setAttribute('aria-hidden','true'); };
         gear.addEventListener('click', open);
         drawer.addEventListener('click',(e)=>{ if(e.target===drawer) shut(); });
         close && close.addEventListener('click', shut);
 
         const sel=$('#setSound');
-        sel && sel.addEventListener('change', ()=>{ setSoundMode(sel.value); });
+        sel && sel.addEventListener('change', ()=>{ setSoundMode(sel.value); syncSettingsUI(); });
+
+        const big=$('#setBigUI');
+        big && big.addEventListener('change', ()=>{ setBigUI(big.checked); });
+
+        const oh=$('#setOneHand');
+        oh && oh.addEventListener('change', ()=>{ setOneHand(oh.value); });
 
         const tClick=$('#setTestClick');
         tClick && tClick.addEventListener('click', ()=>{
@@ -679,7 +698,40 @@ button{
       function syncSoundUI(){
         const mode=getSoundMode();
         const radios=$$('input[name="soundMode"]');
-        radios.forEach(r=>{ r.checked = (r.value===mode); });
+        radios.forEach(r=>{ r.checked = (r.value===mode); }
+
+      /* ---------- UI prefs (Big UI + One-hand) ---------- */
+      function getBigUI(){ return !!loadPrefs().bigUI; }
+      function setBigUI(on){
+        const p=loadPrefs(); p.bigUI=!!on; savePrefs(p);
+        applyBigUI();
+        toast(`Big UI: ${on?'On':'Off'}`);
+        syncSettingsUI();
+      }
+      function applyBigUI(){
+        const on=getBigUI();
+        document.documentElement.classList.toggle('bigui', on);
+      }
+
+      function getOneHand(){ return (loadPrefs().oneHand||'right'); }
+      function setOneHand(mode){
+        const p=loadPrefs(); p.oneHand=(mode==='left'?'left':'right'); savePrefs(p);
+        applyOneHand();
+        toast(`One-hand: ${p.oneHand==='left'?'Left':'Right'}`);
+        syncSettingsUI();
+      }
+      function applyOneHand(){
+        const mode=getOneHand();
+        document.documentElement.classList.toggle('onehand-left', mode==='left');
+        document.documentElement.classList.toggle('onehand-right', mode!=='left');
+      }
+
+      function syncSettingsUI(){
+        const b=$('#setBigUI'); if(b) b.checked = getBigUI();
+        const o=$('#setOneHand'); if(o) o.value = getOneHand();
+        const s=$('#setSound'); if(s) s.value = getSoundMode();
+      }
+);
         const ss=$('#setSound');
         if(ss) ss.value = mode;
       }
@@ -1307,6 +1359,9 @@ button{
       armAudioUnlock();
       initDebugUI();
       initSettingsUI();
+      applyBigUI();
+      applyOneHand();
+      syncSettingsUI();
       syncSoundUI();
 
       /* ---------- Sound ---------- */

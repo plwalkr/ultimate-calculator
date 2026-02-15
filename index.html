@@ -410,7 +410,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.1 mobile polish: keep tab strip fully visible */
+/* v1.4.2 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -418,7 +418,7 @@ button{
 }
 
 
-/* v1.4.1 mobile spacing system + tab scroll hint */
+/* v1.4.2 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -453,7 +453,7 @@ button{
 }
 
 
-/* v1.4.1 mobile tap-target normalization */
+/* v1.4.2 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -487,13 +487,23 @@ button{
   .muted, .subtle, .hint{font-size:.9rem;}
 }
 
+
+/* v1.4.2 TI-Nspire theme readability tweak */
+body.theme-ti, body.ti, .theme-ti{
+  --muted: rgba(255,255,255,.78);
+  --hint: rgba(255,255,255,.72);
+}
+body.theme-ti .muted, body.ti .muted, .theme-ti .muted{color:var(--muted) !important;}
+body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);}
+body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.1 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.2 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -998,6 +1008,9 @@ button{
                 <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap">
                   <label class="pill"><input type="checkbox" id="d1"> Show f'(x) (first line)</label>
                   <label class="pill"><input type="checkbox" id="tanOn"> Tangent @ x₀</label>
+                  <label class="pill"><input type="checkbox" id="intOn"> ∫ area a..b</label>
+                  <label class="pill">a <input id="a" class="input" type="number" step="0.1" value="-1" style="width:110px;display:inline-block;margin-left:6px"></label>
+                  <label class="pill">b <input id="b" class="input" type="number" step="0.1" value="1" style="width:110px;display:inline-block;margin-left:6px"></label>
                   <label class="pill">x₀ <input id="x0" class="input" type="number" step="0.1" value="0" style="width:110px;display:inline-block;margin-left:6px"></label>
                   <input id="x0r" type="range" min="-10" max="10" step="0.1" value="0" style="flex:1;min-width:160px">
                 </div>
@@ -1020,12 +1033,15 @@ button{
             </div>
           </section>`;
 
-        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0'});
+        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1'});
         $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         $('#d1').checked = (saved.d1==='1');
         $('#tanOn').checked = (saved.tanOn==='1');
         $('#x0').value = (saved.x0 ?? '0');
         $('#x0r').value = $('#x0').value;
+        $('#intOn').checked = (saved.intOn==='1');
+        $('#a').value = (saved.a ?? '-1');
+        $('#b').value = (saved.b ?? '1');
         function syncX0Bounds(){
           const a = parseFloat($('#xmin').value)||-10;
           const b = parseFloat($('#xmax').value)||10;
@@ -1039,11 +1055,14 @@ button{
         syncX0Bounds();
 
         function persist(){
-          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value});
+          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value});
         }
         $$('.input').forEach(el=> el.addEventListener('input', persist));
         $('#d1').addEventListener('change', ()=>{ persist(); doPlot(); });
         $('#tanOn').addEventListener('change', ()=>{ persist(); doPlot(); });
+        $('#intOn').addEventListener('change', ()=>{ persist(); doPlot(); });
+        $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) doPlot(); else updateReadout(); });
+        $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) doPlot(); else updateReadout(); });
         $('#x0').addEventListener('input', ()=>{ $('#x0r').value=$('#x0').value; persist(); if($('#tanOn').checked) doPlot(); else updateReadout(); });
         $('#x0r').addEventListener('input', ()=>{ $('#x0').value=$('#x0r').value; persist(); if($('#tanOn').checked) doPlot(); else updateReadout(); });
         $('#xmin').addEventListener('input', ()=>{ syncX0Bounds(); persist(); doPlot(); });
@@ -1054,6 +1073,7 @@ button{
           ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
           $('#x0').value='0'; $('#x0r').value='0';
           $('#tanOn').checked=false;
+          $('#intOn').checked=false; $('#a').value='-1'; $('#b').value='1';
           $('#d1').checked=false;
           Plotly.purge('chart');
           toast('GraphLab: cleared');
@@ -1128,7 +1148,41 @@ function doPlot(){
                 tangentHTML = `<span class="muted">Tangent: parse/eval error</span>`;
               }
             }
-            updateReadout(tangentHTML);
+            // readout is built after integral too
+            let readoutParts = [];
+            if(tangentHTML) readoutParts.push(tangentHTML);
+
+            
+            // numeric integral shading a..b for first line
+            if($('#intOn')?.checked && lines[0]){
+              const aa = parseFloat($('#a').value);
+              const bb = parseFloat($('#b').value);
+              const lo = Math.min(aa,bb), hi = Math.max(aa,bb);
+              try{
+                const fx = math.parse(lines[0]).compile();
+                const xs_ab = xs.filter(x => x>=lo && x<=hi);
+                if(xs_ab.length>=2){
+                  const ys_ab = xs_ab.map(x=>{ const y=fx.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+                  // area shading (to x-axis). If curve crosses axis, shading still useful visually.
+                  traces.push({x:xs_ab, y:ys_ab, type:'scatter', mode:'lines', name:`∫ a..b`, fill:'tozeroy', opacity:0.25});
+                  // trapezoid numeric integral
+                  let area = 0;
+                  for(let i=1;i<xs_ab.length;i++){
+                    const dx = xs_ab[i]-xs_ab[i-1];
+                    const y1 = ys_ab[i-1], y2 = ys_ab[i];
+                    if(Number.isFinite(y1) && Number.isFinite(y2)) area += (y1+y2)*0.5*dx;
+                  }
+                  readoutParts.push(`<b>Integral</b> from a=${lo} to b=${hi}: area ≈ ${area.toFixed(6)}`);
+                }else{
+                  readoutParts.push(`<span class="muted">Integral: increase samples or widen [a,b]</span>`);
+                }
+              }catch(err){
+                logErr(err);
+                readoutParts.push(`<span class="muted">Integral: parse/eval error</span>`);
+              }
+            }
+
+            updateReadout(readoutParts.join('<br>'));
 
             const layout = {
               margin:{l:40,r:15,t:10,b:35},
@@ -1193,7 +1247,8 @@ function renderGraph(){
         $$('.input').forEach(el=> el.addEventListener('input', persist));
         $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
           $('#x0').value='0'; $('#x0r').value='0';
-          $('#tanOn').checked=false; Plotly.purge('chart'); };
+          $('#tanOn').checked=false;
+          $('#intOn').checked=false; $('#a').value='-1'; $('#b').value='1'; Plotly.purge('chart'); };
 
         function updateReadout(info){
           const el = $('#glReadout');

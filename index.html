@@ -410,11 +410,46 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.3.11 mobile polish: keep tab strip fully visible */
+/* v1.3.12 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
   .titleline{gap:8px}
+}
+
+
+/* v1.3.12 mobile spacing system + tab scroll hint */
+:root{ --m-pad:12px; --m-gap:10px; }
+@media (max-width: 520px){
+  /* tighten general vertical rhythm */
+  .wrap{padding:var(--m-pad);}
+  .card{padding:12px;}
+  .grid{gap:var(--m-gap);}
+  .row{gap:8px;}
+  .btnbar{gap:8px;}
+  /* keep sections from double-padding */
+  .card .card{padding:10px;}
+  /* tab strip hint */
+  .tabswrap{position:relative;}
+  .tabswrap::after{
+    content:"";
+    position:absolute; top:0; right:0; height:100%; width:26px;
+    pointer-events:none;
+    background:linear-gradient(to right, rgba(0,0,0,0), var(--bg, #0b0f12));
+    opacity:.9;
+  }
+  .tabs{padding-right:calc(30px + env(safe-area-inset-right));}
+}
+
+
+@media (max-width: 520px){
+  #historyBox, .historyBox, .tape{
+    min-height: 180px;
+    max-height: 60vh;
+    height: auto;
+    resize: vertical;
+    overflow: auto;
+  }
 }
 
 </style>
@@ -423,8 +458,8 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.11 • 2026-02-15</span></div>
-      <div class="tabs">
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.12 • 2026-02-15</span></div>
+      <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
         <button class="tab" data-tab="graph">Graph</button>

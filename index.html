@@ -402,7 +402,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.7 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.8 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
@@ -576,8 +576,7 @@ button{
         panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
-          const text = (DBG && DBG.length) ? DBG.join('
-') : '(no errors yet)';
+          const text = (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)';
           try{ await navigator.clipboard.writeText(text); toast('Debug log copied'); }
           catch(_){
             try{

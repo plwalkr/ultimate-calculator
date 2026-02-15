@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.12 mobile polish: keep tab strip fully visible */
+/* v1.4.13 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.12 mobile spacing system + tab scroll hint */
+/* v1.4.13 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.12 mobile tap-target normalization */
+/* v1.4.13 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.12 TI-Nspire theme readability tweak */
+/* v1.4.13 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.12 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.13 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.12 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.13 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.12 mobile scroll sanity */
+/* v1.4.13 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -529,7 +529,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.12 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.13 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -691,7 +691,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.12: helper so plotting code can report errors without crashing
+      // v1.4.13: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -976,7 +976,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
         $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
         function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
-        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#clearSavedCalcus').onclick=()=>{ clearTab('calculus'); ['fx','x0','a','b','n','limExpr','limA'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; }); };
 
         $('#diffBtn').onclick=()=>{
@@ -1063,6 +1063,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
             <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
               <button class="btn primary" id="plotBtn">Plot</button>
+              <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
               <button class="btn" id="clearBtn">Clear</button>
               <button class="btn" id="exportBtn">Export PNG</button>
               <button class="btn" id="clearSavedGL" title="Forget saved inputs">Clear Saved</button>
@@ -1072,12 +1073,12 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             <div id="glReadout" class="note" style="margin-top:8px"></div>
 
             <div class="note">
-              GraphLab v0: plot + derivative overlay. Next: tangent @ x₀, numeric integral shading, roots, “show work”.
+              GraphLab: multi-line plot + overlays. Tip: enable <b>Auto</b> to re-plot while typing.
               Hotkeys: <b>Enter</b> plot, <b>Shift+Enter</b> newline, <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.
             </div>
           </section>`;
 
-        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0'});
+        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'1'});
         $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         $('#d1').checked = (saved.d1==='1');
         $('#tanOn').checked = (saved.tanOn==='1');
@@ -1086,6 +1087,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         $('#intOn').checked = (saved.intOn==='1');
         $('#absOn').checked = (saved.absOn==='1');
         $('#betweenOn').checked = (saved.betweenOn==='1');
+        $('#autoPlot').checked = (saved.autoPlot!=='0');
         $('#a').value = (saved.a ?? '-1');
         $('#b').value = (saved.b ?? '1');
         $('#rootsOn').checked = (saved.rootsOn==='1');
@@ -1117,14 +1119,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         syncTraceBounds();
 
         function persist(){
-          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0')});
+          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0')});
         }
-        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#d1').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
         $('#tanOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
         $('#intOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
         $('#absOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
         $('#betweenOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
+        $('#autoPlot').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
         $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
         $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
         $('#rootsOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
@@ -1148,6 +1151,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0';
           $('#d1').checked=false;
           Plotly.purge('chart');
+          $('#autoPlot').checked=true;
           toast('GraphLab: cleared');
         };
 
@@ -1420,6 +1424,7 @@ function renderGraph(){
             </div>
             <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
               <button class="btn primary" id="plotBtn">Plot</button>
+              <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
               <button class="btn" id="clearBtn">Clear</button>
               <button class="btn" id="exportBtn">Export PNG</button>
               <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
@@ -1432,7 +1437,7 @@ function renderGraph(){
         const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
         $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
-        $$('.input').forEach(el=> el.addEventListener('input', persist));
+        $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
           $('#x0').value='0'; $('#x0r').value='0';
           $('#tanOn').checked=false;
@@ -1487,6 +1492,7 @@ function doPlot(){
           if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
             e.preventDefault();
             Plotly.purge('chart');
+          $('#autoPlot').checked=true;
             return;
           }
           if(meta && e.key==='Enter'){ // plot only

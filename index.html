@@ -402,7 +402,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.6 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.7 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
@@ -663,6 +663,9 @@ button{
           beep(220, 0.05, 'square', 0.02, 0);
         }catch(_){}
       }
+      // Expose for global pointer handlers
+      window.__LC_clickSound = clickSound;
+
       function fanfareSound(){
         const mode=getSoundMode();
         if(mode!=='fanfare') return;
@@ -1369,7 +1372,7 @@ button{
     const btn = e.target.closest("button");
     if(!btn) return;
     tryVibrate(8);
-    clickSound();
+        try{ if(window.__LC_clickSound) window.__LC_clickSound(); }catch(_){ }
   }, {passive:true});
 })();
 

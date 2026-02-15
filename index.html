@@ -415,7 +415,7 @@ button{
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.9 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.10 • 2026-02-15</span></div>
       <div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calc+</button>
@@ -698,7 +698,8 @@ button{
       function syncSoundUI(){
         const mode=getSoundMode();
         const radios=$$('input[name="soundMode"]');
-        radios.forEach(r=>{ r.checked = (r.value===mode); }
+        radios.forEach(r=>{ r.checked = (r.value===mode); });
+      }
 
       /* ---------- UI prefs (Big UI + One-hand) ---------- */
       function getBigUI(){ return !!loadPrefs().bigUI; }
@@ -730,10 +731,6 @@ button{
         const b=$('#setBigUI'); if(b) b.checked = getBigUI();
         const o=$('#setOneHand'); if(o) o.value = getOneHand();
         const s=$('#setSound'); if(s) s.value = getSoundMode();
-      }
-);
-        const ss=$('#setSound');
-        if(ss) ss.value = mode;
       }
       function applyTheme(name){
         document.body.classList.remove('theme-light','theme-inspire');

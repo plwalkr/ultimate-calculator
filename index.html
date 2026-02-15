@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.11 mobile polish: keep tab strip fully visible */
+/* v1.4.12 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.11 mobile spacing system + tab scroll hint */
+/* v1.4.12 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.11 mobile tap-target normalization */
+/* v1.4.12 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.11 TI-Nspire theme readability tweak */
+/* v1.4.12 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.11 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.12 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.11 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.12 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.11 mobile scroll sanity */
+/* v1.4.12 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -529,7 +529,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.11 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.12 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -691,7 +691,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.11: helper so plotting code can report errors without crashing
+      // v1.4.12: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -1170,7 +1170,7 @@ function doPlot(){
             lines.forEach((ex,i)=>{
               const f = math.parse(ex).compile();
               const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
-              traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name:`f${i+1}(x)`});
+              traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex});
             });
 
             // derivative overlay for first line only
@@ -1179,7 +1179,7 @@ function doPlot(){
                 const dex = math.derivative(lines[0], 'x').toString();
                 const df = math.parse(dex).compile();
                 const dys = xs.map(x=>{ const y=df.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
-                traces.push({x:xs, y:dys, type:'scatter', mode:'lines', name:`f'(x)`, line:{dash:'dot'}});
+                traces.push({x:xs, y:dys, type:'scatter', mode:'lines', name:`d/dx (${lines[0].length>18?lines[0].slice(0,18)+'…':lines[0]})`, line:{dash:'dot', width:2}, opacity:0.85});
               }catch(_){
                 toast("Derivative overlay couldn't parse");
               }
@@ -1208,7 +1208,7 @@ function doPlot(){
 
                 if(Number.isFinite(y0) && Number.isFinite(mval)){
                   const ytan = xs.map(x => (mval*(x-x0) + y0));
-                  traces.push({x:xs, y:ytan, type:'scatter', mode:'lines', name:`tangent @ ${x0}`, line:{dash:'dash'}});
+                  traces.push({x:xs, y:ytan, type:'scatter', mode:'lines', name:`tangent @ ${x0}`, line:{dash:'dash', width:2}, opacity:0.85});
                   traces.push({x:[x0], y:[y0], type:'scatter', mode:'markers', name:'x₀', marker:{size:8}});
                   const eq = `y = ${mval.toFixed(6)}(x − ${x0}) + ${y0.toFixed(6)}`;
                   tangentHTML = `<b>Tangent</b> at x₀=${x0}: f(x₀)=${Number(y0).toFixed(6)}, slope=${Number(mval).toFixed(6)}<br><span class="muted">${eq}</span>`;
@@ -1316,7 +1316,7 @@ function doPlot(){
 
                 if(uniq.length){
                   const yroots = uniq.map(x=>fval(x));
-                  traces.push({x:uniq, y:yroots, type:'scatter', mode:'markers', name:'roots', marker:{size:9, symbol:'circle-open'}});
+                  traces.push({x:uniq, y:yroots, type:'scatter', mode:'markers', name:'roots', marker:{size:9, symbol:'circle-open'}, opacity:0.9});
                   const list = uniq.slice(0,8).map(r=>r.toFixed(6)).join(', ');
                   readoutParts.push(`<b>Roots</b> (${uniq.length}): ${list}${uniq.length>8?' …':''}`);
                 }else{
@@ -1366,7 +1366,7 @@ function doPlot(){
               paper_bgcolor:'rgba(0,0,0,0)',
               plot_bgcolor:'rgba(0,0,0,0)',
               showlegend:true,
-              legend:{orientation:'h'}
+              legend:{orientation:'h', itemwidth:110}
             };
             // add trace vertical line
             if($('#traceOn')?.checked){

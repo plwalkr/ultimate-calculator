@@ -78,7 +78,7 @@
     .theme-light .result{ color:#0b1020; }
     .theme-light .expr{ color:#2f4466; }
 
-    .tape{max-height:420px;overflow:auto}
+    .tape{min-height:240px;max-height:60vh;overflow:auto;resize:vertical;padding-right:4px}
     .trow{display:flex;justify-content:space-between;gap:10px;padding:8px;border-bottom:1px dashed #25304a;font-size:.95rem}
     .theme-light .trow{ border-bottom-color:#d6e3fb; }
     .trow .l{color:#9db0d0}
@@ -296,7 +296,7 @@ button{
 }
 
 
-/* ---------- v1.3.0 Mobile layout upgrade (keeps desktop the same) ---------- */
+/* ---------- v1.3.5 Mobile layout upgrade (keeps desktop the same) ---------- */
 .titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ver{font-size:.85rem;font-weight:700;opacity:.75;white-space:nowrap}
 @media (max-width: 900px){
@@ -334,20 +334,33 @@ button{
 
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
+
+    .dbg-mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px 10px;border-radius:12px;font-weight:900;cursor:pointer}
+    .dbg-mini:hover{background:rgba(255,255,255,.05)}
+    .dbg-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9999}
+    .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:60vh;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
+    .dbg-panel .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .dbg-panel pre{margin:0;white-space:pre-wrap;word-break:break-word;overflow:auto;background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:14px;padding:10px;flex:1}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:9998;display:none;background:rgba(10,20,15,.92);border:1px solid var(--border);padding:10px 12px;border-radius:14px;color:var(--fg);font-weight:800;max-width:min(92vw,520px)}
+
+
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(255,255,255,.03);padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer}
+    .pill input{accent-color: var(--accent);}
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.4 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.3.5 • 2026-02-15</span></div>
       <div class="tabs">
-        <button class="tab active" data-tab="calc">Calculator</button>
+        <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="calculus">Calculus</button>
         <button class="tab" data-tab="graph">Graph</button>
-        <button class="tab" data-tab="units">Unit Converter</button>
-        <button class="tab" data-tab="time">Time Clock</button>
-      </div>
+        <button class="tab" data-tab="units">Units</button>
+        <button class="tab" data-tab="time">Time</button>
+        <button class="tab" data-tab="sound">Sound</button>
+</div>
       <div class="theme-picker">
         <span class="note">Theme</span>
         <select id="themeSel" class="theme-select">
@@ -355,10 +368,26 @@ button{
           <option value="light">Light</option>
           <option value="inspire">TI-Inspire</option>
         </select>
+        <button class="dbg-mini" id="dbgBtn" title="Debug">DBG</button>
       </div>
     </header>
     <div id="diag" class="ok">Loading…</div>
     <main id="view"></main>
+
+    <div class="dbg-panel" id="dbgPanel" aria-hidden="true">
+      <div class="card" role="dialog" aria-label="Debug panel">
+        <div class="top">
+          <div style="font-weight:900">Debug</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="dbgCopy">Copy</button>
+            <button class="btn" id="dbgClose">Close</button>
+          </div>
+        </div>
+        <pre id="dbgLog">(no errors yet)</pre>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
     <div id="selfTests" class="tests"></div>
   </div>
 
@@ -404,6 +433,102 @@ button{
       const PREFS_KEY='legendcalc_prefs';
       function loadPrefs(){ try{ return JSON.parse(localStorage.getItem(PREFS_KEY)||'{}'); }catch(e){ return {}; } }
       function savePrefs(p){ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
+
+      /* ---------- Toast ---------- */
+      function toast(msg){
+        const el=$('#toast');
+        if(!el) return;
+        el.textContent=msg;
+        el.style.display='block';
+        clearTimeout(toast._t);
+        toast._t=setTimeout(()=>{el.style.display='none';}, 1600);
+      }
+
+      /* ---------- Debug capture ---------- */
+      const DBG=[];
+      function dbgLine(level, msg){
+        const t=new Date();
+        const stamp=t.toLocaleTimeString();
+        DBG.push(`[${stamp}] ${level}: ${msg}`);
+        if(DBG.length>200) DBG.shift();
+        const pre=$('#dbgLog');
+        if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
+      }
+      window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.filename?` @ ${e.filename}:${e.lineno}`:'')); });
+      window.addEventListener('unhandledrejection', (e)=>{ dbgLine('PROMISE', (e.reason && (e.reason.message||String(e.reason))) || 'unhandled rejection'); });
+
+      function initDebugUI(){
+        const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
+        if(!btn || !panel) return;
+        const open=()=>{ panel.style.display='block'; panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened'); };
+        const shut=()=>{ panel.style.display='none'; panel.setAttribute('aria-hidden','true'); };
+        btn.addEventListener('click', open);
+        panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
+        close && close.addEventListener('click', shut);
+        copy && copy.addEventListener('click', async ()=>{
+          try{ await navigator.clipboard.writeText(DBG.join('\n')); toast('Debug copied'); }
+          catch(_){ toast('Copy failed'); }
+        });
+      }
+
+      /* ---------- Sound engine (original chimes) ---------- */
+      let audioCtx=null;
+      function getSoundMode(){ return (loadPrefs().soundMode||'off'); }
+      function setSoundMode(mode){
+        const p=loadPrefs(); p.soundMode=mode; savePrefs(p);
+        toast(`Sound: ${mode==='off'?'Off':(mode==='clicks'?'Clicks':'Fanfare')}`);
+        syncSoundUI();
+      }
+      function ensureAudio(){
+        try{
+          audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+          if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+        }catch(_){}
+      }
+      // iOS/Safari: resume AudioContext on first user gesture
+      function armAudioUnlock(){
+        const once=()=>{ ensureAudio(); window.removeEventListener('pointerdown', once, true); window.removeEventListener('touchstart', once, true); };
+        window.addEventListener('pointerdown', once, true);
+        window.addEventListener('touchstart', once, true);
+      }
+      function beep(freq, dur, type='sine', gain=0.03, when=0){
+        if(!audioCtx) return;
+        const o=audioCtx.createOscillator();
+        const g=audioCtx.createGain();
+        o.type=type; o.frequency.value=freq;
+        const t=audioCtx.currentTime + when;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(gain, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t+dur+0.02);
+      }
+      function clickSound(){
+        const mode=getSoundMode();
+        if(mode!=='clicks') return;
+        try{
+          const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (reduce) return;
+          ensureAudio();
+          beep(220, 0.05, 'square', 0.02, 0);
+        }catch(_){}
+      }
+      function fanfareSound(){
+        const mode=getSoundMode();
+        if(mode!=='fanfare') return;
+        try{
+          ensureAudio();
+          // a small “Zelda-ish” ascending triad (original)
+          beep(392, 0.12, 'triangle', 0.03, 0.00); // G4
+          beep(494, 0.12, 'triangle', 0.03, 0.10); // B4
+          beep(587, 0.16, 'triangle', 0.035,0.20); // D5
+        }catch(_){}
+      }
+      function syncSoundUI(){
+        const mode=getSoundMode();
+        const radios=$$('input[name="soundMode"]');
+        radios.forEach(r=>{ r.checked = (r.value===mode); });
+      }
       function applyTheme(name){
         document.body.classList.remove('theme-light','theme-inspire');
         if(name==='light') document.body.classList.add('theme-light');
@@ -419,6 +544,7 @@ button{
         if(which==='graph') return renderGraph();
         if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
+        if(which==='sound') return renderSound();
         return renderCalc();
       }
 
@@ -1024,6 +1150,49 @@ button{
         document.getElementById('selfTests').innerHTML = `<div class='section-title'>Self-Tests</div>${results.join('')}`;
       }
 
+      armAudioUnlock();
+      initDebugUI();
+      syncSoundUI();
+
+      /* ---------- Sound ---------- */
+      function renderSound(){
+        const view=$('#view');
+        const mode=getSoundMode();
+        view.innerHTML = `
+          <section class="surface">
+            <div class="section-title">Sound</div>
+            <div class="grid">
+              <div class="panel">
+                <div class="section-title">Mode</div>
+                <div class="row" style="gap:12px;flex-wrap:wrap">
+                  <label class="pill"><input type="radio" name="soundMode" value="off"> Off</label>
+                  <label class="pill"><input type="radio" name="soundMode" value="clicks"> Clicks</label>
+                  <label class="pill"><input type="radio" name="soundMode" value="fanfare"> Fanfare</label>
+                </div>
+                <div class="hint" style="margin-top:10px">Tip: On iPhone, audio needs the first tap to “wake up.”</div>
+              </div>
+
+              <div class="panel">
+                <div class="section-title">Test</div>
+                <div class="row btnbar">
+                  <button class="btn" id="testClick">Test Click</button>
+                  <button class="btn" id="testFanfare">Test Fanfare</button>
+                </div>
+                <div class="hint" style="margin-top:10px">These are original “fantasy chimes” (inspired vibe, not copied).</div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        // Wire UI
+        syncSoundUI();
+        $$('input[name="soundMode"]').forEach(r=>{
+          r.addEventListener('change', ()=> setSoundMode(r.value));
+        });
+        $('#testClick').addEventListener('click', ()=>{ ensureAudio(); beep(220,0.05,'square',0.02,0); toast('Click'); });
+        $('#testFanfare').addEventListener('click', ()=>{ ensureAudio(); fanfareSound(); toast('Fanfare'); });
+      }
+
       render('calc');
       runSelfTests();
     }
@@ -1041,23 +1210,7 @@ button{
 
   // Subtle click using WebAudio (works broadly). Respects reduced motion.
   let audioCtx = null;
-  function clickSound(){
-    try{
-      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = "square";
-      o.frequency.value = 220;
-      g.gain.value = 0.02;
-      o.connect(g); g.connect(audioCtx.destination);
-      const t = audioCtx.currentTime;
-      o.start(t);
-      o.stop(t + 0.015);
-    }catch(_){}
-  }
-
+  
   // Global pointer feedback for on-screen buttons
   document.addEventListener("pointerdown", (e)=>{
     const btn = e.target.closest("button");

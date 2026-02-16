@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.13 mobile polish: keep tab strip fully visible */
+/* v1.4.15 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.13 mobile spacing system + tab scroll hint */
+/* v1.4.15 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.13 mobile tap-target normalization */
+/* v1.4.15 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.13 TI-Nspire theme readability tweak */
+/* v1.4.15 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.13 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.15 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.13 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.15 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.13 mobile scroll sanity */
+/* v1.4.15 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -529,7 +529,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.13 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.15 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -691,7 +691,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.13: helper so plotting code can report errors without crashing
+      // v1.4.15: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -982,11 +982,11 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         $('#diffBtn').onclick=()=>{
           const fx=$('#fx').value.trim(); if(!fx){ return setCalcOut("<div class='err'>Enter f(x)</div>"); }
           try{
-            const d = math.derivative(fx,'x').toString();
+            const d = window.math.derivative(fx,'x').toString();
             const x0 = parseFloat($('#x0').value);
             let evalAt='';
             if(!Number.isNaN(x0)){
-              const f = math.parse(d).compile();
+              const f = window.math.parse(d).compile();
               const val = f.evaluate({x:x0});
               evalAt = `<div>f'( ${x0} ) = <b>${round(val)}</b></div>`;
             }
@@ -999,7 +999,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           if(!fx||Number.isNaN(a)||Number.isNaN(b)) return setCalcOut("<div class='err'>Enter f(x), a, b</div>");
           if(n%2===1) n+=1; // Simpson needs even
           try{
-            const f = math.parse(fx).compile();
+            const f = window.math.parse(fx).compile();
             const F = x=>{ const v=f.evaluate({x}); if(!Number.isFinite(v)) throw 0; return v; };
             const h=(b-a)/n; let s=F(a)+F(b);
             for(let i=1;i<n;i++){ const x=a+i*h; s += (i%2? 4:2)*F(x); }
@@ -1012,7 +1012,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           const ex=$('#limExpr').value.trim(); const a=parseFloat($('#limA').value);
           if(!ex||Number.isNaN(a)) return setLimitOut("<div class='err'>Enter expression and a</div>");
           try{
-            const f = math.parse(ex).compile();
+            const f = window.math.parse(ex).compile();
             const lim = numericLimit(x=>f.evaluate({x}), a);
             setLimitOut(`<div>lim<sub>x→${a}</sub> ${esc(ex)} = <b>${round(lim)}</b></div>`);
           }catch(e){ setLimitOut("<div class='err'>Limit failed</div>"); }
@@ -1079,7 +1079,8 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           </section>`;
 
         const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'1'});
-        $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
+        $('#gx').value=saved.gx||'';
+        if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         $('#d1').checked = (saved.d1==='1');
         $('#tanOn').checked = (saved.tanOn==='1');
         $('#x0').value = (saved.x0 ?? '0');
@@ -1150,7 +1151,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           $('#ixOn').checked=false;
           $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0';
           $('#d1').checked=false;
-          Plotly.purge('chart');
+          window.Plotly.purge('chart');
           $('#autoPlot').checked=true;
           toast('GraphLab: cleared');
         };
@@ -1162,9 +1163,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         }
 
 function doPlot(){
+          if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length){ try{ Plotly.purge('chart'); }catch(_){ } return; }
+          if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
 
           try{
             const xs = linspace(xmin,xmax,n);
@@ -1172,7 +1174,7 @@ function doPlot(){
 
             // base functions
             lines.forEach((ex,i)=>{
-              const f = math.parse(ex).compile();
+              const f = window.math.parse(ex).compile();
               const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
               traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex});
             });
@@ -1180,8 +1182,8 @@ function doPlot(){
             // derivative overlay for first line only
             if($('#d1').checked && lines[0]){
               try{
-                const dex = math.derivative(lines[0], 'x').toString();
-                const df = math.parse(dex).compile();
+                const dex = window.math.derivative(lines[0], 'x').toString();
+                const df = window.math.parse(dex).compile();
                 const dys = xs.map(x=>{ const y=df.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
                 traces.push({x:xs, y:dys, type:'scatter', mode:'lines', name:`d/dx (${lines[0].length>18?lines[0].slice(0,18)+'…':lines[0]})`, line:{dash:'dot', width:2}, opacity:0.85});
               }catch(_){
@@ -1195,12 +1197,12 @@ function doPlot(){
             if($('#tanOn')?.checked && lines[0]){
               const x0 = parseFloat($('#x0').value);
               try{
-                const fx = math.parse(lines[0]).compile();
+                const fx = window.math.parse(lines[0]).compile();
                 const y0 = fx.evaluate({x:x0});
                 let mval = NaN;
                 try{
-                  const dex = math.derivative(lines[0], 'x').toString();
-                  const df = math.parse(dex).compile();
+                  const dex = window.math.derivative(lines[0], 'x').toString();
+                  const df = window.math.parse(dex).compile();
                   mval = df.evaluate({x:x0});
                 }catch(_){
                   // numeric fallback
@@ -1236,7 +1238,7 @@ function doPlot(){
               const lo = Math.min(aa,bb), hi = Math.max(aa,bb);
               const useAbs = !!$('#absOn')?.checked;
               try{
-                const fx = math.parse(lines[0]).compile();
+                const fx = window.math.parse(lines[0]).compile();
                 const xs_ab = xs.filter(x => x>=lo && x<=hi);
                 if(xs_ab.length>=2){
                   const ys_ab_raw = xs_ab.map(x=>{ const y=fx.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
@@ -1266,7 +1268,7 @@ function doPlot(){
             // Root markers (zeros) for first line
             if($('#rootsOn')?.checked && lines[0]){
               try{
-                const fx = math.parse(lines[0]).compile();
+                const fx = window.math.parse(lines[0]).compile();
                 const roots = [];
                 const tol = 1e-6;
                 const maxIter = 30;
@@ -1339,7 +1341,7 @@ function doPlot(){
             if($('#traceOn')?.checked && lines[0]){
               try{
                 const x = parseFloat($('#xT').value);
-                const fx = math.parse(lines[0]).compile();
+                const fx = window.math.parse(lines[0]).compile();
                 const y = fx.evaluate({x});
                 if(Number.isFinite(y)){
                   traces.push({x:[x], y:[y], type:'scatter', mode:'markers+text', name:'trace', text:[`(${x.toFixed(4)}, ${Number(y).toFixed(6)})`], textposition:'top center', marker:{size:9}});
@@ -1348,8 +1350,8 @@ function doPlot(){
                   readoutParts.push(`<b>Trace</b> x=${x.toFixed(6)} → f(x)=${Number(y).toFixed(6)}`);
                   if($('#d1')?.checked){
                     try{
-                      const dex = math.derivative(lines[0],'x').toString();
-                      const df = math.parse(dex).compile();
+                      const dex = window.math.derivative(lines[0],'x').toString();
+                      const df = window.math.parse(dex).compile();
                       const m = df.evaluate({x});
                       if(Number.isFinite(m)) readoutParts.push(`<span class="muted">f'(x)=${Number(m).toFixed(6)}</span>`);
                     }catch(_){}
@@ -1381,7 +1383,7 @@ function doPlot(){
             }
 
             try{
-              Plotly.newPlot('chart', traces, layout, {responsive:true, displaylogo:false});
+              window.Plotly.newPlot('chart', traces, layout, {responsive:true, displaylogo:false});
             }catch(err){
               logErr(err);
               toast('Plot render error');
@@ -1390,13 +1392,13 @@ function doPlot(){
             persist();
           }catch(err){
             logErr(err);
-            toast('Plot error');
+            toast('Plot error: ' + (err?.message||'unknown'));
           }
         }
 
         $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
-        $('#clearBtn').onclick=()=>{ try{ Plotly.purge('chart'); }catch(_){ } };
-        $('#exportBtn').onclick=()=>{ try{ Plotly.downloadImage('chart',{format:'png',filename:'legendcalc-graphlab'}); }catch(e){ toast('Export blocked'); } };
+        $('#clearBtn').onclick=()=>{ try{ window.Plotly.purge('chart'); }catch(_){ } };
+        $('#exportBtn').onclick=()=>{ try{ window.Plotly.downloadImage('chart',{format:'png',filename:'legendcalc-graphlab'}); }catch(e){ toast('Export blocked'); } };
 
         // hotkeys
         $('#gx').addEventListener('keydown',(e)=>{
@@ -1407,6 +1409,8 @@ function doPlot(){
 
         // initial plot if saved content exists
         if($('#gx').value.trim()) waitForGraphLibs(doPlot);
+        // if Auto is enabled, keep the plot fresh while typing
+        if($('#autoPlot')?.checked) schedulePlot();
       }
 
 
@@ -1435,7 +1439,8 @@ function renderGraph(){
           </section>`;
 
         const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
-        $('#gx').value=saved.gx||''; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
+        $('#gx').value=saved.gx||'';
+        if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
         $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
@@ -1444,7 +1449,7 @@ function renderGraph(){
           $('#intOn').checked=false; $('#absOn').checked=false; $('#a').value='-1'; $('#b').value='1';
           $('#rootsOn').checked=false;
           $('#ixOn').checked=false;
-          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0'; Plotly.purge('chart'); };
+          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0'; window.Plotly.purge('chart'); };
 
         function updateReadout(info){
           const el = $('#glReadout');
@@ -1453,23 +1458,24 @@ function renderGraph(){
         }
 
 function doPlot(){
+          if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          if(!lines.length){ try{ Plotly.purge('chart'); }catch(_){ } return; }
+          if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
           try{
             const xs = linspace(xmin,xmax,n);
             const traces = lines.map((ex,i)=>{
-              const f = math.parse(ex).compile();
+              const f = window.math.parse(ex).compile();
               const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
               return {x:xs,y:ys,mode:'lines',name:ex};
             });
-            Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
+            window.Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
             persist();
           }catch(e){ alert('Parse error in one of the functions'); }
         }
 
         $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
-        $('#clearBtn').onclick=()=>{ try{ Plotly.purge('chart'); }catch(_){ } };
+        $('#clearBtn').onclick=()=>{ try{ window.Plotly.purge('chart'); }catch(_){ } };
         $('#exportBtn').onclick=async ()=>{
           try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
         };
@@ -1491,7 +1497,7 @@ function doPlot(){
           const meta = e.ctrlKey || e.metaKey;
           if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
             e.preventDefault();
-            Plotly.purge('chart');
+            window.Plotly.purge('chart');
           $('#autoPlot').checked=true;
             return;
           }
@@ -1865,10 +1871,10 @@ function doPlot(){
         const fail=(name,msg)=>{ results.push(`<div class='fail'>✖ ${name} — ${msg||''}</div>`); };
 
         try{ const v=math.evaluate('2+2'); (v===4)?pass('Calc: 2+2=4'):fail('Calc: 2+2','got '+v); }catch(e){ fail('Calc basic',e.message); }
-        try{ const d=math.derivative('x^2','x').toString(); const f=math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val); }catch(e){ fail('Calculus derivative',e.message); }
+        try{ const d=window.math.derivative('x^2','x').toString(); const f=window.math.parse(d).compile(); const val=f.evaluate({x:3}); (Math.abs(val-6)<1e-9)?pass('Calculus: d/dx x^2 at x=3 = 6'):fail('Calculus derivative at point','got '+val); }catch(e){ fail('Calculus derivative',e.message); }
         try{ const q=math.unit(1600,'m').to('km').toNumber('km'); (Math.abs(q-1.6)<1e-12)?pass('Units: 1600 m → 1.6 km'):fail('Units convert','got '+q); }catch(e){ fail('Units convert',e.message); }
         try{ const dimMi = JSON.stringify(math.unit(1,'mi').dimensions); const dimCup = JSON.stringify(math.unit(1,'cup').dimensions); (dimMi!==dimCup)?pass('Units: miles not compatible with cups'):fail('Units: miles vs cups dimension check'); }catch(e){ fail('Units incompatibility check',e.message); }
-        try{ const f=math.parse('(sin(x))/x').compile(); const lim=(()=>{const eps=1e-6; return (f.evaluate({x:0+eps})+f.evaluate({x:0-eps}))/2;})(); (Math.abs(lim-1)<1e-3)?pass('Limit: sin(x)/x → 1 at 0'):fail('Limit numeric','got '+lim); }catch(e){ fail('Limit numeric',e.message); }
+        try{ const f=window.math.parse('(sin(x))/x').compile(); const lim=(()=>{const eps=1e-6; return (f.evaluate({x:0+eps})+f.evaluate({x:0-eps}))/2;})(); (Math.abs(lim-1)<1e-3)?pass('Limit: sin(x)/x → 1 at 0'):fail('Limit numeric','got '+lim); }catch(e){ fail('Limit numeric',e.message); }
         try{ const tape = [{e:'1+1',v:2},{e:'2*3',v:6}]; const str = tape.map(t=>`${t.e} = ${t.v}`).reverse().join('\n'); (str.includes('\n') && str.split('\n').length===2)?pass('Tape: newline join works'):fail('Tape join','got '+str); }catch(e){ fail('Tape join test',e.message); }
         try{ const cToF = math.unit(100, 'degC').to('degF').toNumber('degF'); (Math.abs(cToF - 212) < 1e-9) ? pass('Temp: 100°C → 212°F') : fail('Temp conversion','got '+cToF); }catch(e){ fail('Temp conversion test', e.message); }
         try{ const t24 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); return `${h}:${mm}`; })(); const t12 = (function(){ const m=13*60+5; const h=Math.floor(m/60); const mm=String(m%60).padStart(2,'0'); const ampm=h>=12?'PM':'AM'; const h12=(h%12)||12; return `${h12}:${mm} ${ampm}`; })(); (t24==='13:05' && t12==='1:05 PM') ? pass('Time format: 24h/12h formatting') : fail('Time format','24='+t24+', 12='+t12); }catch(e){ fail('Time format test', e.message); }

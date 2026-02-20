@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.29 mobile polish: keep tab strip fully visible */
+/* v1.4.30 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.29 mobile spacing system + tab scroll hint */
+/* v1.4.30 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.29 mobile tap-target normalization */
+/* v1.4.30 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.29 TI-Nspire theme readability tweak */
+/* v1.4.30 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.29 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.30 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.29 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.30 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.29 mobile scroll sanity */
+/* v1.4.30 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -541,7 +541,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.29 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.30 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -747,7 +747,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.29: helper so plotting code can report errors without crashing
+      // v1.4.30: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -1225,15 +1225,23 @@ function doPlot(){
           if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
+          let fx0=null, fx1=null;
+          if(lines[0]){ try{ fx0 = window.math.parse(lines[0]).compile(); }catch(_){ fx0=null; } }
+          if(lines[1]){ try{ fx1 = window.math.parse(lines[1]).compile(); }catch(_){ fx1=null; } }
+
           if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
 
           try{
             const xs = window.linspace(xmin,xmax,n);
             const traces = [];
 
+            let readoutParts = [];
+
             // base functions
             lines.forEach((ex,i)=>{
-              const f = window.math.parse(ex).compile();
+              let f;
+              try{ f = window.math.parse(ex).compile(); }
+              catch(err){ readoutParts.push(`<span class="muted">Line ${i+1}: ${(err&&err.message)?err.message:'parse error'}</span>`); return; }
               const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
               traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex, line:{color: window.GL_PALETTE[i % window.GL_PALETTE.length]}});
             });
@@ -1285,8 +1293,7 @@ function doPlot(){
                 tangentHTML = `<span class="muted">Tangent: parse/eval error</span>`;
               }
             }
-            // readout is built after integral too
-            let readoutParts = [];
+            // readout continues below
             if(tangentHTML) readoutParts.push(tangentHTML);
 
             
@@ -1621,6 +1628,10 @@ function doPlot(){
           if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
           const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
+          let fx0=null, fx1=null;
+          if(lines[0]){ try{ fx0 = window.math.parse(lines[0]).compile(); }catch(_){ fx0=null; } }
+          if(lines[1]){ try{ fx1 = window.math.parse(lines[1]).compile(); }catch(_){ fx1=null; } }
+
           if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
           try{
             const xs = window.linspace(xmin,xmax,n);

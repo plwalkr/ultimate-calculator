@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.37 mobile polish: keep tab strip fully visible */
+/* v1.4.36 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.37 mobile spacing system + tab scroll hint */
+/* v1.4.36 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.37 mobile tap-target normalization */
+/* v1.4.36 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.37 TI-Nspire theme readability tweak */
+/* v1.4.36 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.37 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.36 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.37 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.36 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.37 mobile scroll sanity */
+/* v1.4.36 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -563,9 +563,20 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .glegend .dot{width:10px;height:10px;border-radius:4px;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset;}
 
 
-/* GraphLab reorder */
-.fxmove{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:inherit;}
-.fxmove:active{transform:scale(.98);}
+/* GraphLab eye toggle */
+.eyeBtn{
+  cursor:pointer;
+  font-size:16px;
+  padding:4px 6px;
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+}
+.eyeBtn.off{opacity:.35;}
+
+
+/* Force-hide fxrow checkbox */
+.fxrow input[type="checkbox"]{display:none !important;}
 
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
@@ -573,7 +584,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.37 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.36 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -779,7 +790,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.37: helper so plotting code can report errors without crashing
+      // v1.4.36: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -1276,6 +1287,21 @@ function doPlot(){
             const xs = window.linspace(xmin,xmax,n);
             const traces = [];
 
+            function safeEval(compiled, scope){
+              try{
+                const v = compiled.evaluate(scope);
+                if(typeof v === 'number') return (Number.isFinite(v)? v : NaN);
+                // mathjs can return Complex/BigNumber/Fraction/Unit; we only graph real numbers
+                if(v && typeof v === 'object'){
+                  if('re' in v && 'im' in v) return (Number.isFinite(v.re) ? v.re : NaN);
+                }
+                return NaN;
+              }catch(_e){
+                return NaN;
+              }
+            }
+
+
             let readoutParts = [];
 
             // base functions
@@ -1283,7 +1309,8 @@ function doPlot(){
               let f;
               try{ f = window.math.parse(ex).compile(); }
               catch(err){ readoutParts.push(`<span class="muted">Line ${i+1}: ${(err&&err.message)?err.message:'parse error'}</span>`); return; }
-              const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+              let bad=0; const ys = xs.map(x=>{ const y=safeEval(f,{x}); if(!Number.isFinite(y)) bad++; return y; });
+              if(bad===xs.length){ readoutParts.push(`<span class="muted">Line ${i+1}: eval failed (check syntax like sin(x), use lowercase)</span>`); }
               traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex, line:{color: window.GL_PALETTE[i % window.GL_PALETTE.length]}});
             });
 
@@ -1292,7 +1319,7 @@ function doPlot(){
               try{
                 const dex = window.math.derivative(lines[0], 'x').toString();
                 const df = window.math.parse(dex).compile();
-                const dys = xs.map(x=>{ const y=df.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+                const dys = xs.map(x=> safeEval(df,{x}));
                 traces.push({x:xs, y:dys, type:'scatter', mode:'lines', name:`d/dx (${lines[0].length>18?lines[0].slice(0,18)+'…':lines[0]})`, line:{dash:'dot', width:2}, opacity:0.85});
               }catch(_){
                 toast("Derivative overlay couldn't parse");
@@ -1306,17 +1333,17 @@ function doPlot(){
               const x0 = parseFloat($('#x0').value);
               try{
                 const fx = fx0 || window.math.parse(lines[0]).compile();
-                const y0 = fx.evaluate({x:x0});
+                const y0 = safeEval(fx,{x:x0});
                 let mval = NaN;
                 try{
                   const dex = window.math.derivative(lines[0], 'x').toString();
                   const df = window.math.parse(dex).compile();
-                  mval = df.evaluate({x:x0});
+                  mval = safeEval(df,{x:x0});
                 }catch(_){
                   // numeric fallback
                   const h = 1e-4 * Math.max(1, Math.abs(x0));
-                  const yph = fx.evaluate({x:x0+h});
-                  const ymh = fx.evaluate({x:x0-h});
+                  const yph = safeEval(fx,{x:x0+h});
+                  const ymh = safeEval(fx,{x:x0-h});
                   mval = (yph-ymh)/(2*h);
                 }
 
@@ -1348,7 +1375,7 @@ function doPlot(){
                 const fx = fx0 || window.math.parse(lines[0]).compile();
                 const xs_ab = xs.filter(x => x>=lo && x<=hi);
                 if(xs_ab.length>=2){
-                  const ys_ab_raw = xs_ab.map(x=>{ const y=fx.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+                  const ys_ab_raw = xs_ab.map(x=> safeEval(fx,{x}));
                   const ys_ab = useAbs ? ys_ab_raw.map(y=> (Number.isFinite(y)? Math.abs(y): NaN)) : ys_ab_raw;
 
                   // shading (to x-axis); if Abs area is on we shade |f(x)|
@@ -1381,7 +1408,7 @@ function doPlot(){
                 const maxIter = 30;
 
                 function fval(x){
-                  const y = fx.evaluate({x});
+                  const y = safeEval(fx,{x});
                   return (Number.isFinite(y) ? y : NaN);
                 }
                 function bisect(a,b){
@@ -1449,7 +1476,7 @@ function doPlot(){
               try{
                 const x = parseFloat($('#xT').value);
                 const fx = fx0 || window.math.parse(lines[0]).compile();
-                const y = fx.evaluate({x});
+                const y = safeEval(fx,{x});
                 if(Number.isFinite(y)){
                   traces.push({x:[x], y:[y], type:'scatter', mode:'markers+text', name:'trace', text:[`(${x.toFixed(4)}, ${Number(y).toFixed(6)})`], textposition:'top center', marker:{size:9}});
                   // vertical line via shapes
@@ -1459,7 +1486,7 @@ function doPlot(){
                     try{
                       const dex = window.math.derivative(lines[0],'x').toString();
                       const df = window.math.parse(dex).compile();
-                      const m = df.evaluate({x});
+                      const m = safeEval(df,{x});
                       if(Number.isFinite(m)) readoutParts.push(`<span class="muted">f'(x)=${Number(m).toFixed(6)}</span>`);
                     }catch(_){}
                   }
@@ -1561,15 +1588,16 @@ function doPlot(){
             chk.checked = !!r.enabled;
             chk.title = 'Show/hide';
 
-            const inp = document.createElement('input');
+            
+            const eye = document.createElement('span');
+            eye.className = 'eyeBtn' + (r.enabled ? '' : ' off');
+            eye.textContent = '👁';
+            eye.title = 'Show/hide';
+const inp = document.createElement('input');
             inp.type = 'text';
             inp.value = r.text;
             inp.placeholder = i===0 ? 'sin(x)' : 'x^2 - 3x + 2';
 
-            const up = document.createElement('button');
-            up.type='button'; up.className='fxmove'; up.textContent='▲'; up.title='Move up';
-            const down = document.createElement('button');
-            down.type='button'; down.className='fxmove'; down.textContent='▼'; down.title='Move down';
             const del = document.createElement('button');
             del.type = 'button';
             del.className = 'fxdel';
@@ -1583,17 +1611,16 @@ function doPlot(){
             leftWrap.style.gap='8px';
             leftWrap.appendChild(sw);
             leftWrap.appendChild(chk);
+            leftWrap.appendChild(eye);
 
             row.appendChild(leftWrap);
+            eye.addEventListener('click', ()=>{
+              chk.checked = !chk.checked;
+              eye.classList.toggle('off', !chk.checked);
+              apply();
+            });
             row.appendChild(inp);
-            const stack = document.createElement('div');
-            stack.style.display='flex';
-            stack.style.flexDirection='column';
-            stack.style.gap='6px';
-            stack.appendChild(up);
-            stack.appendChild(down);
-            stack.appendChild(del);
-            row.appendChild(stack);
+            row.appendChild(del);
             host.appendChild(row);
 
             const apply = ()=>{
@@ -1618,14 +1645,6 @@ function doPlot(){
               else { persist(); }
             });
             inp.addEventListener('change', apply);
-            up.addEventListener('click', ()=>{
-              const prev = row.previousElementSibling;
-              if(prev){ row.parentElement.insertBefore(row, prev); apply(); renderFxList(); }
-            });
-            down.addEventListener('click', ()=>{
-              const next = row.nextElementSibling;
-              if(next){ row.parentElement.insertBefore(next, row); apply(); renderFxList(); }
-            });
             del.addEventListener('click', ()=>{
               row.remove();
               apply();
@@ -1705,7 +1724,8 @@ function doPlot(){
             const xs = window.linspace(xmin,xmax,n);
             const traces = lines.map((ex,i)=>{
               const f = window.math.parse(ex).compile();
-              const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
+              let bad=0; const ys = xs.map(x=>{ const y=safeEval(f,{x}); if(!Number.isFinite(y)) bad++; return y; });
+              if(bad===xs.length){ readoutParts.push(`<span class="muted">Line ${i+1}: eval failed (check syntax like sin(x), use lowercase)</span>`); }
               return {x:xs,y:ys,mode:'lines',name:ex};
             });
             window.Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});

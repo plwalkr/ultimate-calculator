@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.33 mobile polish: keep tab strip fully visible */
+/* v1.4.34 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.33 mobile spacing system + tab scroll hint */
+/* v1.4.34 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.33 mobile tap-target normalization */
+/* v1.4.34 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.33 TI-Nspire theme readability tweak */
+/* v1.4.34 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.33 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.34 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.33 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.34 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.33 mobile scroll sanity */
+/* v1.4.34 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -568,7 +568,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.33 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.34 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -774,7 +774,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.33: helper so plotting code can report errors without crashing
+      // v1.4.34: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -1151,6 +1151,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
               <button class="btn primary" id="plotBtn">Plot</button>
               <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
+              <label class="pill" style="align-self:center"><input type="checkbox" id="liveTyping"> Live</label>
               <label class="pill" style="align-self:center"><input type="checkbox" id="forgiving"> Forgiving</label>
               <button class="btn" id="clearBtn">Clear</button>
               <button class="btn" id="exportBtn">Export PNG</button>
@@ -1168,7 +1169,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
-        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', forgiving:'1'});
+        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', liveTyping:'1', forgiving:'1'});
         $('#gx').value=saved.gx||'';
         if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         $('#d1').checked = (saved.d1==='1');
@@ -1179,6 +1180,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         $('#absOn').checked = (saved.absOn==='1');
         $('#betweenOn').checked = (saved.betweenOn==='1');
         $('#autoPlot').checked = (saved.autoPlot!=='0');
+        $('#liveTyping').checked = (saved.liveTyping!=='0');
         $('#forgiving').checked = (saved.forgiving!=='0');
         $('#a').value = (saved.a ?? '-1');
         $('#b').value = (saved.b ?? '1');
@@ -1211,7 +1213,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         syncTraceBounds();
 
         function persist(){
-          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0'), forgiving:($('#forgiving').checked?'1':'0')});
+          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0'), liveTyping:($('#liveTyping').checked?'1':'0'), forgiving:($('#forgiving').checked?'1':'0')});
         }
         $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#d1').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
@@ -1221,6 +1223,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         $('#betweenOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
         $('#autoPlot').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
         $('#forgiving').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
+        $('#liveTyping').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
         $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
         $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
         $('#rootsOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
@@ -1586,11 +1589,18 @@ function doPlot(){
               }));
               $('#gx').value = buildRawLines(domRows);
               persist();
-              if($('#autoPlot')?.checked) schedulePlot();
+              const live = !!$('#liveTyping')?.checked;
+              if($('#autoPlot')?.checked) schedulePlot(false);
+              else if(live && glHasPlotted) schedulePlot(true);
             };
 
             chk.addEventListener('change', apply);
-            inp.addEventListener('input', ()=>{ if($('#autoPlot')?.checked) apply(); else { persist(); } });
+            inp.addEventListener('input', ()=>{
+              const live = !!$('#liveTyping')?.checked;
+              if($('#autoPlot')?.checked) apply();
+              else if(live && glHasPlotted) apply();
+              else { persist(); }
+            });
             inp.addEventListener('change', apply);
             del.addEventListener('click', ()=>{
               row.remove();
@@ -1602,10 +1612,10 @@ function doPlot(){
 
         // Live plotting (debounced) when Auto is enabled
         let _plotTimer=null;
-        function schedulePlot(){
-          if(!$('#autoPlot')?.checked) return;
+        function schedulePlot(force=false){
+          if(!force && !$('#autoPlot')?.checked) return;
           clearTimeout(_plotTimer);
-          _plotTimer=setTimeout(()=>waitForGraphLibs(doPlot), 350);
+          _plotTimer=setTimeout(()=>waitForGraphLibs(doPlot), 250);
         }
 
         // no auto plot on first render unless user toggles Auto
@@ -1628,6 +1638,7 @@ function renderGraph(){
             <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
               <button class="btn primary" id="plotBtn">Plot</button>
               <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
+              <label class="pill" style="align-self:center"><input type="checkbox" id="liveTyping"> Live</label>
               <label class="pill" style="align-self:center"><input type="checkbox" id="forgiving"> Forgiving</label>
               <button class="btn" id="clearBtn">Clear</button>
               <button class="btn" id="exportBtn">Export PNG</button>

@@ -411,7 +411,7 @@ button{
       .onehand-right .keys{padding-left:24px}
     }
 
-/* v1.4.27 mobile polish: keep tab strip fully visible */
+/* v1.4.28 mobile polish: keep tab strip fully visible */
 @media (max-width: 520px){
   .tabs{gap:6px;padding-right:calc(12px + env(safe-area-inset-right));}
   .tab{padding:9px 10px;font-size:.86rem;min-width:unset}
@@ -419,7 +419,7 @@ button{
 }
 
 
-/* v1.4.27 mobile spacing system + tab scroll hint */
+/* v1.4.28 mobile spacing system + tab scroll hint */
 :root{ --m-pad:12px; --m-gap:10px; }
 @media (max-width: 520px){
   /* tighten general vertical rhythm */
@@ -454,7 +454,7 @@ button{
 }
 
 
-/* v1.4.27 mobile tap-target normalization */
+/* v1.4.28 mobile tap-target normalization */
 @media (max-width: 520px){
   /* minimum Apple-friendly tap size */
   button, .btn, .key, .tab, a.btnlike,
@@ -489,7 +489,7 @@ button{
 }
 
 
-/* v1.4.27 TI-Nspire theme readability tweak */
+/* v1.4.28 TI-Nspire theme readability tweak */
 body.theme-ti, body.ti, .theme-ti{
   --muted: rgba(255,255,255,.78);
   --hint: rgba(255,255,255,.72);
@@ -499,7 +499,7 @@ body.theme-ti .note, body.ti .note, .theme-ti .note{color:rgba(255,255,255,.86);
 body.theme-ti .ver, body.ti .ver, .theme-ti .ver{color:rgba(255,255,255,.88) !important;}
 
 
-/* v1.4.27 TI theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.28 TI theme: make GraphLab overlay pills readable (ice-blue) */
 body.theme-ti .pill, body.ti .pill, .theme-ti .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -508,7 +508,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.27 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
+/* v1.4.28 TI-Nspire theme: make GraphLab overlay pills readable (ice-blue) */
 .theme-inspire .pill, body.theme-inspire .pill{
   color: rgba(140,200,255,0.95) !important;
 }
@@ -517,7 +517,7 @@ body.theme-ti .pill input, body.ti .pill input, .theme-ti .pill input{
 }
 
 
-/* v1.4.27 mobile scroll sanity */
+/* v1.4.28 mobile scroll sanity */
 main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (max-width:520px){
   body{overscroll-behavior-y:none;}
@@ -525,13 +525,23 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 
 .diag{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;max-height:42px;overflow:hidden;}
+
+/* GraphLab Function List */
+.fxlist{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.fxrow{display:grid;grid-template-columns:28px 1fr 34px;gap:8px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:12px;}
+.fxrow input[type="text"]{width:100%;padding:10px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.18);color:inherit;}
+.fxswatch{width:18px;height:18px;border-radius:6px;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset;}
+.fxdel{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:inherit;}
+.fxhdr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;}
+.fxhdr .btn{padding:8px 10px;}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.27 • 2026-02-15</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.28 • 2026-02-15</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -735,7 +745,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
       }
       
-      // v1.4.27: helper so plotting code can report errors without crashing
+      // v1.4.28: helper so plotting code can report errors without crashing
       function logErr(err){
         try{
           const msg = (err && (err.stack || err.message)) ? String(err.stack || err.message) : String(err);
@@ -1223,7 +1233,7 @@ function doPlot(){
             lines.forEach((ex,i)=>{
               const f = window.math.parse(ex).compile();
               const ys = xs.map(x=>{ const y=f.evaluate({x}); return (Number.isFinite(y)? y : NaN); });
-              traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex});
+              traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex, line:{color: GL_PALETTE[i % GL_PALETTE.length]}});
             });
 
             // derivative overlay for first line only
@@ -1459,6 +1469,95 @@ function doPlot(){
         // (enable Auto if you want live plotting)
         // if($('#gx').value.trim()) waitForGraphLibs(doPlot);
         // if Auto is enabled, keep the plot fresh while typing
+
+        function parseRawLines(){
+          const raw = ($('#gx')?.value || '').split('\n');
+          const rows = [];
+          raw.forEach((line, i)=>{
+            const s = String(line||'');
+            const trimmed = s.trim();
+            if(!trimmed){ return; }
+            const disabled = trimmed.startsWith('#') || trimmed.startsWith('//');
+            const clean = disabled ? trimmed.replace(/^#\s*/,'').replace(/^\/\/\s*/,'') : trimmed;
+            rows.push({text: clean, enabled: !disabled, srcIndex: i+1});
+          });
+          return rows;
+        }
+
+        function buildRawLines(rows){
+          return rows.map(r=>{
+            const ex = (r.text||'').trim();
+            if(!ex) return '';
+            return r.enabled ? ex : ('# ' + ex);
+          }).filter(Boolean).join('\n');
+        }
+
+        function renderFxList(){
+          const host = $('#fxList');
+          if(!host) return;
+          const rows = parseRawLines();
+          // If empty, seed one row
+          const seed = rows.length ? rows : [{text:'sin(x)', enabled:true, srcIndex:1}];
+          host.innerHTML = '';
+          seed.forEach((r, i)=>{
+            const row = document.createElement('div');
+            row.className = 'fxrow';
+            const sw = document.createElement('div');
+            sw.className = 'fxswatch';
+            sw.style.background = GL_PALETTE[i % GL_PALETTE.length];
+
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = !!r.enabled;
+            chk.title = 'Show/hide';
+
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.value = r.text;
+            inp.placeholder = i===0 ? 'sin(x)' : 'x^2 - 3x + 2';
+
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'fxdel';
+            del.textContent = '×';
+            del.title = 'Remove';
+
+            // layout: checkbox + input + delete, with swatch inside checkbox area
+            const leftWrap = document.createElement('div');
+            leftWrap.style.display='flex';
+            leftWrap.style.alignItems='center';
+            leftWrap.style.gap='8px';
+            leftWrap.appendChild(sw);
+            leftWrap.appendChild(chk);
+
+            row.appendChild(leftWrap);
+            row.appendChild(inp);
+            row.appendChild(del);
+            host.appendChild(row);
+
+            const apply = ()=>{
+              const next = parseRawLines();
+              // if list length differs (seed case), rebuild from DOM instead
+              const domRows = Array.from(host.querySelectorAll('.fxrow')).map((rr, j)=>({
+                text: rr.querySelector('input[type="text"]').value,
+                enabled: rr.querySelector('input[type="checkbox"]').checked
+              }));
+              $('#gx').value = buildRawLines(domRows);
+              persist();
+              schedulePlot();
+            };
+
+            chk.addEventListener('change', apply);
+            inp.addEventListener('input', ()=>{ if($('#autoPlot')?.checked) apply(); else { persist(); } });
+            inp.addEventListener('change', apply);
+            del.addEventListener('click', ()=>{
+              row.remove();
+              apply();
+              renderFxList();
+            });
+          });
+        }
+
         // Live plotting (debounced) when Auto is enabled
         let _plotTimer=null;
         function schedulePlot(){

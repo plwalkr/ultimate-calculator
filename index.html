@@ -584,7 +584,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.42 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.43 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1878,6 +1878,26 @@ function doPlot(){
 
         const NM_PER_FTLB = 1.3558179483314004;
         const NM_PER_INLB = 0.1129848290276167;
+
+        const TORQUE_STORE_KEY = 'legendcalc.torque.v1';
+        function loadTorqueState(){
+          try{ return JSON.parse(localStorage.getItem(TORQUE_STORE_KEY)||'{}') || {}; }catch(_){ return {}; }
+        }
+        function saveTorqueState(patch){
+          const cur = loadTorqueState();
+          const next = Object.assign({}, cur, patch);
+          try{ localStorage.setItem(TORQUE_STORE_KEY, JSON.stringify(next)); }catch(_){}
+          return next;
+        }
+        function setCopyMsg(msg){
+          const el = $('#tCopyMsg');
+          if(!el) return;
+          el.textContent = msg || '';
+          if(msg){
+            setTimeout(()=>{ try{ if(el.textContent===msg) el.textContent=''; }catch(_){ } }, 1600);
+          }
+        }
+
 
         function toNm(val, unit){
           const v = Number(val);

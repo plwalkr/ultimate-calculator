@@ -578,13 +578,31 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 /* Force-hide fxrow checkbox */
 .fxrow input[type="checkbox"]{display:none !important;}
 
+
+/* GraphLab controls drawer */
+.graphlab-grid{display:grid;gap:14px;}
+.graphlab-controls{min-width:0;}
+.graphlab-plot{min-width:0;}
+@media (min-width: 980px){
+  .graphlab-grid{grid-template-columns: 360px 1fr; align-items:start;}
+  body.gl-hide-controls .graphlab-grid{grid-template-columns: 0 1fr;}
+  body.gl-hide-controls .graphlab-controls{display:none;}
+}
+.glCtlBtn{
+  padding:8px 10px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.12);
+  color:inherit;
+}
+.glCtlBtn:active{transform:scale(.98);}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.43 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.44 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1186,6 +1204,21 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
               Hotkeys: <b>Enter</b> plot, <b>Shift+Enter</b> newline, <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.
             </div>
           </section>`;
+
+        const GL_CTL_KEY = 'legendcalc.graphlab.hideControls';
+        function applyCtlState(){
+          const hide = (localStorage.getItem(GL_CTL_KEY) === '1');
+          document.body.classList.toggle('gl-hide-controls', hide);
+          const b = $('#glCtlToggle');
+          if(b) b.textContent = hide ? 'Show controls' : 'Controls';
+        }
+        $('#glCtlToggle')?.addEventListener('click', ()=>{
+          const cur = (localStorage.getItem(GL_CTL_KEY) === '1');
+          localStorage.setItem(GL_CTL_KEY, cur ? '0' : '1');
+          applyCtlState();
+        });
+        applyCtlState();
+
 
         const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', liveTyping:'1', forgiving:'1'});
         $('#gx').value=saved.gx||'';
@@ -1793,8 +1826,8 @@ function doPlot(){
           <section class="surface">
             <div class="section-title">Torque Intelligence</div>
 
-            <div class="grid">
-              <div class="panel">
+            <div class="graphlab-grid">
+              <div class="panel graphlab-controls">
                 <div class="section-title">Converter</div>
                 <div class="row">
                   <label style="flex:1">
@@ -1831,7 +1864,7 @@ function doPlot(){
                 </div>
               </div>
 
-              <div class="panel">
+              <div class="panel graphlab-plot">
                 <div class="section-title">Fast guidance</div>
 
                 <div class="row" style="gap:12px;flex-wrap:wrap">

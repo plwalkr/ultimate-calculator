@@ -584,7 +584,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.40 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.41 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1851,6 +1851,19 @@ function doPlot(){
               </div>
             </div>
 
+
+            <div class="panel" style="margin-top:14px">
+              <div class="section-title">Spec note + copy</div>
+              <div class="row" style="gap:10px;flex-wrap:wrap">
+                <label style="flex:1;min-width:220px">
+                  <div class="note">Spec note (saved)</div>
+                  <input id="tSpecNote" class="input" type="text" placeholder="Example: wheel lugs, dry, per service manual">
+                </label>
+                <button class="btn" id="tCopyPlan" type="button">Copy plan</button>
+              </div>
+              <div class="note" style="margin-top:8px" id="tCopyMsg"></div>
+            </div>
+
             <div class="panel" style="margin-top:14px">
               <div class="section-title">Stage tracker (optional)</div>
               <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap">
@@ -1899,7 +1912,16 @@ function doPlot(){
           }
         }
 
-        function stageRow(nmValue='30', unit='nm'){
+        
+        // restore saved spec note
+        const savedT = loadTorqueState();
+        const noteEl = $('#tSpecNote');
+        if(noteEl){
+          noteEl.value = savedT.specNote || '';
+          noteEl.addEventListener('input', ()=> saveTorqueState({specNote: noteEl.value}));
+        }
+
+function stageRow(nmValue='30', unit='nm'){
           const row=document.createElement('div');
           row.className='card';
           row.style.display='flex';
@@ -1972,6 +1994,44 @@ function doPlot(){
         $('#tInVal').addEventListener('input', update);
         $('#tInUnit').addEventListener('change', update);
         $$('input[name="tCond"]').forEach(r=>r.addEventListener('change', updateGuidance));
+
+
+        $('#tCopyPlan').addEventListener('click', async ()=>{
+          try{
+            const cond = $$('input[name="tCond"]:checked')[0]?.value || 'dry';
+            const condLabel = (cond==='dry'?'Dry':(cond==='lube'?'Lubed':'Threadlocker'));
+            const inVal = $('#tInVal').value;
+            const inUnit = $('#tInUnit').value;
+            const nm = toNm(inVal, inUnit);
+            const line1 = `Torque plan (${condLabel})`;
+            const line2 = `Input: ${inVal} ${inUnit==='nm'?'N·m':(inUnit==='ftlb'?'ft·lb':'in·lb')}  →  ${fmt(nm)} N·m`;
+            const note = ($('#tSpecNote')?.value||'').trim();
+            const stages = Array.from($('#tStages')?.children||[]).map((row,idx)=>{
+              const done = row.dataset.done==='1';
+              const btn = row.querySelector('button.btn');
+              const mark = done ? '✓' : '○';
+              const val = row.querySelector('input[type="number"]')?.value || '';
+              const sel = row.querySelector('select')?.value || 'nm';
+              const u = sel==='nm'?'N·m':(sel==='ftlb'?'ft·lb':'in·lb');
+              const nmv = toNm(val, sel);
+              return `${mark} Stage ${idx+1}: ${val} ${u}  (${fmt(nmv)} N·m)`;
+            });
+            const out = [line1, line2, '', 'Stages:', ...stages];
+            if(note) out.push('', `Note: ${note}`);
+            const text = out.join('\n');
+
+            if(navigator.clipboard && navigator.clipboard.writeText){
+              await navigator.clipboard.writeText(text);
+              setCopyMsg('Copied.');
+            }else{
+              // fallback: prompt
+              window.prompt('Copy this:', text);
+            }
+          }catch(e){
+            setCopyMsg('Copy failed.');
+            try{ logErr(e); }catch(_){}
+          }
+        });
 
         $('#tAddStage').addEventListener('click', ()=>{
           $('#tStages').appendChild(stageRow());

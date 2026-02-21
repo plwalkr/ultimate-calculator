@@ -584,13 +584,14 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.36 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.39 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
         <button class="tab" data-tab="units">Units</button>
         <button class="tab" data-tab="time">Time</button>
         <button class="tab" data-tab="sound">Sound</button>
+        <button class="tab" data-tab="torque">Torque</button>
 </div>
       <div class="theme-picker">
         <span class="note">Theme</span>
@@ -970,6 +971,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                 if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
         if(which==='sound') return renderSound();
+        if(which==='torque') return renderTorque();
         return renderCalc();
       }
 
@@ -2218,3 +2220,204 @@ function doPlot(){
 </script>
 </body>
 </html>
+      function renderTorque(){
+        const view=$('#view');
+        view.innerHTML = `
+          <section class="surface">
+            <div class="section-title">Torque Intelligence</div>
+
+            <div class="grid">
+              <div class="panel">
+                <div class="section-title">Converter</div>
+                <div class="row">
+                  <label style="flex:1">
+                    <div class="note">Input</div>
+                    <input id="tInVal" class="input" type="number" inputmode="decimal" value="100">
+                  </label>
+                  <label style="min-width:140px">
+                    <div class="note">Unit</div>
+                    <select id="tInUnit" class="input">
+                      <option value="nm">N·m</option>
+                      <option value="ftlb">ft·lb</option>
+                      <option value="inlb">in·lb</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                  <div class="card" style="flex:1">
+                    <div class="note">N·m</div>
+                    <div class="big" id="tOutNm">—</div>
+                  </div>
+                  <div class="card" style="flex:1">
+                    <div class="note">ft·lb</div>
+                    <div class="big" id="tOutFt">—</div>
+                  </div>
+                  <div class="card" style="flex:1">
+                    <div class="note">in·lb</div>
+                    <div class="big" id="tOutIn">—</div>
+                  </div>
+                </div>
+
+                <div class="note" style="margin-top:10px">
+                  Tip: use decimals freely. Example: <span class="kbd">74</span> ft·lb → N·m.
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="section-title">Fast guidance</div>
+
+                <div class="row" style="gap:12px;flex-wrap:wrap">
+                  <label class="pill"><input type="radio" name="tCond" value="dry" checked> Dry</label>
+                  <label class="pill"><input type="radio" name="tCond" value="lube"> Lubed</label>
+                  <label class="pill"><input type="radio" name="tCond" value="tl"> Threadlocker</label>
+                </div>
+
+                <div class="card" style="margin-top:10px">
+                  <div class="note">Rule of thumb (not a spec)</div>
+                  <div id="tGuidance" style="margin-top:6px;line-height:1.35"></div>
+                </div>
+
+                <div class="note" style="margin-top:10px">
+                  Always follow the service manual torque spec when you have it. These notes help you avoid the classic “dry vs lubed” mistake.
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top:14px">
+              <div class="section-title">Stage tracker (optional)</div>
+              <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap">
+                <div class="note">Add stages like 30 → 60 → 90. Tap a stage to mark it done.</div>
+                <button class="btn" id="tAddStage" type="button">+ Stage</button>
+              </div>
+
+              <div id="tStages" class="stack" style="margin-top:10px"></div>
+            </div>
+          </section>
+        `;
+
+        const NM_PER_FTLB = 1.3558179483314004;
+        const NM_PER_INLB = 0.1129848290276167;
+
+        function toNm(val, unit){
+          const v = Number(val);
+          if(!Number.isFinite(v)) return NaN;
+          if(unit==='nm') return v;
+          if(unit==='ftlb') return v*NM_PER_FTLB;
+          if(unit==='inlb') return v*NM_PER_INLB;
+          return NaN;
+        }
+        function fmt(x){
+          if(!Number.isFinite(x)) return '—';
+          const a=Math.abs(x);
+          const d = a>=100 ? 1 : (a>=10 ? 2 : 3);
+          return x.toFixed(d);
+        }
+        function update(){
+          const nm = toNm($('#tInVal').value, $('#tInUnit').value);
+          $('#tOutNm').textContent = fmt(nm);
+          $('#tOutFt').textContent = fmt(nm / NM_PER_FTLB);
+          $('#tOutIn').textContent = fmt(nm / NM_PER_INLB);
+        }
+
+        function updateGuidance(){
+          const cond = $$('input[name="tCond"]:checked')[0]?.value || 'dry';
+          const box = $('#tGuidance');
+          if(cond==='dry'){
+            box.innerHTML = `Dry threads: use the published torque spec as-is. If you cleaned threads with brake-clean, you're likely in this category.`;
+          }else if(cond==='lube'){
+            box.innerHTML = `Lubed threads: torque can land higher clamp-load for the same torque. Many manuals call out a different spec when oiled. If no spec is given, be cautious — typical reductions can be ~10–25% depending on fastener and lube.`;
+          }else{
+            box.innerHTML = `Threadlocker: treat it like a lubricant during tightening (it reduces friction while wet). If a spec calls out threadlocker, follow it. If not, don't “add extra torque” as compensation.`;
+          }
+        }
+
+        function stageRow(nmValue='30', unit='nm'){
+          const row=document.createElement('div');
+          row.className='card';
+          row.style.display='flex';
+          row.style.gap='10px';
+          row.style.alignItems='center';
+          row.style.flexWrap='wrap';
+
+          const done=document.createElement('button');
+          done.type='button';
+          done.className='btn';
+          done.textContent='○';
+          done.title='Toggle done';
+
+          const name=document.createElement('input');
+          name.className='input';
+          name.placeholder='Stage name (optional)';
+          name.style.flex='1';
+          name.style.minWidth='160px';
+
+          const val=document.createElement('input');
+          val.className='input';
+          val.type='number';
+          val.inputMode='decimal';
+          val.value=nmValue;
+          val.style.width='120px';
+
+          const sel=document.createElement('select');
+          sel.className='input';
+          sel.style.width='120px';
+          sel.innerHTML = `<option value="nm">N·m</option><option value="ftlb">ft·lb</option><option value="inlb">in·lb</option>`;
+          sel.value=unit;
+
+          const out=document.createElement('div');
+          out.className='note';
+          out.style.flex='1';
+          out.style.minWidth='180px';
+
+          const del=document.createElement('button');
+          del.type='button';
+          del.className='fxdel';
+          del.textContent='×';
+          del.title='Remove stage';
+
+          function recompute(){
+            const nm = toNm(val.value, sel.value);
+            if(!Number.isFinite(nm)) { out.textContent='—'; return; }
+            out.textContent = `${fmt(nm)} N·m  •  ${fmt(nm/NM_PER_FTLB)} ft·lb  •  ${fmt(nm/NM_PER_INLB)} in·lb`;
+          }
+
+          done.addEventListener('click', ()=>{
+            const on = row.dataset.done==='1';
+            row.dataset.done = on ? '0' : '1';
+            done.textContent = on ? '○' : '✓';
+            row.style.opacity = on ? '1' : '.55';
+          });
+          del.addEventListener('click', ()=> row.remove());
+          val.addEventListener('input', recompute);
+          sel.addEventListener('change', recompute);
+
+          row.appendChild(done);
+          row.appendChild(name);
+          row.appendChild(val);
+          row.appendChild(sel);
+          row.appendChild(out);
+          row.appendChild(del);
+          recompute();
+          return row;
+        }
+
+        $('#tInVal').addEventListener('input', update);
+        $('#tInUnit').addEventListener('change', update);
+        $$('input[name="tCond"]').forEach(r=>r.addEventListener('change', updateGuidance));
+
+        $('#tAddStage').addEventListener('click', ()=>{
+          $('#tStages').appendChild(stageRow());
+        });
+
+        // seed with 3 common stages
+        const stageBox = $('#tStages');
+        stageBox.appendChild(stageRow('30','nm'));
+        stageBox.appendChild(stageRow('60','nm'));
+        stageBox.appendChild(stageRow('90','nm'));
+
+        update();
+        updateGuidance();
+      }
+
+

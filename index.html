@@ -604,7 +604,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.46 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.47 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2438,7 +2438,11 @@ function stageRow(nmValue='30', unit='nm'){
            }
            const needTxt = needH>0 ? fmtH(needMin) : '0h 00m';
            const extra = breakUnpaidMin? ` (+${breakUnpaidMin}m unpaid break)` : '';
-           $('#totalNeedOut').innerHTML = `Need <b>${needTxt}</b> to reach <b>${totalGoalH}h</b> (currently ${totalSoFarH}h)${extra}. ${nextInVal? `If you clock in at <b>${formatClock(toMin(nextInVal), use12)}</b>, work until <b>${outStr}</b>.` : '<span class="note">Set Next IN to get an end time.</span>'}`;
+           $('#totalNeedOut').innerHTML =
+             'Need <b>' + needTxt + '</b> to reach <b>' + totalGoalH + 'h</b> (currently ' + totalSoFarH + 'h)' + extra + '. ' +
+             (nextInVal
+               ? ('If you clock in at <b>' + formatClock(toMin(nextInVal), use12) + '</b>, work until <b>' + outStr + '</b>.')
+               : '<span class="note">Set Next IN to get an end time.</span>');
 
 
           // Week summary

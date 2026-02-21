@@ -602,7 +602,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.44 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.45 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -764,7 +764,13 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
       function graphLibsReady(){
         return (window.math && typeof window.math.parse==='function' && window.Plotly && typeof window.Plotly.newPlot==='function');
       }
-      function waitForGraphLibs(cb, tries=40){
+      let glPlotTimer=null;
+function schedulePlot(ms=220){
+  try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
+  glPlotTimer=setTimeout(()=>{ try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } } }, ms);
+}
+
+function waitForGraphLibs(cb, tries=40){
         if(graphLibsReady()) return cb();
         let n=0;
         const iv=setInterval(()=>{
@@ -1311,7 +1317,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 function doPlot(){
           if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
           const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
-          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
+          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value);
+          const nRaw=parseInt($('#samples').value,10)||400;
+          const isMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+          const MAX_SAMPLES = isMobile ? 2000 : 5000;
+          const n = Math.max(50, Math.min(MAX_SAMPLES, nRaw));
+          if(n !== nRaw){
+            $('#samples').value = String(n);
+            toast(`Samples clamped to ${n} for performance`);
+          }
           let fx0=null, fx1=null;
           if(lines[0]){ try{ fx0 = window.math.parse(lines[0]).compile(); }catch(_){ fx0=null; } }
           if(lines[1]){ try{ fx1 = window.math.parse(lines[1]).compile(); }catch(_){ fx1=null; } }

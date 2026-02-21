@@ -596,13 +596,15 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 .glCtlBtn:active{transform:scale(.98);}
 
+
+.hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0;}
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.45 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.46 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2241,8 +2243,7 @@ function stageRow(nmValue='30', unit='nm'){
         if(saved.out){ setOut(saved.out); } else { smartSuggest(); }
       }
 
-      /* ---------- Time Clock (with OCU presets) ---------- */
-      function renderTime(){
+     function renderTime(){
         const view=$('#view');
         const PREFS = loadPrefs();
         const time12 = !!PREFS.time12;
@@ -2288,6 +2289,15 @@ function stageRow(nmValue='30', unit='nm'){
               <div class="surface">
                 <div class="section-title">Today Summary</div>
                 <div id="todayOut"></div>
+                 <div class="hr"></div>
+                 <div class="section-title">Make the total</div>
+                 <div class="row" style="gap:10px;flex-wrap:wrap">
+                   <label><div class="note">Total goal (h)</div><input id="totalGoal" class="input" type="number" step="0.25" value="40"></label>
+                   <label><div class="note">So far (h)</div><input id="totalSoFar" class="input" type="number" step="0.01" value="0"></label>
+                   <label><div class="note">Next IN</div><input id="nextIn" class="input" type="time"></label>
+                   <label><div class="note">Unpaid break (min)</div><input id="breakUnpaid" class="input" type="number" value="0"></label>
+                 </div>
+                 <div id="totalNeedOut" class="note" style="margin-top:6px"></div>
               </div>
               <div class="surface">
                 <div class="section-title">Guidance</div>
@@ -2323,9 +2333,14 @@ function stageRow(nmValue='30', unit='nm'){
         fmtSel.value = time12 ? '12' : '24';
 
         const todayStr = toLocalDate(new Date());
-        const saved = loadTab('time', {goalH:'8', paidL:'0', rows:[{date:todayStr,in:'',out:''}]});
+        const saved = loadTab('time', {goalH:'8', paidL:'0', totalGoal:'40', totalSoFar:'0', nextIn:'', breakUnpaid:'0', rows:[{date:todayStr,in:'',out:''}]});
         $('#goalH').value = saved.goalH || '8';
         $('#paidL').value = saved.paidL || '0';
+        $('#totalGoal').value = saved.totalGoal || '40';
+        $('#totalSoFar').value = saved.totalSoFar || '0';
+        $('#nextIn').value = saved.nextIn || '';
+        $('#breakUnpaid').value = saved.breakUnpaid || '0';
+
 
         rowsEl.addEventListener('input', ()=>{ recompute(); persist(); });
         rowsEl.addEventListener('click', e=>{
@@ -2351,7 +2366,7 @@ function stageRow(nmValue='30', unit='nm'){
             const id=inp.getAttribute('data-in'); const out=$(`input[data-out="${id}"]`); const date=$(`input[data-date="${id}"]`);
             return {date: (date&&date.value)||todayStr, in: inp.value||'', out: (out&&out.value)||''};
           });
-          saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', rows});
+          saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', totalGoal:$('#totalGoal').value||'40', totalSoFar:$('#totalSoFar').value||'0', nextIn:$('#nextIn').value||'', breakUnpaid:$('#breakUnpaid').value||'0', rows});
         }
 
         function addRow(initial){
@@ -2408,6 +2423,24 @@ function stageRow(nmValue='30', unit='nm'){
             ? `Clocked in since <b>${formatClock(preset?openInRounded:openIn, use12)}</b> — to hit <b>${goalH}h</b>, clock out at <b>${suggested}</b>${preset? ' <span class="note">(OCU rounding)</span>':''}.`
             : `Not currently clocked in for today.`;
 
+           // Total goal helper (week/period)
+           const totalGoalH = parseFloat($('#totalGoal').value)||0;
+           const totalSoFarH = parseFloat($('#totalSoFar').value)||0;
+           const needH = Math.max(0, totalGoalH - totalSoFarH);
+           const needMin = Math.round(needH*60);
+           const breakUnpaidMin = Math.max(0, Math.min(240, parseInt($('#breakUnpaid').value||'0',10)||0));
+           let outStr = '—';
+           const nextInVal = $('#nextIn').value;
+           if(nextInVal){
+             const inMin = toMin(nextInVal);
+             const outMin = inMin + needMin + breakUnpaidMin;
+             outStr = formatClock(outMin, use12);
+           }
+           const needTxt = needH>0 ? fmtH(needMin) : '0h 00m';
+           const extra = breakUnpaidMin? ` (+${breakUnpaidMin}m unpaid break)` : '';
+           $('#totalNeedOut').innerHTML = `Need <b>${needTxt}</b> to reach <b>${totalGoalH}h</b> (currently ${totalSoFarH}h)${extra}. ${nextInVal? `If you clock in at <b>${formatClock(toMin(nextInVal), use12)}</b>, work until <b>${outStr}</b>.` : '<span class="note">Set Next IN to get an end time.</span>'}`;
+
+
           // Week summary
           const byDay=new Map();
           segs.forEach(s=>{
@@ -2448,12 +2481,19 @@ function stageRow(nmValue='30', unit='nm'){
         $('#nowOut').onclick=()=>{ const inputs=$$('input[data-out]'); const open=[...inputs].find(i=>!i.value); if(open){ open.value=toLocalTime(new Date()); recompute(); persist(); } };
         $('#goalH').addEventListener('input',()=>{ recompute(); persist(); });
         $('#paidL').addEventListener('change',()=>{ recompute(); persist(); });
+        $('#totalGoal').addEventListener('input',()=>{ recompute(); persist(); });
+        $('#totalSoFar').addEventListener('input',()=>{ recompute(); persist(); });
+        $('#nextIn').addEventListener('change',()=>{ recompute(); persist(); });
+        $('#breakUnpaid').addEventListener('input',()=>{ recompute(); persist(); });
 
         if(saved.rows && saved.rows.length){ saved.rows.forEach(r=>addRow(r)); } else { addRow(); }
         recompute();
 
         function toLocalTime(d){ const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${hh}:${mm}`; }
         function toLocalDate(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
+      }
+
+      e()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
       }
 
       /* ---------- Self-tests ---------- */

@@ -57,15 +57,15 @@
     body{min-height:100vh}
     body{margin:0;background:linear-gradient(180deg,var(--bg),#0e121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+    header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
     h1{font-family:Ringbearer,Inter,serif;letter-spacing:1px;font-size:1.8rem;margin:0;color:var(--accent)}
     .tabs{display:flex;gap:8px;flex-wrap:wrap}
     .tab{border:0;background:var(--tab-bg);color:var(--tab-fg);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
     .tab.active{background:var(--tab-active-bg);color:var(--tab-active-fg)}
     .surface{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
 
-    .theme-picker{display:flex;align-items:center;gap:8px}
-    .theme-select{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:0.95rem}
+    .theme-picker{display:flex;align-items:center;gap:8px;margin-left:auto;padding-top:4px}
+    .theme-select{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:0.95rem;min-height:44px}
 
     .calc-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     @media (max-width:900px){.calc-grid{grid-template-columns:1fr}}
@@ -81,7 +81,7 @@
     .span2{grid-column:span 2}
     .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
     .input, select, textarea{background:var(--control-bg);border:1.5px solid var(--control-bd);border-radius:12px;color:var(--ink);padding:10px;font-size:1rem}
-    .btn{border:1px solid var(--control-bd);background:#22304a;color:#cfe0ff;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer}
+    .btn{border:1px solid var(--control-bd);background:#22304a;color:#cfe0ff;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer;min-height:44px}
     .btn.primary{background:var(--accent-2);color:#fff;border-color:#0b5fb8}
 
     /* Light theme button label contrast fix */
@@ -348,11 +348,11 @@ button{
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
 
-    .dbg-mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px 10px;border-radius:12px;font-weight:900;cursor:pointer}
+    .dbg-mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px 10px;border-radius:12px;font-weight:900;cursor:pointer;min-height:44px}
     .dbg-mini:hover{background:rgba(255,255,255,.05)}
     .dbg-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9999}
     .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:60vh;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
-    .gear-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
+    .gear-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px;min-height:44px}
     .gear-mini:hover{background:rgba(255,255,255,.06)}
     .dbg-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
     .dbg-mini:hover{background:rgba(255,255,255,.06)}
@@ -377,7 +377,7 @@ button{
 
 
     /* Diagnostics pill */
-    #diag{display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
+    #diag{pointer-events:none;display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
     #diag.ok{background:rgba(91,211,142,.14);border:1px solid rgba(91,211,142,.35);color:var(--ink)}
     #diag.err{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:var(--ink)}
     #diag .diag-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
@@ -389,7 +389,7 @@ button{
     /* Toast colors */
     
     @media (max-width:520px){
-      #diag{position:fixed;left:10px;right:10px;bottom:64px;margin:0;z-index:2000}
+      #diag{pointer-events:none;position:fixed;left:10px;right:10px;bottom:64px;margin:0;z-index:2000}
       .settings-drawer .sheet{left:12px;right:12px;width:auto}
     }
 
@@ -524,14 +524,14 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-.diag{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;max-height:42px;overflow:hidden;}
+.diag{pointer-events:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;max-height:42px;overflow:hidden;}
 
 /* GraphLab Function List */
 .fxlist{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
 .fxrow{display:grid;grid-template-columns:28px 1fr 34px;gap:8px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:12px;}
 .fxrow input[type="text"]{width:100%;padding:10px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.18);color:inherit;}
 .fxswatch{width:18px;height:18px;border-radius:6px;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset;}
-.fxdel{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:inherit;}
+.fxdel{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:inherit;;min-height:44px}
 .fxhdr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;}
 .fxhdr .btn{padding:8px 10px;}
 
@@ -584,7 +584,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.41 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.42 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>

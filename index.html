@@ -541,11 +541,28 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 
 /* GraphLab layout grid */
-.glgrid{display:grid;grid-template-columns:1fr;gap:14px;}
+.glgrid{
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: 'top right' 'bottom right';
+display:grid;grid-template-columns:1fr;gap:14px;}
 @media (min-width: 980px){
-  .glgrid{grid-template-columns:420px 1fr;align-items:start;}
+  .glgrid{
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: 'top right' 'bottom right';
+grid-template-columns:420px 1fr;align-items:start;}
 }
-.gll{min-width:0;}
+.gllTop{grid-area:top;}
+    .gllBottom{grid-area:bottom;}
+    .glr{grid-area:right;}
+
+    .gllines{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+    .glline{display:flex;align-items:center;gap:8px;}
+    .glline .expr{flex:1;min-width:160px;}
+    .glline .chip{width:12px;height:12px;border-radius:999px;opacity:.9;flex:0 0 12px;}
+    .glline .tiny{padding:8px 10px;}
+
+    /* old gll */
+    .gll{min-width:0;}
 .glr{min-width:0;}
 .glr .chart{height:520px;min-height:520px;}
 @media (max-width: 520px){
@@ -608,7 +625,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.54 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.55 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1059,6 +1076,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
+
         const K = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches)
           ? ['C','⌫','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','(',')','sin','cos','tan','^','√','π','e','ANS','=']
           : ['7','8','9','/','sin','cos','4','5','6','*','tan','√','1','2','3','-','^','π','0','.','(',')','e','ANS','C','⌫','%','+','='];
@@ -1121,6 +1141,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
+
         const saved = loadTab('calculus', {fx:'', x0:'', a:'', b:'', n:200, limExpr:'', limA:''});
         $('#fx').value = saved.fx||''; $('#x0').value = saved.x0||''; $('#a').value = saved.a||''; $('#b').value = saved.b||''; $('#n').value = saved.n||200; $('#limExpr').value = saved.limExpr||''; $('#limA').value = saved.limA||'';
         function persist(){ saveTab('calculus', {fx:$('#fx').value, x0:$('#x0').value, a:$('#a').value, b:$('#b').value, n:$('#n').value, limExpr:$('#limExpr').value, limA:$('#limA').value}); }
@@ -1179,52 +1202,22 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         view.innerHTML=`
           <section class="surface">
             <div class="glgrid">
-              <div class="gll">
+              <div class="gllTop">
             <div class="row">
-              <label style="grid-column:1/-1">
-                <div class="note">Expression(s) (one per line)</div>
-                <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
-              </label>
-
-              <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
-              <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
-              <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
-
-              <label style="grid-column:1/-1">
-                <div class="note">Overlays</div>
-                <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap">
-                  <label class="pill"><input type="checkbox" id="d1"> Show f'(x) (first line)</label>
-                  <label class="pill"><input type="checkbox" id="tanOn"> Tangent @ x₀</label>
-                  <label class="pill"><input type="checkbox" id="intOn"> ∫ area a..b</label>
-                  <label class="pill"><input type="checkbox" id="absOn"> Abs area</label>
-                  <label class="pill"><input type="checkbox" id="betweenOn"> Between f1−f2 a..b</label>
-                  <label class="pill">a <input id="a" class="input" type="number" step="0.1" value="-1" style="width:110px;display:inline-block;margin-left:6px"></label>
-                  <label class="pill">b <input id="b" class="input" type="number" step="0.1" value="1" style="width:110px;display:inline-block;margin-left:6px"></label>
-                  <label class="pill"><input type="checkbox" id="rootsOn"> Roots (zeros)</label>
-                  <label class="pill"><input type="checkbox" id="ixOn"> Intersections f1=f2</label>
-                  <label class="pill"><input type="checkbox" id="traceOn"> Trace cursor</label>
-                  <label class="pill">x <input id="xT" class="input" type="number" step="0.1" value="0" style="width:110px;display:inline-block;margin-left:6px"></label>
-                  <input id="xTr" type="range" min="-10" max="10" step="0.1" value="0" style="flex:1;min-width:160px">
-                  <label class="pill">x₀ <input id="x0" class="input" type="number" step="0.1" value="0" style="width:110px;display:inline-block;margin-left:6px"></label>
-                  <input id="x0r" type="range" min="-10" max="10" step="0.1" value="0" style="flex:1;min-width:160px">
+              <div style="grid-column:1/-1">
+                <div class="row" style="align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                  <div class="note">Functions</div>
+                  <div class="row" style="gap:8px;flex-wrap:wrap">
+                    <button class="btn" id="glAddLine" type="button">+ Line</button>
+                    <button class="btn" id="glClearLines" type="button">Clear lines</button>
+                  </div>
                 </div>
-              </label>
-            </div>
-
-            <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
-              <button class="btn primary" id="plotBtn">Plot</button>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="liveTyping"> Live</label>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="forgiving"> Forgiving</label>
-              <button class="btn" id="clearBtn">Clear</button>
-              <button class="btn" id="exportBtn">Export PNG</button>
-              <button class="btn" id="clearSavedGL" title="Forget saved inputs">Clear Saved</button>
-            </div>
+                <div id="glLines" class="gllines"></div>
+                <textarea id="gx" class="input" rows="4" style="display:none" aria-hidden="true"></textarea>
               </div>
-              <div class="glr">
 
-            <div class="chartwrap"><div id="glLegend" class="glegend" style="display:none"></div><div id="chart" class="chart"></div></div>
-            <div id="glReadout" class="note" style="margin-top:8px"></div>
+              </div>
+              </div>
 
             <div class="note">
               GraphLab: multi-line plot + overlays. Tip: enable <b>Auto</b> to re-plot while typing. Prefix a line with <b>#</b> or <b>//</b> to disable it (hide). Functions are lowercase: <b>sin(x)</b>, <b>cos(x)</b>.
@@ -1232,6 +1225,71 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
+
+
+        // --- GraphLab line editor (Desmos-ish) ---
+        const GL_PALETTE = ['#5db0ff','#ffd166','#ef476f','#06d6a0','#8338ec','#ff7a00','#00c2ff','#ff4d6d'];
+        function normalizeExpr(s){
+          let x=(s||'').trim();
+          if(!x) return '';
+          // common user habit: Sin/Cos/Tan with caps
+          x = x.replace(/\b(Sin|Cos|Tan|Sec|Csc|Cot|Exp|Ln|Log|Sqrt)\b/g, m=>m.toLowerCase());
+          return x;
+        }
+        function glDefaultLines(){
+          return [
+            {on:true, expr:'sin(x)'},
+            {on:true, expr:'x^2 - 3x + 2'},
+          ];
+        }
+        function glSerialize(lines){
+          // keep hidden lines too
+          return (lines||[]).map(l=>({on:!!l.on, expr:String(l.expr||'')}));
+        }
+        function glSyncTextarea(lines){
+          const gx=$('#gx');
+          if(!gx) return;
+          gx.value = (lines||[]).map(l=>{
+            const e=normalizeExpr(l.expr);
+            if(!e) return '';
+            return l.on ? e : ('# ' + e);
+          }).filter(Boolean).join('\n');
+        }
+        function glRenderLines(lines){
+          const host=$('#glLines');
+          if(!host) return;
+          host.innerHTML='';
+          (lines||[]).forEach((l,idx)=>{
+            const row=document.createElement('div');
+            row.className='glline';
+            const chip=document.createElement('span');
+            chip.className='chip';
+            chip.style.background=GL_PALETTE[idx % GL_PALETTE.length];
+            const cb=document.createElement('input');
+            cb.type='checkbox'; cb.checked=!!l.on; cb.title='Show/hide';
+            const inp=document.createElement('input');
+            inp.className='input expr'; inp.placeholder= idx===0 ? 'f(x) e.g. sin(x)' : 'g(x) ...';
+            inp.value = l.expr||'';
+            const del=document.createElement('button');
+            del.className='btn tiny'; del.type='button'; del.textContent='✕';
+            del.title='Remove line';
+            cb.addEventListener('change', ()=>{ l.on=cb.checked; glSyncTextarea(lines); persist(); maybeLive(); });
+            inp.addEventListener('input', ()=>{ l.expr=inp.value; glSyncTextarea(lines); persist(); maybeLive(); });
+            del.addEventListener('click', ()=>{
+              lines.splice(idx,1);
+              if(lines.length===0) lines.push({on:true, expr:''});
+              glSyncTextarea(lines); persist(); glRenderLines(lines); maybeLive();
+            });
+            row.appendChild(cb);
+            row.appendChild(chip);
+            row.appendChild(inp);
+            row.appendChild(del);
+            host.appendChild(row);
+          });
+        }
+        // --- end line editor ---
         const GL_CTL_KEY = 'legendcalc.graphlab.hideControls';
         function applyCtlState(){
           const hide = (localStorage.getItem(GL_CTL_KEY) === '1');
@@ -1247,7 +1305,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         applyCtlState();
 
 
-        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', liveTyping:'1', forgiving:'1'});
+        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', liveTyping:'1', forgiving:'1', glLines: null});
         $('#gx').value=saved.gx||'';
         if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
         $('#d1').checked = (saved.d1==='1');
@@ -1291,7 +1349,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         syncTraceBounds();
 
         function persist(){
-          saveTab('graphlab', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0'), liveTyping:($('#liveTyping').checked?'1':'0'), forgiving:($('#forgiving').checked?'1':'0')});
+          saveTab('graphlab', {gx:$('#gx').value, glLines: glSerialize(lines), xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0'), liveTyping:($('#liveTyping').checked?'1':'0'), forgiving:($('#forgiving').checked?'1':'0')});
         }
         $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#d1').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
@@ -1741,6 +1799,17 @@ function renderGraph(){
               <label style="grid-column:1/-1"><div class="note">Functions (one per line)</div>
                 <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
               </label>
+              </div>
+              </div>
+              <div class="glr">
+
+            <div class="chartwrap"><div id="glLegend" class="glegend" style="display:none"></div><div id="chart" class="chart"></div></div>
+            <div id="glReadout" class="note" style="margin-top:8px"></div>
+
+              </div>
+              <div class="gllBottom">
+            <div class="row">
+
               <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
               <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
               <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
@@ -1758,6 +1827,9 @@ function renderGraph(){
             <div id="glReadout" class="note" style="margin-top:8px"></div>
             <div class="note">Hotkeys: <b>Enter</b> new line + plot, <b>Shift+Enter</b> new line (no plot), <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.</div>
           </section>`;
+
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
 
         const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
         $('#gx').value=saved.gx||'';
@@ -2162,6 +2234,9 @@ function stageRow(nmValue='30', unit='nm'){
             <div class="note">Dropdown uses categories; only compatible targets are shown. Search filters both lists. "Smart Suggest" picks a human-friendly unit. No miles → cups.</div>
           </section>`;
 
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
+
         const toSel=$('#uTo');
         const fromSel=$('#uFromSel');
         const searchEl=$('#uSearch');
@@ -2342,6 +2417,9 @@ function stageRow(nmValue='30', unit='nm'){
               <div id="week"></div>
             </div>
           </section>`;
+
+        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+
 
         const rowsEl=$('#rows');
         const fmtSel=$('#timeFmt');

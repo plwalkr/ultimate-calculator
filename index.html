@@ -360,6 +360,10 @@ button{
     /* Debug log readability */
     #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:48vh}
 
+    /* Overlay hardening */
+    .dbg-panel,.settings-drawer{pointer-events:none;}
+    .dbg-panel.open,.settings-drawer.open{pointer-events:auto;}
+
     /* Settings drawer */
     .settings-drawer{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9998}
     .settings-drawer .sheet{position:absolute;right:12px;top:12px;bottom:12px;width:min(420px, calc(100vw - 24px));background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px}
@@ -604,7 +608,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.47 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.48 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -734,7 +738,18 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
       }
     })();
 
-    function startApp(){
+    
+      function forceHideOverlays(){
+        try{
+          const d = $('#settingsDrawer');
+          if(d){ d.style.display='none'; d.classList.remove('open'); d.setAttribute('aria-hidden','true'); }
+          const p = $('#dbgPanel');
+          if(p){ p.style.display='none'; p.classList.remove('open'); p.setAttribute('aria-hidden','true'); }
+        }catch(_){}
+      }
+
+function startApp(){
+        forceHideOverlays();
     window.window.GL_PALETTE = window.window.GL_PALETTE || ['#7fd6ff','#38d996','#ffd166','#ff5c5c','#b98bff'];
 
     window.onerror = function(msg, src, line, col, err){
@@ -833,8 +848,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function initDebugUI(){
         const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
         if(!btn || !panel) return;
-        const open=()=>{ panel.style.display='block'; panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened'); };
-        const shut=()=>{ panel.style.display='none'; panel.setAttribute('aria-hidden','true'); };
+        const open=()=>{ panel.style.display='block';
+          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened'); };
+        const shut=()=>{ panel.style.display='none';
+          panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); };
         btn.addEventListener('click', open);
         panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
         close && close.addEventListener('click', shut);
@@ -864,8 +881,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function initSettingsUI(){
         const gear=$('#gearBtn'), drawer=$('#settingsDrawer'), close=$('#setClose');
         if(!gear || !drawer) return;
-        const open=()=>{ drawer.style.display='block'; drawer.setAttribute('aria-hidden','false'); syncSettingsUI(); };
-        const shut=()=>{ drawer.style.display='none'; drawer.setAttribute('aria-hidden','true'); };
+        const open=()=>{ drawer.style.display='block';
+          drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); syncSettingsUI(); };
+        const shut=()=>{ drawer.style.display='none';
+          drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
         gear.addEventListener('click', open);
         drawer.addEventListener('click',(e)=>{ if(e.target===drawer) shut(); });
         close && close.addEventListener('click', shut);

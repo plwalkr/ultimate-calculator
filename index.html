@@ -625,7 +625,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.57 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.58 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1356,10 +1356,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         const aEl=$('#a'); if(aEl) aEl.value = (saved.a ?? '-1');
         const bEl=$('#b'); if(bEl) bEl.value = (saved.b ?? '1');
         const rootsEl=$('#rootsOn'); if(rootsEl) rootsEl.checked = (saved.rootsOn==='1');
-        $('#ixOn').checked = (saved.ixOn==='1');
-        $('#traceOn').checked = (saved.traceOn==='1');
-        $('#xT').value = (saved.xT ?? '0');
-        $('#xTr').value = $('#xT').value;
+        const ixEl=$('#ixOn'); if(ixEl) ixEl.checked = (saved.ixOn==='1');
+        const trEl=$('#traceOn'); if(trEl) trEl.checked = (saved.traceOn==='1');
+        const xTEl=$('#xT'); if(xTEl) xTEl.value = (saved.xT ?? '0');
+        const xTrEl=$('#xTr'); if(xTrEl && xTEl) xTrEl.value = xTEl.value;
         function syncX0Bounds(){
           const a = parseFloat($('#xmin').value)||-10;
           const b = parseFloat($('#xmax').value)||10;
@@ -1411,14 +1411,19 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           clearTab('graphlab');
           ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
           $('#x0').value='0'; $('#x0r').value='0';
-          $('#tanOn').checked=false;
-          $('#intOn').checked=false; $('#absOn').checked=false; $('#a').value='-1'; $('#b').value='1';
-          $('#rootsOn').checked=false;
-          $('#ixOn').checked=false;
-          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0';
-          $('#d1').checked=false;
+          const _el_tanOn=$('#tanOn'); if(_el_tanOn) _el_tanOn.checked=false;
+          const _el_intOn=$('#intOn'); if(_el_intOn) _el_intOn.checked=false;
+        const _el_absOn=$('#absOn'); if(_el_absOn) _el_absOn.checked=false;
+        const _el_a=$('#a'); if(_el_a) _el_a.value='-1';
+        const _el_b=$('#b'); if(_el_b) _el_b.value='1';
+          const _el_rootsOn=$('#rootsOn'); if(_el_rootsOn) _el_rootsOn.checked=false;
+          const _el_ixOn=$('#ixOn'); if(_el_ixOn) _el_ixOn.checked=false;
+          const _el_traceOn=$('#traceOn'); if(_el_traceOn) _el_traceOn.checked=false;
+        const _el_xT=$('#xT'); if(_el_xT) _el_xT.value='0';
+        const _el_xTr=$('#xTr'); if(_el_xTr) _el_xTr.value='0';
+          const _el_d1=$('#d1'); if(_el_d1) _el_d1.checked=false;
           window.Plotly.purge('chart');
-          $('#autoPlot').checked=true;
+          const _el_autoPlot=$('#autoPlot'); if(_el_autoPlot) _el_autoPlot.checked=true;
           toast('GraphLab: cleared');
         };
 
@@ -1873,11 +1878,16 @@ function renderGraph(){
         $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
         $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
           $('#x0').value='0'; $('#x0r').value='0';
-          $('#tanOn').checked=false;
-          $('#intOn').checked=false; $('#absOn').checked=false; $('#a').value='-1'; $('#b').value='1';
-          $('#rootsOn').checked=false;
-          $('#ixOn').checked=false;
-          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0'; window.Plotly.purge('chart'); };
+          const _el_tanOn=$('#tanOn'); if(_el_tanOn) _el_tanOn.checked=false;
+          const _el_intOn=$('#intOn'); if(_el_intOn) _el_intOn.checked=false;
+        const _el_absOn=$('#absOn'); if(_el_absOn) _el_absOn.checked=false;
+        const _el_a=$('#a'); if(_el_a) _el_a.value='-1';
+        const _el_b=$('#b'); if(_el_b) _el_b.value='1';
+          const _el_rootsOn=$('#rootsOn'); if(_el_rootsOn) _el_rootsOn.checked=false;
+          const _el_ixOn=$('#ixOn'); if(_el_ixOn) _el_ixOn.checked=false;
+          const _el_traceOn=$('#traceOn'); if(_el_traceOn) _el_traceOn.checked=false;
+        const _el_xT=$('#xT'); if(_el_xT) _el_xT.value='0';
+        const _el_xTr=$('#xTr'); if(_el_xTr) _el_xTr.value='0'; window.Plotly.purge('chart'); };
 
         function updateReadout(info){
           const el = $('#glReadout');
@@ -1931,7 +1941,7 @@ function doPlot(){
           if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
             e.preventDefault();
             window.Plotly.purge('chart');
-          $('#autoPlot').checked=true;
+          const _el_autoPlot=$('#autoPlot'); if(_el_autoPlot) _el_autoPlot.checked=true;
             return;
           }
           if(meta && e.key==='Enter'){ // plot only

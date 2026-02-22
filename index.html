@@ -608,7 +608,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.51 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.52 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2311,7 +2311,7 @@ function stageRow(nmValue='30', unit='nm'){
                  <div class="hr"></div>
                  <div class="section-title">Finish my shift</div>
                  <div class="row" style="gap:10px;flex-wrap:wrap">
-                   <label><div class="note">Target total (h)</div><input id="totalGoal" class="input" type="number" step="0.25" value="40"></label>
+                   <label><div class="note">Target total (h)</div><input id="totalGoal" class="input" type="number" step="0.25" value="40"><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" id="tg12" type="button">12h</button><button class="btn" id="tg36" type="button">36h</button><button class="btn" id="tg40" type="button">40h</button></div></label>
                    <label><div class="note">Unpaid break (min)</div><input id="breakUnpaid" class="input" type="number" value="0"></label>
                    <label style="min-width:180px"><div class="note">Use start time</div>
                      <select id="startMode" class="input">
@@ -2503,6 +2503,16 @@ function stageRow(nmValue='30', unit='nm'){
         $('#nextIn').addEventListener('change',()=>{ recompute(); persist(); });
         $('#breakUnpaid').addEventListener('input',()=>{ recompute(); persist(); });
         $('#startMode').addEventListener('change',()=>{ recompute(); persist(); });
+        // Quick targets
+        function setGoal(h){
+          $('#totalGoal').value = String(h);
+          toast(`Target total: ${h}h`);
+          recompute(); persist();
+        }
+        $('#tg12')?.addEventListener('click', ()=>setGoal(12));
+        $('#tg36')?.addEventListener('click', ()=>setGoal(36));
+        $('#tg40')?.addEventListener('click', ()=>setGoal(40));
+
         $('#totalGoal').addEventListener('input',()=>{ recompute(); persist(); });
         $('#nextIn').addEventListener('change',()=>{ recompute(); persist(); });
         $('#breakUnpaid').addEventListener('input',()=>{ recompute(); persist(); });

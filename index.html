@@ -310,7 +310,7 @@ button{
 
 
 /* ---------- v1.3.5 Mobile layout upgrade (keeps desktop the same) ---------- */
-.titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center;width:100%}
+.titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ver{font-size:.85rem;font-weight:800;opacity:1;color:var(--muted);white-space:nowrap}
 @media (max-width: 900px){
   .wrap{margin:0 auto; padding: 0 12px}
@@ -625,7 +625,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.56 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.61 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1225,702 +1225,182 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
-        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+        
+        // ---- GraphLab init (runs after DOM paint to avoid null element crashes) ----
+        setTimeout(() => {
+          const token = String(Date.now()) + ':' + Math.random().toString(16).slice(2);
+          view.dataset.glToken = token;
 
+          // If this tab re-rendered before we run, bail.
+          if (!view.isConnected || view.dataset.glToken !== token) return;
 
+          // Line editor helpers
+          const GL_PALETTE = ['#5db0ff','#ffd166','#ef476f','#06d6a0','#8338ec','#ff7a00','#00c2ff','#ff4d6d'];
+          function normalizeExpr(s){
+            let x=(s||'').trim();
+            if(!x) return '';
+            x = x.replace(/\b(Sin|Cos|Tan|Sec|Csc|Cot|Exp|Ln|Log|Sqrt)\b/g, m=>m.toLowerCase());
+            return x;
+          }
+          function glSerialize(lines){
+            return (lines||[]).map(l=>({on:!!l.on, expr:String(l.expr||'')}));
+          }
+          function glSyncTextarea(lines){
+            const gx=$('#gx');
+            if(!gx) return;
+            gx.value = (lines||[]).map(l=>{
+              const e=normalizeExpr(l.expr);
+              if(!e) return '';
+              return l.on ? e : ('# ' + e);
+            }).filter(Boolean).join('\n');
+          }
+          function glRenderLines(lines){
+            const host=$('#glLines');
+            if(!host) return;
+            host.innerHTML='';
+            (lines||[]).forEach((l,idx)=>{
+              const row=document.createElement('div');
+              row.className='glline';
+              const cb=document.createElement('input');
+              cb.type='checkbox'; cb.checked=!!l.on; cb.title='Show/hide';
+              const chip=document.createElement('span');
+              chip.className='chip';
+              chip.style.background=GL_PALETTE[idx % GL_PALETTE.length];
+              const inp=document.createElement('input');
+              inp.className='input expr'; inp.placeholder= idx===0 ? 'f(x) e.g. sin(x)' : 'g(x) ...';
+              inp.value = l.expr||'';
+              const del=document.createElement('button');
+              del.className='btn tiny'; del.type='button'; del.textContent='✕'; del.title='Remove line';
 
-        // --- GraphLab line editor (Desmos-ish) ---
-        const GL_PALETTE = ['#5db0ff','#ffd166','#ef476f','#06d6a0','#8338ec','#ff7a00','#00c2ff','#ff4d6d'];
-        function normalizeExpr(s){
-          let x=(s||'').trim();
-          if(!x) return '';
-          // common user habit: Sin/Cos/Tan with caps
-          x = x.replace(/\b(Sin|Cos|Tan|Sec|Csc|Cot|Exp|Ln|Log|Sqrt)\b/g, m=>m.toLowerCase());
-          return x;
-        }
-        function glDefaultLines(){
-          return [
-            {on:true, expr:'sin(x)'},
-            {on:true, expr:'x^2 - 3x + 2'},
-          ];
-        }
-        function glSerialize(lines){
-          // keep hidden lines too
-          return (lines||[]).map(l=>({on:!!l.on, expr:String(l.expr||'')}));
-        }
-        function glSyncTextarea(lines){
-          const gx=$('#gx');
-          if(!gx) return;
-          gx.value = (lines||[]).map(l=>{
-            const e=normalizeExpr(l.expr);
-            if(!e) return '';
-            return l.on ? e : ('# ' + e);
-          }).filter(Boolean).join('\n');
-        }
-        function glRenderLines(lines){
-          const host=$('#glLines');
-          if(!host) return;
-          host.innerHTML='';
-          (lines||[]).forEach((l,idx)=>{
-            const row=document.createElement('div');
-            row.className='glline';
-            const chip=document.createElement('span');
-            chip.className='chip';
-            chip.style.background=GL_PALETTE[idx % GL_PALETTE.length];
-            const cb=document.createElement('input');
-            cb.type='checkbox'; cb.checked=!!l.on; cb.title='Show/hide';
-            const inp=document.createElement('input');
-            inp.className='input expr'; inp.placeholder= idx===0 ? 'f(x) e.g. sin(x)' : 'g(x) ...';
-            inp.value = l.expr||'';
-            const del=document.createElement('button');
-            del.className='btn tiny'; del.type='button'; del.textContent='✕';
-            del.title='Remove line';
-            cb.addEventListener('change', ()=>{ l.on=cb.checked; glSyncTextarea(lines); persist(); maybeLive(); });
-            inp.addEventListener('input', ()=>{ l.expr=inp.value; glSyncTextarea(lines); persist(); maybeLive(); });
-            del.addEventListener('click', ()=>{
-              lines.splice(idx,1);
-              if(lines.length===0) lines.push({on:true, expr:''});
-              glSyncTextarea(lines); persist(); glRenderLines(lines); maybeLive();
+              cb.addEventListener('change', ()=>{ l.on=cb.checked; glSyncTextarea(lines); persist(); maybeLive(); });
+              inp.addEventListener('input', ()=>{ l.expr=inp.value; glSyncTextarea(lines); persist(); maybeLive(); });
+              del.addEventListener('click', ()=>{
+                lines.splice(idx,1);
+                if(lines.length===0) lines.push({on:true, expr:''});
+                glSyncTextarea(lines); persist(); glRenderLines(lines); maybeLive();
+              });
+
+              row.appendChild(cb);
+              row.appendChild(chip);
+              row.appendChild(inp);
+              row.appendChild(del);
+              host.appendChild(row);
             });
-            row.appendChild(cb);
-            row.appendChild(chip);
-            row.appendChild(inp);
-            row.appendChild(del);
-            host.appendChild(row);
+          }
+
+          function parseLinesFromGx(gxText){
+            const out=[];
+            (String(gxText||'').split(/\r?\n/)).forEach(line=>{
+              let s=String(line||'').trim();
+              if(!s) return;
+              let on=true;
+              if(s.startsWith('#') || s.startsWith('//')){ on=false; s=s.replace(/^(#|\/\/)+\s*/,''); }
+              out.push({on, expr:s});
+            });
+            return out.length? out : [{on:true, expr:'sin(x)'}];
+          }
+
+          const saved = loadTab('graphlab', {
+            gx:'', xmin:'-10', xmax:'10', samples:'400',
+            d1:'0', tanOn:'0', x0:'0',
+            intOn:'0', a:'-1', b:'1',
+            rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0',
+            absOn:'0', betweenOn:'0',
+            autoPlot:'0', livePlot:'1', forgiving:'1',
+            glLines: null
           });
-        }
-        // --- end line editor ---
-        const GL_CTL_KEY = 'legendcalc.graphlab.hideControls';
-        function applyCtlState(){
-          const hide = (localStorage.getItem(GL_CTL_KEY) === '1');
-          document.body.classList.toggle('gl-hide-controls', hide);
-          const b = $('#glCtlToggle');
-          if(b) b.textContent = hide ? 'Show controls' : 'Controls';
-        }
-        $('#glCtlToggle')?.addEventListener('click', ()=>{
-          const cur = (localStorage.getItem(GL_CTL_KEY) === '1');
-          localStorage.setItem(GL_CTL_KEY, cur ? '0' : '1');
-          applyCtlState();
-        });
-        applyCtlState();
 
+          const lines = Array.isArray(saved.glLines) ? glSerialize(saved.glLines) : parseLinesFromGx(saved.gx);
+          if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
+          glSyncTextarea(lines);
+          glRenderLines(lines);
 
-        const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'400', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', ixOn:'0', traceOn:'0', xT:'0', absOn:'0', betweenOn:'0', autoPlot:'0', liveTyping:'1', forgiving:'1', glLines: null});
-        $('#gx').value=saved.gx||'';
-        if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
-        $('#d1').checked = (saved.d1==='1');
-        $('#tanOn').checked = (saved.tanOn==='1');
-        $('#x0').value = (saved.x0 ?? '0');
-        $('#x0r').value = $('#x0').value;
-        $('#intOn').checked = (saved.intOn==='1');
-        $('#absOn').checked = (saved.absOn==='1');
-        $('#betweenOn').checked = (saved.betweenOn==='1');
-        $('#autoPlot').checked = (saved.autoPlot!=='0');
-        $('#liveTyping').checked = (saved.liveTyping!=='0');
-        $('#forgiving').checked = (saved.forgiving!=='0');
-        $('#a').value = (saved.a ?? '-1');
-        $('#b').value = (saved.b ?? '1');
-        $('#rootsOn').checked = (saved.rootsOn==='1');
-        $('#ixOn').checked = (saved.ixOn==='1');
-        $('#traceOn').checked = (saved.traceOn==='1');
-        $('#xT').value = (saved.xT ?? '0');
-        $('#xTr').value = $('#xT').value;
-        function syncX0Bounds(){
-          const a = parseFloat($('#xmin').value)||-10;
-          const b = parseFloat($('#xmax').value)||10;
-          const lo = Math.min(a,b), hi = Math.max(a,b);
-          $('#x0r').min = String(lo);
-          $('#x0r').max = String(hi);
-          const v = Math.min(hi, Math.max(lo, parseFloat($('#x0').value)||0));
-          $('#x0').value = String(v);
-          $('#x0r').value = String(v);
-        }
-        function syncTraceBounds(){
-          const a = parseFloat($('#xmin').value)||-10;
-          const b = parseFloat($('#xmax').value)||10;
-          const lo = Math.min(a,b), hi = Math.max(a,b);
-          $('#xTr').min = String(lo);
-          $('#xTr').max = String(hi);
-          const v = Math.min(hi, Math.max(lo, parseFloat($('#xT').value)||0));
-          $('#xT').value = String(v);
-          $('#xTr').value = String(v);
-        }
-        syncX0Bounds();
-        syncTraceBounds();
+          // Restore controls safely (DOM exists now)
+          const xminEl=$('#xmin'), xmaxEl=$('#xmax'), sampEl=$('#samples');
+          if(xminEl) xminEl.value = saved.xmin || '-10';
+          if(xmaxEl) xmaxEl.value = saved.xmax || '10';
+          if(sampEl) sampEl.value = saved.samples || '400';
 
-        function persist(){
-          saveTab('graphlab', {gx:$('#gx').value, glLines: glSerialize(lines), xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value, d1:($('#d1').checked?'1':'0'), tanOn:($('#tanOn').checked?'1':'0'), x0:$('#x0').value, intOn:($('#intOn').checked?'1':'0'), a:$('#a').value, b:$('#b').value, rootsOn:($('#rootsOn').checked?'1':'0'), ixOn:($('#ixOn').checked?'1':'0'), traceOn:($('#traceOn').checked?'1':'0'), xT:$('#xT').value, absOn:($('#absOn').checked?'1':'0'), betweenOn:($('#betweenOn').checked?'1':'0'), autoPlot:($('#autoPlot').checked?'1':'0'), liveTyping:($('#liveTyping').checked?'1':'0'), forgiving:($('#forgiving').checked?'1':'0')});
-        }
-        $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
-        $('#d1').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#tanOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#intOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#absOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#betweenOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#autoPlot').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
-        $('#forgiving').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
-        $('#liveTyping').addEventListener('change', ()=>{ persist(); if($('#autoPlot').checked) schedulePlot(); });
-        $('#a').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
-        $('#b').addEventListener('input', ()=>{ persist(); if($('#intOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
-        $('#rootsOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#ixOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#traceOn').addEventListener('change', ()=>{ persist(); waitForGraphLibs(doPlot); });
-        $('#xT').addEventListener('input', ()=>{ $('#xTr').value=$('#xT').value; persist(); if($('#traceOn').checked) waitForGraphLibs(doPlot); });
-        $('#xTr').addEventListener('input', ()=>{ $('#xT').value=$('#xTr').value; persist(); if($('#traceOn').checked) waitForGraphLibs(doPlot); });
-        $('#x0').addEventListener('input', ()=>{ $('#x0r').value=$('#x0').value; persist(); if($('#tanOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
-        $('#x0r').addEventListener('input', ()=>{ $('#x0').value=$('#x0r').value; persist(); if($('#tanOn').checked) waitForGraphLibs(doPlot); else updateReadout(); });
-        $('#xmin').addEventListener('input', ()=>{ syncX0Bounds(); syncTraceBounds(); persist(); waitForGraphLibs(doPlot); });
-        $('#xmax').addEventListener('input', ()=>{ syncX0Bounds(); syncTraceBounds(); persist(); waitForGraphLibs(doPlot); });
+          const setChk = (id,v)=>{ const el=$('#'+id); if(el) el.checked=!!v; };
+          const setVal = (id,v)=>{ const el=$('#'+id); if(el) el.value=String(v); };
 
-        $('#clearSavedGL').onclick=()=>{
-          clearTab('graphlab');
-          ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
-          $('#x0').value='0'; $('#x0r').value='0';
-          $('#tanOn').checked=false;
-          $('#intOn').checked=false; $('#absOn').checked=false; $('#a').value='-1'; $('#b').value='1';
-          $('#rootsOn').checked=false;
-          $('#ixOn').checked=false;
-          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0';
-          $('#d1').checked=false;
-          window.Plotly.purge('chart');
-          $('#autoPlot').checked=true;
-          toast('GraphLab: cleared');
-        };
+          setChk('d1', saved.d1==='1');
+          setChk('tanOn', saved.tanOn==='1');
+          setVal('x0', saved.x0 ?? '0');
+          setVal('x0r', saved.x0 ?? '0');
 
-        function updateReadout(info){
-          const el = $('#glReadout');
-          if(!el) return;
-          el.innerHTML = info ? info : '';
-        }
+          setChk('intOn', saved.intOn==='1');
+          setVal('a', saved.a ?? '-1');
+          setVal('b', saved.b ?? '1');
 
-function doPlot(){
-          if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
-          const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
-          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value);
-          const nRaw=parseInt($('#samples').value,10)||400;
-          const isMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
-          const MAX_SAMPLES = isMobile ? 1200 : 2500;
-          const n = Math.max(50, Math.min(MAX_SAMPLES, nRaw));
-          if(n !== nRaw){ $('#samples').value = String(n); }
-          let fx0=null, fx1=null;
-          if(lines[0]){ try{ fx0 = window.math.parse(lines[0]).compile(); }catch(_){ fx0=null; } }
-          if(lines[1]){ try{ fx1 = window.math.parse(lines[1]).compile(); }catch(_){ fx1=null; } }
+          setChk('rootsOn', saved.rootsOn==='1');
+          setChk('ixOn', saved.ixOn==='1');
+          setChk('traceOn', saved.traceOn==='1');
+          setVal('xT', saved.xT ?? '0');
+          setVal('xTr', saved.xT ?? '0');
 
-          if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
+          setChk('absOn', saved.absOn==='1');
+          setChk('betweenOn', saved.betweenOn==='1');
 
-          try{
-            const xs = window.linspace(xmin,xmax,n);
-            const traces = [];
+          // Live plotting toggle (v1.4.54+)
+          const liveEl=$('#livePlot'); if(liveEl) liveEl.checked = (saved.livePlot!=='0');
 
-            function safeEval(compiled, scope){
-              try{
-                const v = compiled.evaluate(scope);
-                if(typeof v === 'number') return (Number.isFinite(v)? v : NaN);
-                // mathjs can return Complex/BigNumber/Fraction/Unit; we only graph real numbers
-                if(v && typeof v === 'object'){
-                  if('re' in v && 'im' in v) return (Number.isFinite(v.re) ? v.re : NaN);
-                }
-                return NaN;
-              }catch(_e){
-                return NaN;
-              }
-            }
-
-
-            let readoutParts = [];
-
-            // base functions
-            lines.forEach((ex,i)=>{
-              let f;
-              try{ f = window.math.parse(ex).compile(); }
-              catch(err){ readoutParts.push(`<span class="muted">Line ${i+1}: ${(err&&err.message)?err.message:'parse error'}</span>`); return; }
-              let bad=0; const ys = xs.map(x=>{ const y=safeEval(f,{x}); if(!Number.isFinite(y)) bad++; return y; });
-              if(bad===xs.length){ readoutParts.push(`<span class="muted">Line ${i+1}: eval failed (check syntax like sin(x), use lowercase)</span>`); }
-              traces.push({x:xs, y:ys, type:'scatter', mode:'lines', name: ex.length>22 ? (ex.slice(0,22)+'…') : ex, line:{color: window.GL_PALETTE[i % window.GL_PALETTE.length]}});
+          function persist(){
+            saveTab('graphlab', {
+              gx: ($('#gx')?.value || ''),
+              glLines: glSerialize(lines),
+              xmin: ($('#xmin')?.value || '-10'),
+              xmax: ($('#xmax')?.value || '10'),
+              samples: ($('#samples')?.value || '400'),
+              d1: $('#d1')?.checked ? '1':'0',
+              tanOn: $('#tanOn')?.checked ? '1':'0',
+              x0: $('#x0')?.value || '0',
+              intOn: $('#intOn')?.checked ? '1':'0',
+              a: $('#a')?.value || '-1',
+              b: $('#b')?.value || '1',
+              rootsOn: $('#rootsOn')?.checked ? '1':'0',
+              ixOn: $('#ixOn')?.checked ? '1':'0',
+              traceOn: $('#traceOn')?.checked ? '1':'0',
+              xT: $('#xT')?.value || '0',
+              absOn: $('#absOn')?.checked ? '1':'0',
+              betweenOn: $('#betweenOn')?.checked ? '1':'0',
+              livePlot: $('#livePlot')?.checked ? '1':'0',
+              forgiving: ($('#forgiving')?.checked ?? true) ? '1':'0'
             });
-
-            // derivative overlay for first line only
-            if($('#d1').checked && lines[0]){
-              try{
-                const dex = window.math.derivative(lines[0], 'x').toString();
-                const df = window.math.parse(dex).compile();
-                const dys = xs.map(x=> safeEval(df,{x}));
-                traces.push({x:xs, y:dys, type:'scatter', mode:'lines', name:`d/dx (${lines[0].length>18?lines[0].slice(0,18)+'…':lines[0]})`, line:{dash:'dot', width:2}, opacity:0.85});
-              }catch(_){
-                toast("Derivative overlay couldn't parse");
-              }
-            }
-
-            
-            // tangent line at x0 for first line
-            let tangentHTML = "";
-            if($('#tanOn')?.checked && lines[0]){
-              const x0 = parseFloat($('#x0').value);
-              try{
-                const fx = fx0 || window.math.parse(lines[0]).compile();
-                const y0 = safeEval(fx,{x:x0});
-                let mval = NaN;
-                try{
-                  const dex = window.math.derivative(lines[0], 'x').toString();
-                  const df = window.math.parse(dex).compile();
-                  mval = safeEval(df,{x:x0});
-                }catch(_){
-                  // numeric fallback
-                  const h = 1e-4 * Math.max(1, Math.abs(x0));
-                  const yph = safeEval(fx,{x:x0+h});
-                  const ymh = safeEval(fx,{x:x0-h});
-                  mval = (yph-ymh)/(2*h);
-                }
-
-                if(Number.isFinite(y0) && Number.isFinite(mval)){
-                  const ytan = xs.map(x => (mval*(x-x0) + y0));
-                  traces.push({x:xs, y:ytan, type:'scatter', mode:'lines', name:`tangent @ ${x0}`, line:{dash:'dash', width:2}, opacity:0.85});
-                  traces.push({x:[x0], y:[y0], type:'scatter', mode:'markers', name:'x₀', marker:{size:8}});
-                  const eq = `y = ${mval.toFixed(6)}(x − ${x0}) + ${y0.toFixed(6)}`;
-                  tangentHTML = `<b>Tangent</b> at x₀=${x0}: f(x₀)=${Number(y0).toFixed(6)}, slope=${Number(mval).toFixed(6)}<br><span class="muted">${eq}</span>`;
-                }else{
-                  tangentHTML = `<span class="muted">Tangent: function not finite at x₀</span>`;
-                }
-              }catch(err){
-                logErr(err);
-                tangentHTML = `<span class="muted">Tangent: parse/eval error</span>`;
-              }
-            }
-            // readout continues below
-            if(tangentHTML) readoutParts.push(tangentHTML);
-
-            
-            // numeric integral shading a..b for first line
-            if($('#intOn')?.checked && lines[0]){
-              const aa = parseFloat($('#a').value);
-              const bb = parseFloat($('#b').value);
-              const lo = Math.min(aa,bb), hi = Math.max(aa,bb);
-              const useAbs = !!$('#absOn')?.checked;
-              try{
-                const fx = fx0 || window.math.parse(lines[0]).compile();
-                const xs_ab = xs.filter(x => x>=lo && x<=hi);
-                if(xs_ab.length>=2){
-                  const ys_ab_raw = xs_ab.map(x=> safeEval(fx,{x}));
-                  const ys_ab = useAbs ? ys_ab_raw.map(y=> (Number.isFinite(y)? Math.abs(y): NaN)) : ys_ab_raw;
-
-                  // shading (to x-axis); if Abs area is on we shade |f(x)|
-                  traces.push({x:xs_ab, y:ys_ab, type:'scatter', mode:'lines', name: useAbs ? `|f(x)| area` : `∫ a..b`, fill:'tozeroy', opacity:0.25});
-
-                  // trapezoid numeric integral
-                  let area = 0;
-                  for(let i=1;i<xs_ab.length;i++){
-                    const dx = xs_ab[i]-xs_ab[i-1];
-                    const y1 = ys_ab[i-1], y2 = ys_ab[i];
-                    if(Number.isFinite(y1) && Number.isFinite(y2)) area += (y1+y2)*0.5*dx;
-                  }
-                  readoutParts.push(`<b>Integral</b> from a=${lo} to b=${hi}: ${useAbs?'abs area':'signed area'} ≈ ${area.toFixed(6)}`);
-                }else{
-                  readoutParts.push(`<span class="muted">Integral: increase samples or widen [a,b]</span>`);
-                }
-              }catch(err){
-                logErr(err);
-                readoutParts.push(`<span class="muted">Integral: parse/eval error</span>`);
-              }
-            }
-
-
-            // Root markers (zeros) for first line
-            if($('#rootsOn')?.checked && lines[0]){
-              try{
-                const fx = fx0 || window.math.parse(lines[0]).compile();
-                const roots = [];
-                const tol = 1e-6;
-                const maxIter = 30;
-
-                function fval(x){
-                  const y = safeEval(fx,{x});
-                  return (Number.isFinite(y) ? y : NaN);
-                }
-                function bisect(a,b){
-                  let fa=fval(a), fb=fval(b);
-                  if(!Number.isFinite(fa) || !Number.isFinite(fb)) return NaN;
-                  if(fa===0) return a;
-                  if(fb===0) return b;
-                  if(fa*fb>0) return NaN;
-                  let lo=a, hi=b, flo=fa, fhi=fb;
-                  for(let i=0;i<maxIter;i++){
-                    const mid=(lo+hi)/2;
-                    const fm=fval(mid);
-                    if(!Number.isFinite(fm)) break;
-                    if(Math.abs(fm) < tol) return mid;
-                    if(flo*fm<=0){ hi=mid; fhi=fm; }
-                    else { lo=mid; flo=fm; }
-                  }
-                  return (lo+hi)/2;
-                }
-
-                let prevX = xs[0];
-                let prevY = fval(prevX);
-                for(let i=1;i<xs.length;i++){
-                  const x = xs[i];
-                  const y = fval(x);
-                  if(Number.isFinite(prevY) && Number.isFinite(y)){
-                    if(prevY===0){
-                      roots.push(prevX);
-                    }else if(y===0){
-                      roots.push(x);
-                    }else if(prevY*y < 0){
-                      const r = bisect(prevX, x);
-                      if(Number.isFinite(r)) roots.push(r);
-                    }
-                  }
-                  prevX=x; prevY=y;
-                }
-
-                // de-dup close roots
-                roots.sort((a,b)=>a-b);
-                const uniq=[];
-                for(const r of roots){
-                  if(!uniq.length || Math.abs(r-uniq[uniq.length-1])>1e-3) uniq.push(r);
-                }
-
-                if(uniq.length){
-                  const yroots = uniq.map(x=>fval(x));
-                  traces.push({x:uniq, y:yroots, type:'scatter', mode:'markers', name:'roots', marker:{size:9, symbol:'circle-open'}, opacity:0.9});
-                  const list = uniq.slice(0,8).map(r=>r.toFixed(6)).join(', ');
-                  readoutParts.push(`<b>Roots</b> (${uniq.length}): ${list}${uniq.length>8?' …':''}`);
-                }else{
-                  readoutParts.push(`<span class="muted">Roots: none detected in [x-min, x-max]</span>`);
-                }
-              }catch(err){
-                logErr(err);
-                readoutParts.push(`<span class="muted">Roots: parse/eval error</span>`);
-              }
-            }
-
-            updateReadout(readoutParts.join('<br>'));
-
-            
-            // Trace cursor for first line (and derivative if enabled)
-            if($('#traceOn')?.checked && lines[0]){
-              try{
-                const x = parseFloat($('#xT').value);
-                const fx = fx0 || window.math.parse(lines[0]).compile();
-                const y = safeEval(fx,{x});
-                if(Number.isFinite(y)){
-                  traces.push({x:[x], y:[y], type:'scatter', mode:'markers+text', name:'trace', text:[`(${x.toFixed(4)}, ${Number(y).toFixed(6)})`], textposition:'top center', marker:{size:9}});
-                  // vertical line via shapes
-                  // We'll add shape in layout below.
-                  readoutParts.push(`<b>Trace</b> x=${x.toFixed(6)} → f(x)=${Number(y).toFixed(6)}`);
-                  if($('#d1')?.checked){
-                    try{
-                      const dex = window.math.derivative(lines[0],'x').toString();
-                      const df = window.math.parse(dex).compile();
-                      const m = safeEval(df,{x});
-                      if(Number.isFinite(m)) readoutParts.push(`<span class="muted">f'(x)=${Number(m).toFixed(6)}</span>`);
-                    }catch(_){}
-                  }
-                }else{
-                  readoutParts.push(`<span class="muted">Trace: f(x) not finite</span>`);
-                }
-              }catch(err){
-                logErr(err);
-                readoutParts.push(`<span class="muted">Trace: parse/eval error</span>`);
-              }
-            }
-
-            const layout = {
-              margin:{l:40,r:15,t:10,b:35},
-              xaxis:{title:'x', zeroline:true},
-              yaxis:{title:'y', zeroline:true},
-              paper_bgcolor:'rgba(0,0,0,0)',
-              plot_bgcolor:'rgba(0,0,0,0)',
-              showlegend:true,
-              legend:{orientation:'h', itemwidth:110}
-            };
-            // add trace vertical line
-            if($('#traceOn')?.checked){
-              const x = parseFloat($('#xT').value);
-              if(Number.isFinite(x)){
-                layout.shapes = (layout.shapes||[]).concat([{type:'line', x0:x, x1:x, y0:0, y1:1, xref:'x', yref:'paper', line:{dash:'dot', width:1}}]);
-              }
-            }
-
-            try{
-              window.Plotly.newPlot('chart', traces, layout, {responsive:true, displaylogo:false});
-            }catch(err){
-              logErr(err);
-              toast('Plot render error');
-              return;
-            }
-            persist();
-          }catch(err){
-            logErr(err);
-            toast('Plot error: ' + (err?.message||'unknown'));
           }
-        }
 
-        $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
-        $('#clearBtn').onclick=()=>{ try{ window.Plotly.purge('chart'); }catch(_){ } };
-        $('#exportBtn').onclick=()=>{ try{ window.Plotly.downloadImage('chart',{format:'png',filename:'legendcalc-graphlab'}); }catch(e){ toast('Export blocked'); } };
+          function maybeLive(){
+            if($('#livePlot')?.checked) schedulePlot();
+          }
 
-        // hotkeys
-        $('#gx').addEventListener('keydown',(e)=>{
-          if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='l'){ e.preventDefault(); $('#gx').value=''; doPlot(); }
-          if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); doPlot(); }
-          if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); doPlot(); }
-        });
-
-        // initial plot if saved content exists
-        // initial plot only when user requests, to avoid lockups on some devices
-        // (enable Auto if you want live plotting)
-        // if($('#gx').value.trim()) waitForGraphLibs(doPlot);
-        // if Auto is enabled, keep the plot fresh while typing
-
-        function parseRawLines(){
-          const raw = ($('#gx')?.value || '').split('\n');
-          const rows = [];
-          raw.forEach((line, i)=>{
-            const s = String(line||'');
-            const trimmed = s.trim();
-            if(!trimmed){ return; }
-            const disabled = trimmed.startsWith('#') || trimmed.startsWith('//');
-            const clean = disabled ? trimmed.replace(/^#\s*/,'').replace(/^\/\/\s*/,'') : trimmed;
-            rows.push({text: clean, enabled: !disabled, srcIndex: i+1});
+          // +Line / Clear
+          $('#glAddLine')?.addEventListener('click', ()=>{
+            lines.push({on:true, expr:''});
+            glSyncTextarea(lines); persist(); glRenderLines(lines); maybeLive();
           });
-          return rows;
-        }
-
-        function buildRawLines(rows){
-          return rows.map(r=>{
-            const ex = (r.text||'').trim();
-            if(!ex) return '';
-            return r.enabled ? ex : ('# ' + ex);
-          }).filter(Boolean).join('\n');
-        }
-
-        function renderFxList(){
-          const host = $('#fxList');
-          if(!host) return;
-          const rows = parseRawLines();
-          // If empty, seed one row
-          const seed = rows.length ? rows : [{text:'sin(x)', enabled:true, srcIndex:1}];
-          host.innerHTML = '';
-          seed.forEach((r, i)=>{
-            const row = document.createElement('div');
-            row.className = 'fxrow';
-            const sw = document.createElement('div');
-            sw.className = 'fxswatch';
-            sw.style.background = window.GL_PALETTE[i % window.GL_PALETTE.length];
-
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.checked = !!r.enabled;
-            chk.title = 'Show/hide';
-
-            
-            const eye = document.createElement('span');
-            eye.className = 'eyeBtn' + (r.enabled ? '' : ' off');
-            eye.textContent = '👁';
-            eye.title = 'Show/hide';
-const inp = document.createElement('input');
-            inp.type = 'text';
-            inp.value = r.text;
-            inp.placeholder = i===0 ? 'sin(x)' : 'x^2 - 3x + 2';
-
-            const del = document.createElement('button');
-            del.type = 'button';
-            del.className = 'fxdel';
-            del.textContent = '×';
-            del.title = 'Remove';
-
-            // layout: checkbox + input + delete, with swatch inside checkbox area
-            const leftWrap = document.createElement('div');
-            leftWrap.style.display='flex';
-            leftWrap.style.alignItems='center';
-            leftWrap.style.gap='8px';
-            leftWrap.appendChild(sw);
-            leftWrap.appendChild(chk);
-            leftWrap.appendChild(eye);
-
-            row.appendChild(leftWrap);
-            eye.addEventListener('click', ()=>{
-              chk.checked = !chk.checked;
-              eye.classList.toggle('off', !chk.checked);
-              apply();
-            });
-            row.appendChild(inp);
-            row.appendChild(del);
-            host.appendChild(row);
-
-            const apply = ()=>{
-              const next = parseRawLines();
-              // if list length differs (seed case), rebuild from DOM instead
-              const domRows = Array.from(host.querySelectorAll('.fxrow')).map((rr, j)=>({
-                text: rr.querySelector('input[type="text"]').value,
-                enabled: rr.querySelector('input[type="checkbox"]').checked
-              }));
-              $('#gx').value = buildRawLines(domRows);
-              persist();
-              const live = !!$('#liveTyping')?.checked;
-              if($('#autoPlot')?.checked) schedulePlot(false);
-              else if(live && glHasPlotted) schedulePlot(true);
-            };
-
-            chk.addEventListener('change', apply);
-            inp.addEventListener('input', ()=>{
-              const live = !!$('#liveTyping')?.checked;
-              if($('#autoPlot')?.checked) apply();
-              else if(live && glHasPlotted) apply();
-              else { persist(); }
-            });
-            inp.addEventListener('change', apply);
-            del.addEventListener('click', ()=>{
-              row.remove();
-              apply();
-              renderFxList();
-            });
+          $('#glClearLines')?.addEventListener('click', ()=>{
+            lines.splice(0, lines.length, {on:true, expr:''});
+            glSyncTextarea(lines); persist(); glRenderLines(lines);
+            toast('Lines cleared');
+            maybeLive();
           });
-        }
 
-        // Live plotting (debounced) when Auto is enabled
-        let _plotTimer=null;
-        function schedulePlot(force=false){
-          if(!force && !$('#autoPlot')?.checked) return;
-          clearTimeout(_plotTimer);
-          _plotTimer=setTimeout(()=>waitForGraphLibs(doPlot), 250);
-        }
+          // Plot button + input listeners
+          $('#plotBtn')?.addEventListener('click', ()=>{ doPlot(); });
 
-        // no auto plot on first render unless user toggles Auto
-        // if($('#autoPlot')?.checked) schedulePlot();
-      }
+          ;['xmin','xmax','samples','x0','a','b','xT'].forEach(id=>{
+            const el=$('#'+id);
+            if(el) el.addEventListener('input', ()=>{ persist(); maybeLive(); });
+          });
+          ;['d1','tanOn','intOn','rootsOn','ixOn','traceOn','absOn','betweenOn','livePlot'].forEach(id=>{
+            const el=$('#'+id);
+            if(el) el.addEventListener('change', ()=>{ persist(); maybeLive(); });
+          });
 
+          // initial plot (if something exists)
+          if(($('#gx')?.value||'').trim()) doPlot();
+        }, 0);
 
-function renderGraph(){
-        const view=$('#view');
-        view.innerHTML=`
-          <section class="surface">
-            <div class="row">
-              <label style="grid-column:1/-1"><div class="note">Functions (one per line)</div>
-                <textarea id="gx" class="input" rows="4" placeholder="e.g.\nsin(x)\nx^2 - 3x + 2\nexp(-x^2)"></textarea>
-              </label>
-              </div>
-              </div>
-              <div class="glr">
-
-            <div class="chartwrap"><div id="glLegend" class="glegend" style="display:none"></div><div id="chart" class="chart"></div></div>
-            <div id="glReadout" class="note" style="margin-top:8px"></div>
-
-              </div>
-              <div class="gllBottom">
-            <div class="row">
-
-              <label><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
-              <label><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
-              <label><div class="note">Samples</div><input id="samples" class="input" type="number" value="400"></label>
-            </div>
-            <div class="btnbar" style="display:flex;gap:8px;margin:10px 0">
-              <button class="btn primary" id="plotBtn">Plot</button>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="autoPlot"> Auto</label>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="liveTyping"> Live</label>
-              <label class="pill" style="align-self:center"><input type="checkbox" id="forgiving"> Forgiving</label>
-              <button class="btn" id="clearBtn">Clear</button>
-              <button class="btn" id="exportBtn">Export PNG</button>
-              <button class="btn" id="clearSavedGraph" title="Forget saved inputs">Clear Saved</button>
-            </div>
-            <div id="chart" class="chart"></div>
-            <div id="glReadout" class="note" style="margin-top:8px"></div>
-            <div class="note">Hotkeys: <b>Enter</b> new line + plot, <b>Shift+Enter</b> new line (no plot), <b>Ctrl/Cmd+Enter</b> plot only, <b>Ctrl+L</b> clear.</div>
-          </section>`;
-
-        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
-
-
-        const saved = loadTab('graph', {gx:'', xmin:'-10', xmax:'10', samples:'400'});
-        $('#gx').value=saved.gx||'';
-        if(!$('#gx').value.trim()) $('#gx').value='sin(x)'; $('#xmin').value=saved.xmin||'-10'; $('#xmax').value=saved.xmax||'10'; $('#samples').value=saved.samples||'400';
-        function persist(){ saveTab('graph', {gx:$('#gx').value, xmin:$('#xmin').value, xmax:$('#xmax').value, samples:$('#samples').value}); }
-        $$('.input').forEach(el=> el.addEventListener('input', ()=>{ persist(); schedulePlot(); }));
-        $('#clearSavedGraph').onclick=()=>{ clearTab('graph'); ['gx','xmin','xmax','samples'].forEach(id=>$('#'+id).value='');
-          $('#x0').value='0'; $('#x0r').value='0';
-          $('#tanOn').checked=false;
-          $('#intOn').checked=false; $('#absOn').checked=false; $('#a').value='-1'; $('#b').value='1';
-          $('#rootsOn').checked=false;
-          $('#ixOn').checked=false;
-          $('#traceOn').checked=false; $('#xT').value='0'; $('#xTr').value='0'; window.Plotly.purge('chart'); };
-
-        function updateReadout(info){
-          const el = $('#glReadout');
-          if(!el) return;
-          el.innerHTML = info ? info : '';
-        }
-
-function doPlot(){
-          if(!graphLibsReady()){ toast('GraphLab: loading…'); return; }
-          const lines=$('#gx').value.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,6);
-          const xmin=parseFloat($('#xmin').value), xmax=parseFloat($('#xmax').value), n=parseInt($('#samples').value,10)||400;
-          let fx0=null, fx1=null;
-          if(lines[0]){ try{ fx0 = window.math.parse(lines[0]).compile(); }catch(_){ fx0=null; } }
-          if(lines[1]){ try{ fx1 = window.math.parse(lines[1]).compile(); }catch(_){ fx1=null; } }
-
-          if(!lines.length){ try{ window.Plotly.purge('chart'); }catch(_){ } return; }
-          try{
-            const xs = window.linspace(xmin,xmax,n);
-            const traces = lines.map((ex,i)=>{
-              const f = window.math.parse(ex).compile();
-              let bad=0; const ys = xs.map(x=>{ const y=safeEval(f,{x}); if(!Number.isFinite(y)) bad++; return y; });
-              if(bad===xs.length){ readoutParts.push(`<span class="muted">Line ${i+1}: eval failed (check syntax like sin(x), use lowercase)</span>`); }
-              return {x:xs,y:ys,mode:'lines',name:ex};
-            });
-            window.Plotly.newPlot('chart',traces,{paper_bgcolor:'transparent',plot_bgcolor:'#0b0e13',margin:{l:45,r:10,b:35,t:10},xaxis:{gridcolor:'#1f2735',zeroline:false},yaxis:{gridcolor:'#1f2735',zeroline:false}});
-            persist();
-          }catch(e){ alert('Parse error in one of the functions'); }
-        }
-
-        $('#plotBtn').onclick=()=>waitForGraphLibs(doPlot);
-        $('#clearBtn').onclick=()=>{ try{ window.Plotly.purge('chart'); }catch(_){ } };
-        $('#exportBtn').onclick=async ()=>{
-          try{ const url = await Plotly.toImage('chart',{format:'png',height:600,width:900,scale:2}); const a=document.createElement('a'); a.href=url; a.download='legendcalc-graph.png'; a.click(); }catch(e){ alert('Export failed'); }
-        };
-        function linspace(a,b,n){ const arr=new Array(n); const h=(b-a)/(n-1); for(let i=0;i<n;i++) arr[i]=a+i*h; return arr; }
-
-
-        // Responsive resize (helps iPhone rotation / address-bar collapse)
-        let _rzT=null;
-        window.addEventListener('resize', ()=>{
-          if(!_rzT) _rzT=setTimeout(()=>{
-            _rzT=null;
-            try{ Plotly.Plots.resize('chart'); }catch(_){}
-          }, 120);
-        }, {passive:true});
-
-        // Hotkeys on textarea
-        const gx = $('#gx');
-        gx.addEventListener('keydown', (e)=>{
-          const meta = e.ctrlKey || e.metaKey;
-          if(meta && e.key.toLowerCase()==='l'){ // Ctrl/Cmd+L: clear
-            e.preventDefault();
-            window.Plotly.purge('chart');
-          $('#autoPlot').checked=true;
-            return;
-          }
-          if(meta && e.key==='Enter'){ // plot only
-            e.preventDefault();
-            doPlot();
-            return;
-          }
-          if(e.key==='Enter' && e.shiftKey){ // newline, no plot
-            // allow default newline insertion
-            setTimeout(()=>{ persist(); },0);
-            return;
-          }
-          if(e.key==='Enter' && !e.shiftKey && !meta){ // newline + plot
-            e.preventDefault();
-            const start = gx.selectionStart, end = gx.selectionEnd;
-            const val = gx.value;
-            gx.value = val.slice(0, start) + '\n' + val.slice(end);
-            gx.selectionStart = gx.selectionEnd = start + 1;
-            persist();
-            doPlot();
-          }
-        });
-
-        if(($('#gx').value||'').trim()) doPlot();
       }
 
             /* ---------- Torque Intelligence ---------- */

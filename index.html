@@ -625,7 +625,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.59 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.60 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1225,14 +1225,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>`;
 
-        // Defer GraphLab initialization until DOM nodes exist (prevents null element crashes)
-        const glToken = String(Date.now()) + ':' + Math.random().toString(16).slice(2);
-        view.dataset.glToken = glToken;
+        
+        // Defer GraphLab init until after DOM is painted (prevents null element crashes)
+        const token = String(Date.now()) + ':' + Math.random().toString(16).slice(2);
+        view.dataset.glToken = token;
 
-        function initGraphLab(){
-          
-          
-                  function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+        setTimeout(() => {
+          if (!view.isConnected) return;
+          if (view.dataset.glToken !== token) return; // tab re-rendered
+          function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
           
           
           
@@ -1349,11 +1350,11 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                   if(xmaxEl) xmaxEl.value = saved.xmax || '10';
                   if(sampEl) sampEl.value = saved.samples || '400';
                   if(gxEl && !gxEl.value.trim()) gxEl.value='sin(x)';
-                  setChk('d1', (saved.d1==='1'));
-                  setChk('tanOn', (saved.tanOn==='1'));
+                  $('#d1').checked = (saved.d1==='1');
+                  $('#tanOn').checked = (saved.tanOn==='1');
                   $('#x0').value = (saved.x0 ?? '0');
                   $('#x0r').value = $('#x0').value;
-                  setChk('intOn', (saved.intOn==='1'));
+                  $('#intOn').checked = (saved.intOn==='1');
                   $('#absOn').checked = (saved.absOn==='1');
                   $('#betweenOn').checked = (saved.betweenOn==='1');
                   $('#autoPlot').checked = (saved.autoPlot!=='0');
@@ -1361,9 +1362,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                   $('#forgiving').checked = (saved.forgiving!=='0');
                   $('#a').value = (saved.a ?? '-1');
                   $('#b').value = (saved.b ?? '1');
-                  setChk('rootsOn', (saved.rootsOn==='1'));
-                  setChk('ixOn', (saved.ixOn==='1'));
-                  setChk('traceOn', (saved.traceOn==='1'));
+                  $('#rootsOn').checked = (saved.rootsOn==='1');
+                  $('#ixOn').checked = (saved.ixOn==='1');
+                  $('#traceOn').checked = (saved.traceOn==='1');
                   $('#xT').value = (saved.xT ?? '0');
                   $('#xTr').value = $('#xT').value;
                   function syncX0Bounds(){
@@ -1966,13 +1967,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           
                       /* ---------- Torque Intelligence ---------- */
                 
-        }
-
-        requestAnimationFrame(()=>{
-          if(!view.isConnected) return;
-          if(view.dataset.glToken !== glToken) return; // tab re-rendered
-          initGraphLab();
-        });
+        }, 0);
 function renderTorque(){
         const view=$('#view');
         view.innerHTML = `

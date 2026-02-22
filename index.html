@@ -57,9 +57,9 @@
     body{min-height:100vh}
     body{margin:0;background:linear-gradient(180deg,var(--bg),#0e121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
-    header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+    header{margin-bottom:14px}
     h1{font-family:Ringbearer,Inter,serif;letter-spacing:1px;font-size:1.8rem;margin:0;color:var(--accent)}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
     .tab{border:0;background:var(--tab-bg);color:var(--tab-fg);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800}
     .tab.active{background:var(--tab-active-bg);color:var(--tab-active-fg)}
     .surface{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px}
@@ -310,7 +310,7 @@ button{
 
 
 /* ---------- v1.3.5 Mobile layout upgrade (keeps desktop the same) ---------- */
-.titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.titleline{display:flex;justify-content:center;align-items:baseline;gap:10px;flex-wrap:wrap;text-align:center}
 .ver{font-size:.85rem;font-weight:800;opacity:1;color:var(--muted);white-space:nowrap}
 @media (max-width: 900px){
   .wrap{margin:0 auto; padding: 0 12px}
@@ -393,6 +393,7 @@ button{
     /* Toast colors */
     
     @media (max-width:520px){
+  .tabs{justify-content:flex-start;}
       #diag{pointer-events:none;position:fixed;left:10px;right:10px;bottom:64px;margin:0;z-index:2000}
       .settings-drawer .sheet{left:12px;right:12px;width:auto}
     }
@@ -435,7 +436,7 @@ button{
   /* keep sections from double-padding */
   .card .card{padding:10px;}
   /* tab strip hint */
-  .tabswrap{position:relative;}
+  .tabswrap{width:100%;position:relative;}
   .tabswrap::after{
     content:"";
     position:absolute; top:0; right:0; height:100%; width:26px;
@@ -625,7 +626,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.60 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.62 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1965,9 +1966,11 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                   if(($('#gx').value||'').trim()) doPlot();
                 }
           
-                      /* ---------- Torque Intelligence ---------- */
+                      
                 
         }, 0);
+      }
+
 function renderTorque(){
         const view=$('#view');
         view.innerHTML = `

@@ -625,7 +625,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.56 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.57 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1342,19 +1342,20 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         if(xmaxEl) xmaxEl.value = saved.xmax || '10';
         if(sampEl) sampEl.value = saved.samples || '400';
         if(gxEl && !gxEl.value.trim()) gxEl.value='sin(x)';
-        $('#d1').checked = (saved.d1==='1');
-        $('#tanOn').checked = (saved.tanOn==='1');
-        $('#x0').value = (saved.x0 ?? '0');
-        $('#x0r').value = $('#x0').value;
-        $('#intOn').checked = (saved.intOn==='1');
-        $('#absOn').checked = (saved.absOn==='1');
-        $('#betweenOn').checked = (saved.betweenOn==='1');
-        $('#autoPlot').checked = (saved.autoPlot!=='0');
-        $('#liveTyping').checked = (saved.liveTyping!=='0');
-        $('#forgiving').checked = (saved.forgiving!=='0');
-        $('#a').value = (saved.a ?? '-1');
-        $('#b').value = (saved.b ?? '1');
-        $('#rootsOn').checked = (saved.rootsOn==='1');
+        const d1El=$('#d1'); if(d1El) d1El.checked = (saved.d1==='1');
+        const tanEl=$('#tanOn'); if(tanEl) tanEl.checked = (saved.tanOn==='1');
+        const x0El=$('#x0'); if(x0El) x0El.value = (saved.x0 ?? '0');
+        const x0rEl=$('#x0r'); if(x0rEl && x0El) x0rEl.value = x0El.value;
+        const intEl=$('#intOn'); if(intEl) intEl.checked = (saved.intOn==='1');
+        const absEl=$('#absOn'); if(absEl) absEl.checked = (saved.absOn==='1');
+        const betweenEl=$('#betweenOn'); if(betweenEl) betweenEl.checked = (saved.betweenOn==='1');
+        const autoEl=$('#autoPlot'); if(autoEl) autoEl.checked = (saved.autoPlot!=='0');
+        const liveEl=$('#liveTyping'); if(liveEl) liveEl.checked = (saved.liveTyping!=='0');
+        const forgEl=$('#forgiving'); if(forgEl) forgEl.checked = (saved.forgiving!=='0');
+
+        const aEl=$('#a'); if(aEl) aEl.value = (saved.a ?? '-1');
+        const bEl=$('#b'); if(bEl) bEl.value = (saved.b ?? '1');
+        const rootsEl=$('#rootsOn'); if(rootsEl) rootsEl.checked = (saved.rootsOn==='1');
         $('#ixOn').checked = (saved.ixOn==='1');
         $('#traceOn').checked = (saved.traceOn==='1');
         $('#xT').value = (saved.xT ?? '0');

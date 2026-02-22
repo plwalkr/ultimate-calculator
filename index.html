@@ -608,7 +608,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.52 • 2026-02-20</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.53 • 2026-02-20</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2309,19 +2309,29 @@ function stageRow(nmValue='30', unit='nm'){
                 <div class="section-title">Today Summary</div>
                 <div id="todayOut"></div>
                  <div class="hr"></div>
-                 <div class="section-title">Finish my shift</div>
-                 <div class="row" style="gap:10px;flex-wrap:wrap">
-                   <label><div class="note">Target total (h)</div><input id="totalGoal" class="input" type="number" step="0.25" value="40"><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" id="tg12" type="button">12h</button><button class="btn" id="tg36" type="button">36h</button><button class="btn" id="tg40" type="button">40h</button></div></label>
-                   <label><div class="note">Unpaid break (min)</div><input id="breakUnpaid" class="input" type="number" value="0"></label>
-                   <label style="min-width:180px"><div class="note">Use start time</div>
-                     <select id="startMode" class="input">
-                       <option value="auto">Auto (open punch if present)</option>
-                       <option value="nextin">Next IN</option>
-                     </select>
+                 
+                 <div class="hr"></div>
+                 <div class="section-title">Shift planner</div>
+                 <div class="note">Enter your times (manual). We’ll tell you how long you still need and what time to clock out.</div>
+
+                 <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px">
+                   <label style="min-width:180px">
+                     <div class="note">Target (h)</div>
+                     <input id="spTarget" class="input" type="number" step="0.25" value="12">
+                     <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap">
+                       <button class="btn" id="sp12" type="button">12h</button>
+                       <button class="btn" id="sp36" type="button">36h</button>
+                       <button class="btn" id="sp40" type="button">40h</button>
+                     </div>
                    </label>
-                   <label><div class="note">Next IN</div><input id="nextIn" class="input" type="time"></label>
+
+                   <label><div class="note">Clock IN</div><input id="spIn1" class="input" type="time"></label>
+                   <label><div class="note">Break OUT (optional)</div><input id="spOut1" class="input" type="time"></label>
+                   <label><div class="note">Back IN (optional)</div><input id="spIn2" class="input" type="time"></label>
                  </div>
-                 <div id="totalNeedOut" class="note" style="margin-top:6px"></div>
+
+                 <div id="spOut" class="note" style="margin-top:10px"></div>
+          
           
               </div>
               <div class="surface">
@@ -2358,13 +2368,15 @@ function stageRow(nmValue='30', unit='nm'){
         fmtSel.value = time12 ? '12' : '24';
 
         const todayStr = toLocalDate(new Date());
-        const saved = loadTab('time', {goalH:'8', paidL:'0', totalGoal:'40', nextIn:'', breakUnpaid:'0', startMode:'auto', rows:[{date:todayStr,in:'',out:''}]});
+        const saved = loadTab('time', {goalH:'8', paidL:'0', spTarget:'12', spIn1:'', spOut1:'', spIn2:'', rows:[{date:todayStr,in:'',out:''}]});
         $('#goalH').value = saved.goalH || '8';
         $('#paidL').value = saved.paidL || '0';
-        $('#totalGoal').value = saved.totalGoal || '40';
-        $('#nextIn').value = saved.nextIn || '';
-        $('#breakUnpaid').value = saved.breakUnpaid || '0';
-        $('#startMode').value = saved.startMode || 'auto';
+        // Shift planner
+        $('#spTarget').value = saved.spTarget || '12';
+        $('#spIn1').value = saved.spIn1 || '';
+        $('#spOut1').value = saved.spOut1 || '';
+        $('#spIn2').value = saved.spIn2 || '';
+
 
 
         rowsEl.addEventListener('input', ()=>{ recompute(); persist(); });
@@ -2391,7 +2403,7 @@ function stageRow(nmValue='30', unit='nm'){
             const id=inp.getAttribute('data-in'); const out=$(`input[data-out="${id}"]`); const date=$(`input[data-date="${id}"]`);
             return {date: (date&&date.value)||todayStr, in: inp.value||'', out: (out&&out.value)||''};
           });
-          saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', totalGoal:$('#totalGoal').value||'40', nextIn:$('#nextIn').value||'', breakUnpaid:$('#breakUnpaid').value||'0', startMode:$('#startMode').value||'auto', rows});
+          saveTab('time', {goalH:$('#goalH').value||'8', paidL:$('#paidL').value||'0', spTarget:$('#spTarget').value||'12', spIn1:$('#spIn1').value||'', spOut1:$('#spOut1').value||'', spIn2:$('#spIn2').value||'', rows});
         }
 
         function addRow(initial){
@@ -2499,23 +2511,17 @@ function stageRow(nmValue='30', unit='nm'){
         $('#nowOut').onclick=()=>{ const inputs=$$('input[data-out]'); const open=[...inputs].find(i=>!i.value); if(open){ open.value=toLocalTime(new Date()); recompute(); persist(); } };
         $('#goalH').addEventListener('input',()=>{ recompute(); persist(); });
         $('#paidL').addEventListener('change',()=>{ recompute(); persist(); });
-        $('#totalGoal').addEventListener('input',()=>{ recompute(); persist(); });
-        $('#nextIn').addEventListener('change',()=>{ recompute(); persist(); });
-        $('#breakUnpaid').addEventListener('input',()=>{ recompute(); persist(); });
-        $('#startMode').addEventListener('change',()=>{ recompute(); persist(); });
-        // Quick targets
+        // Shift planner listeners
+        function setSP(h){ $('#spTarget').value=String(h); toast(`Target: ${h}h`); recompute(); persist(); }
+        $('#sp12')?.addEventListener('click', ()=>setSP(12));
+        $('#sp36')?.addEventListener('click', ()=>setSP(36));
+        $('#sp40')?.addEventListener('click', ()=>setSP(40));
+        ;['spTarget','spIn1','spOut1','spIn2'].forEach(id=>{ $('#'+id)?.addEventListener('input', ()=>{ recompute(); persist(); }); });
+
         function setGoal(h){
-          $('#totalGoal').value = String(h);
           toast(`Target total: ${h}h`);
           recompute(); persist();
         }
-        $('#tg12')?.addEventListener('click', ()=>setGoal(12));
-        $('#tg36')?.addEventListener('click', ()=>setGoal(36));
-        $('#tg40')?.addEventListener('click', ()=>setGoal(40));
-
-        $('#totalGoal').addEventListener('input',()=>{ recompute(); persist(); });
-        $('#nextIn').addEventListener('change',()=>{ recompute(); persist(); });
-        $('#breakUnpaid').addEventListener('input',()=>{ recompute(); persist(); });
 
         if(saved.rows && saved.rows.length){ saved.rows.forEach(r=>addRow(r)); } else { addRow(); }
         recompute();

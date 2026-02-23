@@ -542,14 +542,21 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 /* GraphLab layout grid */
 .glgrid{
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 'top right' 'bottom right';
-display:grid;grid-template-columns:1fr;gap:14px;}
+  display:grid;
+  gap:14px;
+  grid-template-columns:1fr;
+  /* Mobile: stack inputs -> graph -> controls */
+  grid-template-areas:
+    'top'
+    'right'
+    'bottom';
+}
 @media (min-width: 980px){
   .glgrid{
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 'top right' 'bottom right';
-grid-template-columns:420px 1fr;align-items:start;}
+    grid-template-columns:420px 1fr;
+    grid-template-areas: 'top right' 'bottom right';
+    align-items:start;
+  }
 }
 .gllTop{grid-area:top;}
     .gllBottom{grid-area:bottom;}
@@ -626,7 +633,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.65 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.66 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>

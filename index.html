@@ -621,12 +621,12 @@ grid-template-columns:420px 1fr;align-items:start;}
 .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0;}
 .cpick{width:34px;height:34px;padding:0;border:none;background:transparent;}
 </style>
-    <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.64 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.65 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -828,7 +828,6 @@ function doPlot(){
     expr: String(l.expr||'').trim(),
     color: l.color || null
   }));
-  });
 
   let xmin = parseFloat(xminEl.value); if(!isFinite(xmin)) xmin=-10;
   let xmax = parseFloat(xmaxEl.value); if(!isFinite(xmax)) xmax=10;

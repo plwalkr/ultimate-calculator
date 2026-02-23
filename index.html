@@ -626,7 +626,7 @@ grid-template-columns:420px 1fr;align-items:start;}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.63 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.64 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -756,15 +756,16 @@ grid-template-columns:420px 1fr;align-items:start;}
       }
     })();
 
-    
       function forceHideOverlays(){
+        // NOTE: This runs before startApp() defines the $ helper, so it must NOT use $().
         try{
-          const d = $('#settingsDrawer');
+          const d = document.getElementById('settingsDrawer');
           if(d){ d.style.display='none'; d.classList.remove('open'); d.setAttribute('aria-hidden','true'); }
-          const p = $('#dbgPanel');
+          const p = document.getElementById('dbgPanel');
           if(p){ p.style.display='none'; p.classList.remove('open'); p.setAttribute('aria-hidden','true'); }
         }catch(_){}
       }
+
 
 function startApp(){
         forceHideOverlays();

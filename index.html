@@ -619,13 +619,14 @@ grid-template-columns:420px 1fr;align-items:start;}
 
 
 .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0;}
+.cpick{width:34px;height:34px;padding:0;border:none;background:transparent;}
 </style>
     <link rel="manifest" href="data:application/manifest+json,{"name":"LegendCalc","short_name":"LegendCalc","start_url":".","display":"standalone","background_color":"#0b1a12","theme_color":"#0b1a12","icons":[]}">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.62 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.63 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -811,13 +812,21 @@ function doPlot(){
 
   if(!(window.math && window.Plotly)) { toast('GraphLab: loading libs...'); return; }
 
-  const rawLines = String(gxEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
-
-  const enabled = [];
-  rawLines.forEach(line=>{
-    // allow disabling via "# " prefix
-    if(line.startsWith('#') || line.startsWith('//')) return;
-    enabled.push(line);
+  // Prefer structured line state (colors + enabled), fallback to gx textarea
+  const st = (typeof loadTab==='function') ? loadTab('graphlab', {}) : {};
+  let lines = Array.isArray(st.glLines) ? st.glLines : null;
+  if(!lines){
+    const rawLines = String(gxEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
+    lines = rawLines.map(s=>{
+      let on=true, expr=s;
+      if(expr.startsWith('#') || expr.startsWith('//')){ on=false; expr=expr.replace(/^(#+|\/\/+)\s*/,''); }
+      return {on, expr, color:null};
+    });
+  }
+  const enabled = lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>({
+    expr: String(l.expr||'').trim(),
+    color: l.color || null
+  }));
   });
 
   let xmin = parseFloat(xminEl.value); if(!isFinite(xmin)) xmin=-10;
@@ -838,7 +847,8 @@ function doPlot(){
   const traces = [];
 
   // helper to compile once per expression
-  enabled.forEach((expr, idx)=>{
+  enabled.forEach((item, idx)=>{
+    const expr = item.expr;
     try{
       const node = window.math.parse(expr);
       const compiled = node.compile();
@@ -853,7 +863,7 @@ function doPlot(){
         y: ys,
         mode: 'lines',
         name: expr,
-        line: { width: 2, color: palette[idx % palette.length] }
+        line: { width: 2, color: (item.color || palette[idx % palette.length]) }
       });
     }catch(e){
       try{ dbgAdd('ERROR', 'GraphLab parse: ' + expr + ' → ' + (e && e.message ? e.message : e)); }catch(_){}
@@ -876,7 +886,7 @@ function doPlot(){
   // Use first enabled function for overlays
   if(enabled.length){
     try{
-      const expr0 = enabled[0];
+      const expr0 = enabled[0].expr;
       const fnode = window.math.parse(expr0);
       const f = fnode.compile();
 
@@ -1448,7 +1458,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             return x;
           }
           function glSerialize(lines){
-            return (lines||[]).map(l=>({on:!!l.on, expr:String(l.expr||'')}));
+            return (lines||[]).map(l=>({on:!!l.on, expr:String(l.expr||''), color:(l.color||null)}));
           }
           function glSyncTextarea(lines){
             const gx=$('#gx');
@@ -1471,7 +1481,14 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
               const chip=document.createElement('span');
               chip.className='chip';
-              chip.style.background=GL_PALETTE[idx % GL_PALETTE.length];
+              const defaultColor = GL_PALETTE[idx % GL_PALETTE.length];
+              chip.style.background = (l.color || defaultColor);
+
+              const cPick=document.createElement('input');
+              cPick.type='color';
+              cPick.className='cpick';
+              cPick.value = (l.color || defaultColor);
+              cPick.title='Line color';
 
               const inp=document.createElement('input');
               inp.className='input expr';
@@ -1484,6 +1501,13 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
               cb.addEventListener('change', ()=>{
                 l.on=cb.checked;
+                glSyncTextarea(lines);
+                persist();
+                if($('#livePlot')?.checked) schedulePlot();
+              });
+              cPick.addEventListener('input', ()=>{
+                l.color = cPick.value;
+                chip.style.background = cPick.value;
                 glSyncTextarea(lines);
                 persist();
                 if($('#livePlot')?.checked) schedulePlot();
@@ -1505,6 +1529,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
               row.appendChild(cb);
               row.appendChild(chip);
+              row.appendChild(cPick);
               row.appendChild(inp);
               row.appendChild(del);
               host.appendChild(row);

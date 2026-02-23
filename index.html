@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.67 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.68 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1710,6 +1710,87 @@ function renderTorque(){
 
               <div id="tStages" class="stack" style="margin-top:10px"></div>
             </div>
+
+            <div class="panel" style="margin-top:14px">
+              <div class="section-title">Clamp-load estimator (simple)</div>
+              <div class="note">Uses the quick shop formula <b>T = K · F · D</b>. Good for estimates and “sanity checks” — always follow the service manual when a spec exists.</div>
+
+              <div class="row" style="margin-top:10px">
+                <label style="flex:1;min-width:180px">
+                  <div class="note">Bolt diameter D</div>
+                  <input id="tBoltDia" class="input" type="number" inputmode="decimal" placeholder="e.g. 0.472 or 12">
+                </label>
+                <label style="min-width:140px">
+                  <div class="note">Dia unit</div>
+                  <select id="tBoltDiaUnit" class="input">
+                    <option value="in">in</option>
+                    <option value="mm">mm</option>
+                  </select>
+                </label>
+                <label style="min-width:160px">
+                  <div class="note">K factor</div>
+                  <input id="tK" class="input" type="number" inputmode="decimal" step="0.01" placeholder="0.20">
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:10px;align-items:center">
+                <label class="pill" style="justify-content:center;gap:10px">
+                  <input id="tKAuto" type="checkbox" checked>
+                  <span>Auto K from thread condition</span>
+                </label>
+
+                <label style="flex:1;min-width:200px">
+                  <div class="note">Mode</div>
+                  <select id="tEstMode" class="input">
+                    <option value="torque">Torque from clamp load</option>
+                    <option value="clamp">Clamp load from torque</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <label style="flex:1;min-width:200px">
+                  <div class="note">Clamp load F</div>
+                  <input id="tClampVal" class="input" type="number" inputmode="decimal" placeholder="e.g. 12000">
+                </label>
+                <label style="min-width:140px">
+                  <div class="note">Clamp unit</div>
+                  <select id="tClampUnit" class="input">
+                    <option value="lbf">lbf</option>
+                    <option value="n">N</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <label style="flex:1;min-width:200px">
+                  <div class="note">Torque T</div>
+                  <input id="tEstTVal" class="input" type="number" inputmode="decimal" placeholder="e.g. 150">
+                </label>
+                <label style="min-width:140px">
+                  <div class="note">Torque unit</div>
+                  <select id="tEstTUnit" class="input">
+                    <option value="ftlb">ft·lb</option>
+                    <option value="nm">N·m</option>
+                    <option value="inlb">in·lb</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:12px">
+                <div class="card" style="flex:1">
+                  <div class="note">Estimated torque</div>
+                  <div style="font-weight:900;font-size:1.2rem" id="tEstTorqueOut">—</div>
+                  <div class="note" id="tEstTorqueOut2">—</div>
+                </div>
+                <div class="card" style="flex:1">
+                  <div class="note">Estimated clamp load</div>
+                  <div style="font-weight:900;font-size:1.2rem" id="tEstClampOut">—</div>
+                  <div class="note" id="tEstClampOut2">—</div>
+                </div>
+              </div>
+            </div>
+
           </section>
         `;
 
@@ -1775,7 +1856,136 @@ function renderTorque(){
         const noteEl = $('#tSpecNote');
         if(noteEl){
           noteEl.value = savedT.specNote || '';
-          noteEl.addEventListener('input', ()=> saveTorqueState({specNote: noteEl.value}));
+          noteEl.addEventListener\('input', \(\)=> saveTorqueState\(\{specNote: noteEl.value\}\)\);
+        \}
+
+
+        // Clamp-load estimator (T = K * F * D)
+        const LBF_TO_N = 4.4482216152605;
+        const IN_TO_M = 0.0254;
+        const MM_TO_M = 0.001;
+
+        const K_BY_COND = { dry: 0.20, lube: 0.15, lock: 0.17 };
+        function getCond(){
+          return ($$('input[name="tCond"]:checked')[0]?.value) || 'dry';
+        }
+        function nmToUnit(nm, unit){
+          const v = Number(nm);
+          if(!Number.isFinite(v)) return NaN;
+          if(unit==='nm') return v;
+          if(unit==='ftlb') return v / NM_PER_FTLB;
+          if(unit==='inlb') return v / NM_PER_INLB;
+          return NaN;
+        }
+        function diaToM(val, unit){
+          const v = Number(val);
+          if(!Number.isFinite(v) || v<=0) return NaN;
+          if(unit==='mm') return v * MM_TO_M;
+          return v * IN_TO_M; // inches default
+        }
+        function forceToN(val, unit){
+          const v = Number(val);
+          if(!Number.isFinite(v) || v<=0) return NaN;
+          if(unit==='n') return v;
+          return v * LBF_TO_N; // lbf default
+        }
+        function nToUnit(n, unit){
+          const v = Number(n);
+          if(!Number.isFinite(v)) return NaN;
+          if(unit==='n') return v;
+          return v / LBF_TO_N;
+        }
+
+        function syncKFromCond(){
+          const kEl = $('#tK');
+          const auto = $('#tKAuto');
+          if(!kEl || !auto || !auto.checked) return;
+          const cond = getCond();
+          const k = (cond==='lube') ? K_BY_COND.lube : (cond==='lock' ? K_BY_COND.lock : K_BY_COND.dry);
+          // only overwrite if blank or previously auto-set
+          if(!kEl.value || kEl.dataset.auto==='1'){
+            kEl.value = String(k);
+            kEl.dataset.auto = '1';
+          }
+        }
+
+        function clampEstimatorUpdate(){
+          const modeEl = $('#tEstMode');
+          const kEl = $('#tK');
+          const dEl = $('#tBoltDia');
+          const duEl = $('#tBoltDiaUnit');
+          const fEl = $('#tClampVal');
+          const fuEl = $('#tClampUnit');
+          const tEl = $('#tEstTVal');
+          const tuEl = $('#tEstTUnit');
+
+          const outT = $('#tEstTorqueOut');
+          const outT2 = $('#tEstTorqueOut2');
+          const outF = $('#tEstClampOut');
+          const outF2 = $('#tEstClampOut2');
+
+          if(!modeEl || !kEl || !dEl || !duEl || !fEl || !fuEl || !tEl || !tuEl || !outT || !outT2 || !outF || !outF2) return;
+
+          // mode UI
+          const mode = modeEl.value || 'torque';
+          const torqueMode = (mode === 'torque');
+          fEl.disabled = !torqueMode;
+          fuEl.disabled = !torqueMode;
+          tEl.disabled = torqueMode;
+          tuEl.disabled = torqueMode;
+
+          const K = Number(kEl.value);
+          const Dm = diaToM(dEl.value, duEl.value);
+          if(!Number.isFinite(K) || K<=0 || !Number.isFinite(Dm)){
+            outT.textContent = '—';
+            outT2.textContent = 'Enter diameter + K';
+            outF.textContent = '—';
+            outF2.textContent = '—';
+            return;
+          }
+
+          let F_N = NaN;
+          let T_Nm = NaN;
+
+          if(torqueMode){
+            F_N = forceToN(fEl.value, fuEl.value);
+            if(Number.isFinite(F_N)) T_Nm = K * F_N * Dm;
+          }else{
+            T_Nm = toNm(tEl.value, tuEl.value);
+            if(Number.isFinite(T_Nm)) F_N = T_Nm / (K * Dm);
+          }
+
+          if(Number.isFinite(T_Nm)){
+            const ft = nmToUnit(T_Nm, 'ftlb');
+            const inch = nmToUnit(T_Nm, 'inlb');
+            outT.textContent = `${fmt(ft)} ft·lb`;
+            outT2.textContent = `${fmt(T_Nm)} N·m  •  ${fmt(inch)} in·lb`;
+          }else{
+            outT.textContent = '—';
+            outT2.textContent = torqueMode ? 'Enter clamp load' : 'Enter torque';
+          }
+
+          if(Number.isFinite(F_N)){
+            const lbf = nToUnit(F_N, 'lbf');
+            outF.textContent = `${(Number.isFinite(lbf)? lbf.toFixed(0) : '—')} lbf`;
+            outF2.textContent = `${(Number.isFinite(F_N)? F_N.toFixed(0) : '—')} N`;
+          }else{
+            outF.textContent = '—';
+            outF2.textContent = '—';
+          }
+
+          // persist estimator inputs
+          saveTorqueState({
+            boltDia: dEl.value,
+            boltDiaUnit: duEl.value,
+            k: kEl.value,
+            kAuto: !!($('#tKAuto')?.checked),
+            estMode: modeEl.value,
+            clampVal: fEl.value,
+            clampUnit: fuEl.value,
+            estTVal: tEl.value,
+            estTUnit: tuEl.value
+          });
         }
 
 function stageRow(nmValue='30', unit='nm'){
@@ -1899,6 +2109,48 @@ function stageRow(nmValue='30', unit='nm'){
         stageBox.appendChild(stageRow('30','nm'));
         stageBox.appendChild(stageRow('60','nm'));
         stageBox.appendChild(stageRow('90','nm'));
+
+
+        // restore estimator state
+        (function initClampEstimator(){
+          const st = loadTorqueState();
+          const dEl = $('#tBoltDia'); if(dEl && st.boltDia!=null) dEl.value = st.boltDia;
+          const duEl = $('#tBoltDiaUnit'); if(duEl && st.boltDiaUnit) duEl.value = st.boltDiaUnit;
+          const kEl = $('#tK'); if(kEl && st.k!=null) { kEl.value = st.k; kEl.dataset.auto = (st.kAuto ? '1':'0'); }
+          const autoEl = $('#tKAuto'); if(autoEl && st.kAuto!=null) autoEl.checked = !!st.kAuto;
+          const mEl = $('#tEstMode'); if(mEl && st.estMode) mEl.value = st.estMode;
+          const fEl = $('#tClampVal'); if(fEl && st.clampVal!=null) fEl.value = st.clampVal;
+          const fuEl = $('#tClampUnit'); if(fuEl && st.clampUnit) fuEl.value = st.clampUnit;
+          const tEl = $('#tEstTVal'); if(tEl && st.estTVal!=null) tEl.value = st.estTVal;
+          const tuEl = $('#tEstTUnit'); if(tuEl && st.estTUnit) tuEl.value = st.estTUnit;
+
+          // default values if empty
+          if(duEl && !duEl.value) duEl.value = 'in';
+          if(fuEl && !fuEl.value) fuEl.value = 'lbf';
+          if(tuEl && !tuEl.value) tuEl.value = 'ftlb';
+
+          // wire listeners (guarded)
+          const onAny = (el, evt)=>{ try{ el && el.addEventListener(evt, clampEstimatorUpdate); }catch(_){ } };
+          ['input','change'].forEach(evt=>{
+            onAny(dEl, evt); onAny(duEl, evt); onAny($('#tClampVal'), evt); onAny($('#tClampUnit'), evt);
+            onAny($('#tEstTVal'), evt); onAny($('#tEstTUnit'), evt); onAny($('#tEstMode'), evt);
+          });
+
+          // K handling
+          if(kEl){
+            kEl.addEventListener('input', ()=>{ kEl.dataset.auto='0'; clampEstimatorUpdate(); });
+          }
+          if(autoEl){
+            autoEl.addEventListener('change', ()=>{ if(autoEl.checked){ if(kEl) kEl.dataset.auto='1'; syncKFromCond(); } clampEstimatorUpdate(); });
+          }
+
+          // keep K synced to condition when auto is on
+          $$('input[name="tCond"]').forEach(r=>r.addEventListener('change', ()=>{ syncKFromCond(); clampEstimatorUpdate(); }));
+
+          // seed K from condition if auto and empty
+          syncKFromCond();
+          clampEstimatorUpdate();
+        })();
 
         update();
         updateGuidance();

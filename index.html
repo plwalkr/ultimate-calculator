@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.66 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.67 • 2026-02-22</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -970,9 +970,10 @@ function doPlot(){
     xaxis: {range:[xmin,xmax], showgrid: gridOn, zeroline: true},
     yaxis: {showgrid: gridOn, zeroline: true},
     showlegend: false,
+    dragmode: 'pan',
   };
 
-  const config = {displayModeBar:false, responsive:true};
+  const config = {displayModeBar:false, responsive:true, scrollZoom:true, doubleClick:'reset'};
 
   try{
     window.Plotly.newPlot(chartEl, traces.length? traces : [{x:[0],y:[0],mode:'lines',line:{width:0}}], layout, config);

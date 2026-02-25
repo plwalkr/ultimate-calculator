@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.68 • 2026-02-22</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.69 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1856,8 +1856,8 @@ function renderTorque(){
         const noteEl = $('#tSpecNote');
         if(noteEl){
           noteEl.value = savedT.specNote || '';
-          noteEl.addEventListener\('input', \(\)=> saveTorqueState\(\{specNote: noteEl.value\}\)\);
-        \}
+          noteEl.addEventListener('input', ()=> saveTorqueState({specNote: noteEl.value}));
+        }
 
 
         // Clamp-load estimator (T = K * F * D)

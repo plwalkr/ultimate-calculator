@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.73 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.74 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -924,8 +924,38 @@ function doPlot(){
         }
       }
 
+      
+      // Signed definite integral + shading
+      // Uses Simpson’s Rule on [lo, hi] to compute ∫ f(x) dx (signed)
+      const ro = document.getElementById('glReadout');
+      if(ro) ro.textContent = '';
       if(intOn && isFinite(a) && isFinite(b)){
         const lo = Math.min(a,b), hi = Math.max(a,b);
+
+        // Simpson’s Rule (N must be even)
+        const N = 400;
+        const h = (hi - lo) / N;
+
+        let sum = 0;
+        for(let i=0;i<=N;i++){
+          const x = lo + i*h;
+          const fx = safeEval(x);
+          if(fx === null) continue;
+
+          if(i===0 || i===N) sum += fx;
+          else if(i%2===0) sum += 2*fx;
+          else sum += 4*fx;
+        }
+        const areaVal = (h/3) * sum;
+
+        if(ro){
+          const fmt = (v)=> (typeof v==='number' && isFinite(v)) ? (Math.abs(v)>=1e6 ? v.toExponential(6) : v.toPrecision(8)) : String(v);
+          ro.innerHTML =
+            `∫[${fmt(lo)}, ${fmt(hi)}] f(x) dx ≈ <b>${fmt(areaVal)}</b><br>` +
+            `<span style="font-weight:400">Simpson’s Rule (N=${N}, h=${fmt(h)}, signed)</span>`;
+        }
+
+        // Shading
         const xs2 = xs.filter(x=>x>=lo && x<=hi);
         const ys2 = xs2.map(x=> safeEval(x));
         traces.push({
@@ -938,6 +968,7 @@ function doPlot(){
           line: {width: 0.5}
         });
       }
+
 
       if(rootsOn){
         // simple sign-change root markers

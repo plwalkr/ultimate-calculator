@@ -715,13 +715,36 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .mpBtn{width:100%}
 }
 
+
+/* --- MathPad UI polish (readability + spacing) --- */
+.mathpad .mpHead{padding:14px 14px}
+.mathpad .mpBody{padding:14px}
+.mpExpr{min-height:104px;font-size:1.08rem;line-height:1.35}
+.mpRow{gap:12px}
+.mpBtn{padding:12px 14px;font-size:1.02rem}
+.mpOut{padding:12px 14px}
+.mpOut .label{font-size:1.05rem}
+.mpOut pre{font-size:1.05rem}
+.mpErr{margin-top:10px;border:1px solid rgba(255,99,99,.35);background:rgba(255,99,99,.10);border-radius:14px;padding:10px 12px;font-weight:800}
+.theme-light .mpErr{background:#fff1f1;border-color:#ffb3b3}
+.mpGrid{display:grid;gap:12px}
+@media (min-width: 860px){ .mpGrid{grid-template-columns: 1.2fr .8fr} }
+.mpCard{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.03);padding:12px}
+.theme-light .mpCard{border-color:#d6e3fb;background:#eef3ff}
+.mpCardTitle{font-weight:900;margin:0 0 10px 0;font-size:1.05rem}
+.mpField{display:flex;flex-direction:column;gap:6px}
+.mpField label{font-weight:900}
+.mpBtns{display:grid;gap:10px}
+@media (min-width: 520px){ .mpBtns{grid-template-columns: repeat(4,1fr);} }
+@media (max-width: 520px){ .mpBtns{grid-template-columns: 1fr 1fr;} }
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.80 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.81 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -867,9 +890,12 @@ function initMathPad(){
   const exprEl = document.getElementById('mpExpr');
   const varEl  = document.getElementById('mpVar');
   const aEl    = document.getElementById('mpA');
+  const xEl    = document.getElementById('mpX');
   const bEl    = document.getElementById('mpB');
   const nEl    = document.getElementById('mpN');
   const outBox = document.getElementById('mpOut');
+  const outLab = document.getElementById('mpOutLabel');
+  const errBox = document.getElementById('mpErr');
   const outTxt = document.getElementById('mpOutText');
   const workDet= document.getElementById('mpWork');
   const workBd = document.getElementById('mpWorkBody');
@@ -887,12 +913,13 @@ function initMathPad(){
     if(st.a!=null) aEl.value = st.a;
     if(st.b!=null) bEl.value = st.b;
     if(st.n!=null) nEl.value = st.n;
+    if(st.x!=null && xEl) xEl.value = st.x;
   }catch(_){}
   const save = ()=>{
     try{
       localStorage.setItem('lc_mathpad', JSON.stringify({
         expr: exprEl.value, v: varEl.value||'x',
-        a: aEl.value, b: bEl.value, n: nEl.value
+        a: aEl.value, b: bEl.value, n: nEl.value, x: (xEl?xEl.value:'')
       }));
     }catch(_){}
   };
@@ -902,11 +929,18 @@ function initMathPad(){
     aEl.addEventListener(ev, save);
     bEl.addEventListener(ev, save);
     nEl.addEventListener(ev, save);
+    if(xEl) xEl.addEventListener(ev, save);
   });
 
-  const showOut = (label, val, workHtml)=>{
+  
+  const showOut = (label, val, workHtml, errMsg)=>{
+    if(errBox){
+      if(errMsg){ errBox.style.display='block'; errBox.textContent = errMsg; }
+      else { errBox.style.display='none'; errBox.textContent=''; }
+    }
+    if(outLab) outLab.textContent = label;
     outBox.style.display = 'block';
-    outTxt.textContent = `${label}\n${val}`;
+    outTxt.textContent = val;
     if(workHtml){
       workDet.style.display='block';
       workBd.innerHTML = workHtml;
@@ -916,6 +950,7 @@ function initMathPad(){
     }
   };
 
+
   const getExpr = ()=> (exprEl.value||'').trim();
   const getVar  = ()=> (varEl.value||'x').trim() || 'x';
 
@@ -924,17 +959,39 @@ function initMathPad(){
     return Number.isFinite(v) ? v : null;
   };
 
+  
   btnEval.addEventListener('click', ()=>{
     const expr = getExpr();
-    if(!expr) return showOut('Evaluate', 'Enter an expression first.');
+    const v = getVar();
+    const xraw = (xEl && xEl.value ? xEl.value : '').trim();
+
+    if(!expr) return showOut('Evaluate', 'Enter an expression first.', '', 'No expression provided.');
+
     try{
-      const res = window.math.evaluate(expr);
-      showOut('Evaluate', String(res),
-        `<div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
-         <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
-      );
+      let res;
+      if(xraw !== ''){
+        const xv = Number(xraw);
+        if(!Number.isFinite(xv)) return showOut('Evaluate', 'Enter a numeric value.', '', 'x must be a number.');
+        const compiled = window.math.compile(expr);
+        res = compiled.evaluate({[v]: xv});
+        showOut(
+          `Evaluate at ${v}=${xv}`,
+          String(res),
+          `<div><b>f(${escapeHtml(v)})</b> = <span class="mono">${escapeHtml(expr)}</span></div>
+           <div style="margin-top:6px"><b>${escapeHtml(v)}</b> = ${escapeHtml(String(xv))}</div>
+           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
+        );
+      }else{
+        res = window.math.evaluate(expr);
+        showOut(
+          'Evaluate',
+          String(res),
+          `<div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
+           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
+        );
+      }
     }catch(e){
-      showOut('Evaluate', (e && e.message) ? e.message : String(e));
+      showOut('Evaluate', (e && e.message) ? e.message : String(e), '', 'Math error while evaluating.');
     }
   });
 
@@ -944,7 +1001,7 @@ function initMathPad(){
     if(!expr) return showOut('Derivative', 'Enter an expression first.');
     try{
       const d = window.math.derivative(expr, v).toString();
-      showOut(`d/d${v}`, d,
+      showOut(`Derivative d/d${v}`, d,
         `<div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
          <div style="margin-top:6px"><b>Derivative</b>: f′(${escapeHtml(v)}) = <span class="mono">${escapeHtml(d)}</span></div>`
       );
@@ -985,7 +1042,7 @@ function initMathPad(){
         else sum += 4*fx;
       }
       const area = (h/3)*sum;
-      showOut(`∫ a→b (signed)`, area.toPrecision(10),
+      showOut(`Integral ∫ a→b (signed)`, area.toPrecision(10),
         `<div><b>Integral</b>: ∫<sub>${lo}</sub><sup>${hi}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
          <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule (N=${N}, h=${h.toPrecision(6)}, signed)</div>
          <div style="margin-top:6px"><b>Result</b>: ${area.toPrecision(10)}</div>
@@ -996,8 +1053,11 @@ function initMathPad(){
     }
   });
 
+  
   btnClr.addEventListener('click', ()=>{
     exprEl.value='';
+    if(xEl) xEl.value='';
+    if(errBox){ errBox.style.display='none'; errBox.textContent=''; }
     outBox.style.display='none';
     workDet.style.display='none';
     try{ localStorage.removeItem('lc_mathpad'); }catch(_){}
@@ -1610,38 +1670,67 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
           </section>
 
+
 <div class="mathpad" id="mathPad">
   <div class="mpHead">
     <span class="kpill">MathPad</span>
-    <span class="note" style="font-weight:700;">(symbolic + numeric calculus)</span>
+    <span class="note" style="font-weight:800;">Evaluate • Derivative • Definite Integral</span>
   </div>
   <div class="mpBody">
-    <div class="note" style="margin-bottom:8px">
-      Type an expression using MathJS style (examples: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">log(x)</span>). Use lowercase trig.
+
+    <div class="mpGrid">
+      <div class="mpCard">
+        <div class="mpCardTitle">Expression</div>
+        <div class="note" style="margin-bottom:10px">
+          Use MathJS syntax (lowercase trig). Examples: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">log(x)</span>, <span class="mono">sqrt(x)</span>.
+        </div>
+        <textarea id="mpExpr" class="mpExpr" placeholder="f(x) = ...  e.g.  sin(x) + x^2"></textarea>
+
+        <div class="mpField" style="margin-top:12px">
+          <label class="note">Evaluate at (optional)</label>
+          <div class="mpRow">
+            <input id="mpVar" class="inp" value="x" style="max-width:120px" aria-label="variable">
+            <span class="note" style="font-weight:900">=</span>
+            <input id="mpX" class="inp" value="" placeholder="value (e.g. 2.5)" style="max-width:220px" aria-label="x value">
+            <span class="note" style="font-weight:700;opacity:.85">leave blank to evaluate constants</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mpCard">
+        <div class="mpCardTitle">Integral settings</div>
+        <div class="mpRow">
+          <div class="mpField" style="flex:1 1 120px">
+            <label class="note">a</label>
+            <input id="mpA" class="inp" value="0">
+          </div>
+          <div class="mpField" style="flex:1 1 120px">
+            <label class="note">b</label>
+            <input id="mpB" class="inp" value="1">
+          </div>
+          <div class="mpField" style="flex:1 1 140px">
+            <label class="note">N (even)</label>
+            <input id="mpN" class="inp" value="400">
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:10px">
+          Definite integral uses <b>Simpson’s Rule</b> (signed area). Bigger N = more accuracy but slower.
+        </div>
+
+        <div class="mpBtns" style="margin-top:12px">
+          <button class="mpBtn" id="mpEval">Evaluate</button>
+          <button class="mpBtn" id="mpDeriv">Derivative d/dx</button>
+          <button class="mpBtn" id="mpInt">Integral ∫ a→b</button>
+          <button class="mpBtn" id="mpClear">Clear</button>
+        </div>
+      </div>
     </div>
 
-    <textarea id="mpExpr" class="mpExpr" placeholder="Example: sin(x) + x^2"></textarea>
-
-    <div class="mpRow" style="margin-top:10px">
-      <label class="note" style="font-weight:900;min-width:90px">Variable</label>
-      <input id="mpVar" class="inp" value="x" style="max-width:120px">
-      <label class="note" style="font-weight:900;min-width:40px">a</label>
-      <input id="mpA" class="inp" value="0" style="max-width:120px">
-      <label class="note" style="font-weight:900;min-width:40px">b</label>
-      <input id="mpB" class="inp" value="1" style="max-width:120px">
-      <label class="note" style="font-weight:900;min-width:40px">N</label>
-      <input id="mpN" class="inp" value="400" style="max-width:120px">
-    </div>
-
-    <div class="mpRow" style="margin-top:10px">
-      <button class="mpBtn mpMini" id="mpEval">Evaluate</button>
-      <button class="mpBtn mpMini" id="mpDeriv">d/dx</button>
-      <button class="mpBtn mpMini" id="mpInt">∫ a→b</button>
-      <button class="mpBtn mpMini" id="mpClear">Clear</button>
-    </div>
+    <div id="mpErr" class="mpErr" style="display:none"></div>
 
     <div class="mpOut" id="mpOut" style="display:none">
-      <div class="label">Result</div>
+      <div class="label" id="mpOutLabel">Result</div>
       <pre id="mpOutText"></pre>
     </div>
 
@@ -1649,8 +1738,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       <summary>Show work</summary>
       <div class="workBody" id="mpWorkBody"></div>
     </details>
+
   </div>
 </div>
+
 
 `;
 

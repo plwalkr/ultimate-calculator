@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.70 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.71 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1629,69 +1629,72 @@ function renderTorque(){
         view.innerHTML = `
           <section class="surface">
             <div class="section-title">Torque Intelligence</div>
+            <div class="note" style="margin-top:-6px">Fast conversions + “sanity-check” math helpers. <b>Specs live in the service manual</b>; this page helps you convert, plan stages, and avoid dry/lube mistakes.</div>
 
-            <div class="graphlab-grid">
-              <div class="panel graphlab-controls">
-                <div class="section-title">Converter</div>
-                <div class="row">
-                  <label style="flex:1">
-                    <div class="note">Input</div>
-                    <input id="tInVal" class="input" type="number" inputmode="decimal" value="100">
-                  </label>
-                  <label style="min-width:140px">
-                    <div class="note">Unit</div>
-                    <select id="tInUnit" class="input">
-                      <option value="nm">N·m</option>
-                      <option value="ftlb">ft·lb</option>
-                      <option value="inlb">in·lb</option>
-                    </select>
-                  </label>
+            <details open class="card" style="margin-top:12px;padding:12px">
+              <summary style="font-weight:900;cursor:pointer">Converter</summary>
+              <div class="note" style="margin-top:6px">Enter any unit and get all three. (1 ft·lb = 12 in·lb)</div>
+
+              <div class="row" style="margin-top:10px">
+                <label style="flex:1">
+                  <div class="note">Input</div>
+                  <input id="tInVal" class="input" type="number" inputmode="decimal" value="100">
+                </label>
+                <label style="min-width:140px">
+                  <div class="note">Unit</div>
+                  <select id="tInUnit" class="input">
+                    <option value="nm">N·m</option>
+                    <option value="ftlb">ft·lb</option>
+                    <option value="inlb">in·lb</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <div class="card" style="flex:1">
+                  <div class="note">N·m</div>
+                  <div class="big" id="tOutNm">—</div>
                 </div>
-
-                <div class="row" style="margin-top:10px">
-                  <div class="card" style="flex:1">
-                    <div class="note">N·m</div>
-                    <div class="big" id="tOutNm">—</div>
-                  </div>
-                  <div class="card" style="flex:1">
-                    <div class="note">ft·lb</div>
-                    <div class="big" id="tOutFt">—</div>
-                  </div>
-                  <div class="card" style="flex:1">
-                    <div class="note">in·lb</div>
-                    <div class="big" id="tOutIn">—</div>
-                  </div>
+                <div class="card" style="flex:1">
+                  <div class="note">ft·lb</div>
+                  <div class="big" id="tOutFt">—</div>
                 </div>
-
-                <div class="note" style="margin-top:10px">
-                  Tip: use decimals freely. Example: <span class="kbd">74</span> ft·lb → N·m.
+                <div class="card" style="flex:1">
+                  <div class="note">in·lb</div>
+                  <div class="big" id="tOutIn">—</div>
                 </div>
               </div>
 
-              <div class="panel graphlab-plot">
-                <div class="section-title">Fast guidance</div>
-
-                <div class="row" style="gap:12px;flex-wrap:wrap">
-                  <label class="pill"><input type="radio" name="tCond" value="dry" checked> Dry</label>
-                  <label class="pill"><input type="radio" name="tCond" value="lube"> Lubed</label>
-                  <label class="pill"><input type="radio" name="tCond" value="tl"> Threadlocker</label>
-                </div>
-
-                <div class="card" style="margin-top:10px">
-                  <div class="note">Rule of thumb (not a spec)</div>
-                  <div id="tGuidance" style="margin-top:6px;line-height:1.35"></div>
-                </div>
-
-                <div class="note" style="margin-top:10px">
-                  Always follow the service manual torque spec when you have it. These notes help you avoid the classic “dry vs lubed” mistake.
-                </div>
+              <div class="note" style="margin-top:10px">
+                Tip: use decimals freely. Example: <span class="kbd">74</span> ft·lb → N·m.
               </div>
-            </div>
+            </details>
 
+            <details open class="card" style="margin-top:12px;padding:12px">
+              <summary style="font-weight:900;cursor:pointer">Dry vs lubed guidance</summary>
+              <div class="note" style="margin-top:6px">Why it matters: lubrication changes friction, which changes clamp load for the <i>same torque</i>.</div>
 
-            <div class="panel" style="margin-top:14px">
-              <div class="section-title">Spec note + copy</div>
-              <div class="row" style="gap:10px;flex-wrap:wrap">
+              <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:10px">
+                <label class="pill"><input type="radio" name="tCond" value="dry" checked> Dry</label>
+                <label class="pill"><input type="radio" name="tCond" value="lube"> Lubed</label>
+                <label class="pill"><input type="radio" name="tCond" value="tl"> Threadlocker</label>
+              </div>
+
+              <div class="card" style="margin-top:10px">
+                <div class="note">Rule of thumb (not a spec)</div>
+                <div id="tGuidance" style="margin-top:6px;line-height:1.35"></div>
+              </div>
+
+              <div class="note" style="margin-top:10px">
+                Always follow the service manual torque spec when you have it. These notes help you avoid the classic “dry vs lubed” mistake.
+              </div>
+            </details>
+
+            <details class="card" style="margin-top:12px;padding:12px">
+              <summary style="font-weight:900;cursor:pointer">Spec note + copy plan</summary>
+              <div class="note" style="margin-top:6px">Keep a quick note (saved) and copy a tightening plan to text/clipboard.</div>
+
+              <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px">
                 <label style="flex:1;min-width:220px">
                   <div class="note">Spec note (saved)</div>
                   <input id="tSpecNote" class="input" type="text" placeholder="Example: wheel lugs, dry, per service manual">
@@ -1699,21 +1702,30 @@ function renderTorque(){
                 <button class="btn" id="tCopyPlan" type="button">Copy plan</button>
               </div>
               <div class="note" style="margin-top:8px" id="tCopyMsg"></div>
-            </div>
+            </details>
 
-            <div class="panel" style="margin-top:14px">
-              <div class="section-title">Stage tracker (optional)</div>
-              <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap">
-                <div class="note">Add stages like 30 → 60 → 90. Tap a stage to mark it done.</div>
+            <details class="card" style="margin-top:12px;padding:12px">
+              <summary style="font-weight:900;cursor:pointer">Stage tracker (optional)</summary>
+              <div class="note" style="margin-top:6px">Use for multi-step tightening: e.g., 30 → 60 → 90. Tap ○/✓ to mark a stage done.</div>
+
+              <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:10px">
+                <div class="note">Stages are for your process, not a spec.</div>
                 <button class="btn" id="tAddStage" type="button">+ Stage</button>
               </div>
 
               <div id="tStages" class="stack" style="margin-top:10px"></div>
-            </div>
+            </details>
 
-            <div class="panel" style="margin-top:14px">
-              <div class="section-title">Clamp-load estimator (simple)</div>
-              <div class="note">Uses the quick shop formula <b>T = K · F · D</b>. Good for estimates and “sanity checks” — always follow the service manual when a spec exists.</div>
+            <details class="card" style="margin-top:12px;padding:12px">
+              <summary style="font-weight:900;cursor:pointer">Clamp-load estimator (simple)</summary>
+              <div class="note" style="margin-top:6px">
+                Uses the shop formula <b>T = K · F · D</b> for estimates. Rearranged: <b>F = T / (K · D)</b>.
+                <br><span class="note">T = torque, F = clamp load, D = nominal bolt diameter, K = “nut factor” (friction).</span>
+              </div>
+
+              <div class="note" style="margin-top:8px">
+                Typical starting points (if you have no better guidance): Dry K≈0.20, Lubed K≈0.15, Threadlocker K≈0.17.
+              </div>
 
               <div class="row" style="margin-top:10px">
                 <label style="flex:1;min-width:240px">
@@ -1743,81 +1755,70 @@ function renderTorque(){
 
                 <label style="flex:1;min-width:180px">
                   <div class="note">Bolt diameter D</div>
-                  <input id="tBoltDia" class="input" type="number" inputmode="decimal" placeholder="e.g. 0.472 or 12">
+                  <input id="tBoltDia" class="input" type="number" inputmode="decimal" value="12">
                 </label>
+
                 <label style="min-width:140px">
                   <div class="note">Dia unit</div>
-                  <select id="tBoltDiaUnit" class="input">
-                    <option value="in">in</option>
+                  <select id="tDiaUnit" class="input">
                     <option value="mm">mm</option>
-                  </select>
-                </label>
-                <label style="min-width:160px">
-                  <div class="note">K factor</div>
-                  <input id="tK" class="input" type="number" inputmode="decimal" step="0.01" placeholder="0.20">
-                </label>
-              </div>
-
-              <div class="row" style="margin-top:10px;align-items:center">
-                <label class="pill" style="justify-content:center;gap:10px">
-                  <input id="tKAuto" type="checkbox" checked>
-                  <span>Auto K from thread condition</span>
-                </label>
-
-                <label style="flex:1;min-width:200px">
-                  <div class="note">Mode</div>
-                  <select id="tEstMode" class="input">
-                    <option value="torque">Torque from clamp load</option>
-                    <option value="clamp">Clamp load from torque</option>
+                    <option value="in">in</option>
                   </select>
                 </label>
               </div>
 
               <div class="row" style="margin-top:10px">
-                <label style="flex:1;min-width:200px">
+                <label style="flex:1;min-width:180px">
+                  <div class="note">Nut factor K</div>
+                  <input id="tK" class="input" type="number" inputmode="decimal" value="0.20" step="0.01">
+                </label>
+
+                <label style="flex:1;min-width:180px">
                   <div class="note">Clamp load F</div>
-                  <input id="tClampVal" class="input" type="number" inputmode="decimal" placeholder="e.g. 12000">
+                  <input id="tF" class="input" type="number" inputmode="decimal" value="12000">
                 </label>
+
                 <label style="min-width:140px">
-                  <div class="note">Clamp unit</div>
-                  <select id="tClampUnit" class="input">
+                  <div class="note">F unit</div>
+                  <select id="tFUnit" class="input">
                     <option value="lbf">lbf</option>
-                    <option value="n">N</option>
+                    <option value="N">N</option>
                   </select>
                 </label>
               </div>
 
               <div class="row" style="margin-top:10px">
-                <label style="flex:1;min-width:200px">
-                  <div class="note">Torque T</div>
-                  <input id="tEstTVal" class="input" type="number" inputmode="decimal" placeholder="e.g. 150">
+                <label style="flex:1;min-width:220px">
+                  <div class="note">Torque T (output)</div>
+                  <div class="card" id="tClampOut" style="padding:10px">—</div>
                 </label>
+
+                <label style="min-width:200px">
+                  <div class="note">Mode</div>
+                  <select id="tClampMode" class="input">
+                    <option value="t_from_f">Torque from clamp load</option>
+                    <option value="f_from_t">Clamp load from torque</option>
+                  </select>
+                </label>
+
+                <label style="flex:1;min-width:180px">
+                  <div class="note">Torque input (for F from T)</div>
+                  <input id="tTIn" class="input" type="number" inputmode="decimal" value="100">
+                </label>
+
                 <label style="min-width:140px">
-                  <div class="note">Torque unit</div>
-                  <select id="tEstTUnit" class="input">
-                    <option value="ftlb">ft·lb</option>
+                  <div class="note">T unit</div>
+                  <select id="tTUnit" class="input">
                     <option value="nm">N·m</option>
+                    <option value="ftlb">ft·lb</option>
                     <option value="inlb">in·lb</option>
                   </select>
                 </label>
               </div>
 
-              <div class="row" style="margin-top:12px">
-                <div class="card" style="flex:1">
-                  <div class="note">Estimated torque</div>
-                  <div style="font-weight:900;font-size:1.2rem" id="tEstTorqueOut">—</div>
-                  <div class="note" id="tEstTorqueOut2">—</div>
-                </div>
-                <div class="card" style="flex:1">
-                  <div class="note">Estimated clamp load</div>
-                  <div style="font-weight:900;font-size:1.2rem" id="tEstClampOut">—</div>
-                  <div class="note" id="tEstClampOut2">—</div>
-                </div>
-              </div>
-            </div>
-
-          </section>
-        `;
+              <div class="note" style="margin-top:10px">This estimator is intentionally simple. If you want the “real” version later: we’ll add thread pitch + stress area + proof load presets.</div>
+            </details>
+          </section>`;
 
         const NM_PER_FTLB = 1.3558179483314004;
         const NM_PER_INLB = 0.1129848290276167;

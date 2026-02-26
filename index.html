@@ -820,6 +820,9 @@ function doPlot(){
 
   if(!(window.math && window.Plotly)) { toast('GraphLab: loading libs...'); return; }
 
+  const readoutEl = document.getElementById('glReadout');
+  if(readoutEl) readoutEl.textContent = '';
+
   // Prefer structured line state (colors + enabled), fallback to gx textarea
   const st = (typeof loadTab==='function') ? loadTab('graphlab', {}) : {};
   let lines = Array.isArray(st.glLines) ? st.glLines : null;
@@ -926,6 +929,8 @@ function doPlot(){
 
       if(intOn && isFinite(a) && isFinite(b)){
         const lo = Math.min(a,b), hi = Math.max(a,b);
+
+        // Shade area (visual)
         const xs2 = xs.filter(x=>x>=lo && x<=hi);
         const ys2 = xs2.map(x=> safeEval(x));
         traces.push({
@@ -937,6 +942,44 @@ function doPlot(){
           fill: 'tozeroy',
           line: {width: 0.5}
         });
+
+        // Numeric definite integral (signed) via Simpson's Rule
+        // ∫ f(x) dx ≈ (h/3)[f0 + fN + 4(f1+f3+...) + 2(f2+f4+...)]
+        try{
+          let N = 600; // must be even
+          const span = Math.abs(hi - lo);
+          const isMob2 = window.matchMedia && window.matchMedia('(max-width: 860px)').matches;
+          const capN = isMob2 ? 800 : 2400;
+          // more samples for larger spans, but cap for performance
+          N = Math.max(200, Math.min(capN, Math.floor(300 + span*60)));
+          if(N % 2 === 1) N += 1;
+
+          const h = (hi - lo) / N;
+          let sum = 0;
+          let bad = 0;
+
+          for(let i=0;i<=N;i++){
+            const x = lo + i*h;
+            const fx = safeEval(x);
+            if(fx===null){ bad++; continue; }
+            if(i===0 || i===N) sum += fx;
+            else if(i%2===0) sum += 2*fx;
+            else sum += 4*fx;
+          }
+
+          if(readoutEl){
+            if(bad > Math.max(6, N*0.02)){
+              readoutEl.textContent = `∫[${lo}, ${hi}] f(x) dx: undefined (function not defined throughout interval)`;
+            }else{
+              const areaVal = (h/3) * sum; // signed area
+              // Show "it works": include method + signed result
+              readoutEl.textContent = `∫[${lo}, ${hi}] f(x) dx ≈ ${Number(areaVal).toPrecision(10)}  (Simpson's Rule, signed)`;
+            }
+          }
+        }catch(e){
+          try{ dbgAdd('ERROR', 'Integral calc: ' + (e && e.message ? e.message : e)); }catch(_){}
+          if(readoutEl) readoutEl.textContent = 'Integral: error computing value';
+        }
       }
 
       if(rootsOn){

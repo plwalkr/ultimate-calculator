@@ -647,13 +647,50 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .mathbox{font-size:.95rem}
 }
 
+
+/* --- GraphLab Calculus Reference (Apple-grade, phone-friendly) --- */
+.calcRef{margin-top:10px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(0,0,0,.10);overflow:hidden}
+.theme-light .calcRef{border-color:#c9d7ef;background:#ffffff}
+.calcRef summary{cursor:pointer;list-style:none;padding:12px 12px;font-weight:900;display:flex;align-items:center;gap:10px}
+.calcRef summary::-webkit-details-marker{display:none}
+.calcRef summary::after{content:"▾";margin-left:auto;opacity:.8}
+.calcRef[open] summary::after{content:"▴"}
+.calcRef .refBody{padding:12px;border-top:1px solid rgba(255,255,255,.10)}
+.theme-light .calcRef .refBody{border-top-color:#d6e3fb}
+.refGrid{display:grid;gap:10px}
+@media (min-width: 860px){ .refGrid{grid-template-columns:1fr 1fr} }
+.refCard{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+.theme-light .refCard{border-color:#d6e3fb;background:#eef3ff}
+.refTitle{font-weight:900;margin:0 0 8px 0}
+.refMath{
+  font-family: "Times New Roman", Times, serif;
+  font-size:1.08rem;
+  line-height:1.35;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(0,0,0,.10);
+  border:1px solid rgba(255,255,255,.10);
+}
+.theme-light .refMath{background:#ffffff;border-color:#c9d7ef}
+.refSmall{font-size:.92rem;color:var(--muted);line-height:1.35}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.kpill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:900}
+.theme-light .kpill{border-color:#c9d7ef;background:#ffffff}
+@media (max-width:520px){
+  .calcRef summary{padding:14px 12px}
+  .refMath{font-size:1.02rem}
+  .refCard{padding:12px}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.76 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.77 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>

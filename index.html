@@ -690,7 +690,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.77 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.78 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -869,7 +869,20 @@ function startApp(){
 function doPlot(){
   // GraphLab plotter (multi-line, Desmos-ish)
   const chartEl = document.getElementById('chart');
-  // GraphLab readouts (safe defaults)
+  
+
+  // GraphLab readouts (defaults)
+  try{
+    const out0=document.getElementById('areaValue'); if(out0) out0.innerHTML='';
+    const det0=document.getElementById('areaDetails'); if(det0) det0.style.display='none';
+    const math0=document.getElementById('areaMath'); if(math0) math0.textContent='(waiting for integral…)';
+    const cref0=document.getElementById('glCalcRef'); if(cref0) cref0.style.display='none';
+    const d10=document.getElementById('glDynLine1'); if(d10) d10.textContent='';
+    const d20=document.getElementById('glDynLine2'); if(d20) d20.textContent='';
+    const d30=document.getElementById('glDynLine3'); if(d30) d30.textContent='';
+  }catch(_){}
+
+// GraphLab readouts (safe defaults)
   const out0 = document.getElementById('areaValue');
   const det0 = document.getElementById('areaDetails');
   const math0 = document.getElementById('areaMath');
@@ -1013,6 +1026,39 @@ function doPlot(){
         }
         const areaVal = (h/3) * sum;
 
+  // ---- Integral readout + "show the math" + reference sheet (safe) ----
+  try{
+    const out = document.getElementById('areaValue');
+    const det = document.getElementById('areaDetails');
+    const mathBox = document.getElementById('areaMath');
+    const cref = document.getElementById('glCalcRef');
+    const d1 = document.getElementById('glDynLine1');
+    const d2 = document.getElementById('glDynLine2');
+    const d3 = document.getElementById('glDynLine3');
+
+    if(out){
+      out.innerHTML = `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}<br><span style="font-weight:400">Simpson’s Rule (N=${N}, h=${h.toPrecision(6)}, signed)</span>`;
+    }
+    if(det){ det.style.display='block'; }
+    if(cref){ cref.style.display='block'; }
+    if(d1){ d1.textContent = `f(x) = ${expr0||'f(x)'}`; }
+    if(d2){ d2.textContent = `a=${lo}, b=${hi}, n=${N} (even), h=(b-a)/n=${h.toPrecision(6)}`; }
+    if(d3){ d3.textContent = `∫[a,b] f(x) dx ≈ ${areaVal.toPrecision(8)} (signed)`; }
+
+    if(mathBox){
+      const symInt='∫', symApprox='≈';
+      mathBox.innerHTML = `
+        <div class="mathline"><span class="mathsym">${symInt}</span><sub class="mathsym">${lo}</sub><sup class="mathsym">${hi}</sup> f(x) dx ${symApprox} (h/3)[f(x₀)+4f(x₁)+2f(x₂)+…+4f(xₙ₋₁)+f(xₙ)]</div>
+        <div class="mathline">n=${N} (even), a=${lo}, b=${hi}</div>
+        <div class="mathline">h=(b−a)/n=(${hi}−${lo})/${N}= <b>${h.toPrecision(6)}</b></div>
+        <div class="mathline">xᵢ=a+i·h, i=0…n</div>
+        <div class="mathline">Area ${symApprox} <b>${areaVal.toPrecision(8)}</b> (signed)</div>
+        <div class="note">Signed area: below the x‑axis subtracts.</div>
+      `;
+    }
+  }catch(e){ try{ logErr(e); }catch(_){ } }
+
+
   const out = document.getElementById('areaValue');
   const det = document.getElementById('areaDetails');
   const mathBox = document.getElementById('areaMath');
@@ -1082,6 +1128,7 @@ function doPlot(){
   const gridOn = document.getElementById('gridOn')?.checked !== false;
 
   const layout = {
+        dragmode:'zoom',
     margin: {l: 40, r: 20, t: 20, b: 40},
     xaxis: {range:[xmin,xmax], showgrid: gridOn, zeroline: true},
     yaxis: {showgrid: gridOn, zeroline: true},

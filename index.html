@@ -627,13 +627,33 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0;}
 .cpick{width:34px;height:34px;padding:0;border:none;background:transparent;}
+
+/* --- GraphLab integral "show the math" dropdown (phone-friendly) --- */
+.mathdetails{margin-top:10px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(0,0,0,.10);overflow:hidden}
+.theme-light .mathdetails{border-color:#c9d7ef;background:#ffffff}
+.mathdetails summary{cursor:pointer;list-style:none;padding:12px 12px;font-weight:900;display:flex;align-items:center;gap:10px}
+.mathdetails summary::-webkit-details-marker{display:none}
+.mathdetails summary::after{content:"▾";margin-left:auto;opacity:.8}
+.mathdetails[open] summary::after{content:"▴"}
+.mathbox{padding:12px;border-top:1px solid rgba(255,255,255,.10);font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:.92rem;line-height:1.35;word-break:break-word}
+.theme-light .mathbox{border-top-color:#d6e3fb}
+.mathline{margin:0 0 10px 0}
+.mathsym{font-family: "Times New Roman", Times, serif; font-size:1.05rem}
+.kbdpill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:800}
+.theme-light .kbdpill{border-color:#c9d7ef;background:#eef3ff}
+@media (max-width:520px){
+  .mathdetails summary{padding:14px 12px}
+  .mathbox{font-size:.95rem}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.74 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.75 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -812,6 +832,14 @@ function startApp(){
 function doPlot(){
   // GraphLab plotter (multi-line, Desmos-ish)
   const chartEl = document.getElementById('chart');
+  // GraphLab readouts (safe defaults)
+  const out0 = document.getElementById('areaValue');
+  const det0 = document.getElementById('areaDetails');
+  const math0 = document.getElementById('areaMath');
+  if(out0) out0.innerHTML = '';
+  if(det0) det0.style.display = 'none';
+  if(math0) math0.textContent = '(waiting for integral…)';
+
   const gxEl = document.getElementById('gx');
   const xminEl = document.getElementById('xmin');
   const xmaxEl = document.getElementById('xmax');
@@ -947,6 +975,26 @@ function doPlot(){
           else sum += 4*fx;
         }
         const areaVal = (h/3) * sum;
+
+  const out = document.getElementById('areaValue');
+  const det = document.getElementById('areaDetails');
+  const mathBox = document.getElementById('areaMath');
+  if(out){
+    out.innerHTML = `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}<br><span style=\"font-weight:400\">Simpson’s Rule (N = ${N}, h = ${h.toPrecision(6)}, signed)</span>`;
+  }
+  if(det){ det.style.display='block'; }
+  if(mathBox){
+    const symInt='∫', symApprox='≈';
+    mathBox.innerHTML = `
+      <div class=\"mathline\"><span class=\"mathsym\">${symInt}</span><sub class=\"mathsym\">${lo}</sub><sup class=\"mathsym\">${hi}</sup> f(x) dx ${symApprox} (h/3)·[f(x₀)+4f(x₁)+2f(x₂)+…+4f(xₙ₋₁)+f(xₙ)]</div>
+      <div class=\"mathline\">n = ${N} (even), a = ${lo}, b = ${hi}</div>
+      <div class=\"mathline\">h = (b − a) / n = (${hi} − ${lo}) / ${N} = <b>${h.toPrecision(6)}</b></div>
+      <div class=\"mathline\">xᵢ = a + i·h for i = 0…n</div>
+      <div class=\"mathline\">Area ${symApprox} ( ${h.toPrecision(6)} / 3 ) · weighted sum = <b>${areaVal.toPrecision(8)}</b></div>
+      <div class=\"note\">Signed area: portions below the x-axis subtract.</div>
+    `;
+  }
+
 
         if(ro){
           const fmt = (v)=> (typeof v==='number' && isFinite(v)) ? (Math.abs(v)>=1e6 ? v.toExponential(6) : v.toPrecision(8)) : String(v);

@@ -684,13 +684,44 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .refCard{padding:12px}
 }
 
+
+/* --- Calculator: MathPad (symbolic + numeric calculus, phone-friendly) --- */
+.mathpad{margin-top:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(0,0,0,.10);overflow:hidden}
+.theme-light .mathpad{border-color:#c9d7ef;background:#ffffff}
+.mathpad .mpHead{display:flex;align-items:center;gap:10px;padding:12px 12px;font-weight:900}
+.mathpad .mpBody{padding:12px;border-top:1px solid rgba(255,255,255,.10)}
+.theme-light .mathpad .mpBody{border-top-color:#d6e3fb}
+.mpRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.mpRow > *{flex:1 1 auto}
+.mpExpr{width:100%;min-height:80px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.12);color:inherit;padding:10px 12px;font-size:1rem}
+.theme-light .mpExpr{background:#ffffff;border-color:#c9d7ef}
+.mpBtn{border-radius:14px;padding:10px 12px;font-weight:900;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);cursor:pointer}
+.theme-light .mpBtn{background:#eef3ff;border-color:#c9d7ef}
+.mpBtn:active{transform:translateY(1px)}
+.mpMini{min-width:120px}
+.mpOut{margin-top:10px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(0,0,0,.08);padding:10px 12px}
+.theme-light .mpOut{background:#ffffff;border-color:#d6e3fb}
+.mpOut .label{font-weight:900;margin-bottom:6px}
+.mpOut pre{white-space:pre-wrap;word-break:break-word;margin:0}
+.mpWork{margin-top:10px}
+.mpWork summary{cursor:pointer;list-style:none;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font-weight:900}
+.theme-light .mpWork summary{border-color:#c9d7ef;background:#eef3ff}
+.mpWork summary::-webkit-details-marker{display:none}
+.mpWork summary::after{content:"▾";margin-left:8px;opacity:.8}
+.mpWork[open] summary::after{content:"▴"}
+.mpWork .workBody{margin-top:8px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.08);padding:10px 12px;font-family:"Times New Roman",Times,serif;font-size:1.05rem;line-height:1.35;overflow-x:auto}
+.theme-light .mpWork .workBody{background:#ffffff;border-color:#d6e3fb}
+@media (max-width:520px){
+  .mpBtn{width:100%}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.79 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.80 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -830,6 +861,148 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         }catch(_){}
       }
 
+
+
+function initMathPad(){
+  const exprEl = document.getElementById('mpExpr');
+  const varEl  = document.getElementById('mpVar');
+  const aEl    = document.getElementById('mpA');
+  const bEl    = document.getElementById('mpB');
+  const nEl    = document.getElementById('mpN');
+  const outBox = document.getElementById('mpOut');
+  const outTxt = document.getElementById('mpOutText');
+  const workDet= document.getElementById('mpWork');
+  const workBd = document.getElementById('mpWorkBody');
+  const btnEval= document.getElementById('mpEval');
+  const btnDer = document.getElementById('mpDeriv');
+  const btnInt = document.getElementById('mpInt');
+  const btnClr = document.getElementById('mpClear');
+  if(!exprEl || !btnEval) return;
+
+  // Load/save
+  try{
+    const st = JSON.parse(localStorage.getItem('lc_mathpad')||'{}');
+    if(st.expr && !exprEl.value) exprEl.value = st.expr;
+    if(st.v) varEl.value = st.v;
+    if(st.a!=null) aEl.value = st.a;
+    if(st.b!=null) bEl.value = st.b;
+    if(st.n!=null) nEl.value = st.n;
+  }catch(_){}
+  const save = ()=>{
+    try{
+      localStorage.setItem('lc_mathpad', JSON.stringify({
+        expr: exprEl.value, v: varEl.value||'x',
+        a: aEl.value, b: bEl.value, n: nEl.value
+      }));
+    }catch(_){}
+  };
+  ['input','change'].forEach(ev=>{
+    exprEl.addEventListener(ev, save);
+    varEl.addEventListener(ev, save);
+    aEl.addEventListener(ev, save);
+    bEl.addEventListener(ev, save);
+    nEl.addEventListener(ev, save);
+  });
+
+  const showOut = (label, val, workHtml)=>{
+    outBox.style.display = 'block';
+    outTxt.textContent = `${label}\n${val}`;
+    if(workHtml){
+      workDet.style.display='block';
+      workBd.innerHTML = workHtml;
+    }else{
+      workDet.style.display='none';
+      workBd.textContent='';
+    }
+  };
+
+  const getExpr = ()=> (exprEl.value||'').trim();
+  const getVar  = ()=> (varEl.value||'x').trim() || 'x';
+
+  const safeNum = (s)=>{
+    const v = Number(s);
+    return Number.isFinite(v) ? v : null;
+  };
+
+  btnEval.addEventListener('click', ()=>{
+    const expr = getExpr();
+    if(!expr) return showOut('Evaluate', 'Enter an expression first.');
+    try{
+      const res = window.math.evaluate(expr);
+      showOut('Evaluate', String(res),
+        `<div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
+         <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
+      );
+    }catch(e){
+      showOut('Evaluate', (e && e.message) ? e.message : String(e));
+    }
+  });
+
+  btnDer.addEventListener('click', ()=>{
+    const expr = getExpr();
+    const v = getVar();
+    if(!expr) return showOut('Derivative', 'Enter an expression first.');
+    try{
+      const d = window.math.derivative(expr, v).toString();
+      showOut(`d/d${v}`, d,
+        `<div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
+         <div style="margin-top:6px"><b>Derivative</b>: f′(${escapeHtml(v)}) = <span class="mono">${escapeHtml(d)}</span></div>`
+      );
+    }catch(e){
+      showOut('Derivative', (e && e.message) ? e.message : String(e));
+    }
+  });
+
+  btnInt.addEventListener('click', ()=>{
+    const expr = getExpr();
+    const v = getVar();
+    const a = safeNum(aEl.value);
+    const b = safeNum(bEl.value);
+    let N = parseInt(nEl.value, 10);
+    if(!expr) return showOut('Definite integral', 'Enter an expression first.');
+    if(a===null || b===null) return showOut('Definite integral', 'Enter numeric a and b.');
+    if(!Number.isFinite(N) || N<10) N = 400;
+    if(N%2===1) N += 1;
+
+    try{
+      const compiled = window.math.compile(expr);
+      const lo = Math.min(a,b), hi = Math.max(a,b);
+      const h = (hi - lo) / N;
+      let sum = 0;
+
+      for(let i=0;i<=N;i++){
+        const x = lo + i*h;
+        let fx;
+        try{
+          fx = compiled.evaluate({[v]: x});
+        }catch(_){
+          fx = NaN;
+        }
+        fx = Number(fx);
+        if(!Number.isFinite(fx)) fx = 0;
+        if(i===0 || i===N) sum += fx;
+        else if(i%2===0) sum += 2*fx;
+        else sum += 4*fx;
+      }
+      const area = (h/3)*sum;
+      showOut(`∫ a→b (signed)`, area.toPrecision(10),
+        `<div><b>Integral</b>: ∫<sub>${lo}</sub><sup>${hi}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
+         <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule (N=${N}, h=${h.toPrecision(6)}, signed)</div>
+         <div style="margin-top:6px"><b>Result</b>: ${area.toPrecision(10)}</div>
+         <div class="note" style="margin-top:8px">Signed integral: portions below the axis subtract (negative contribution).</div>`
+      );
+    }catch(e){
+      showOut('Definite integral', (e && e.message) ? e.message : String(e));
+    }
+  });
+
+  btnClr.addEventListener('click', ()=>{
+    exprEl.value='';
+    outBox.style.display='none';
+    workDet.style.display='none';
+    try{ localStorage.removeItem('lc_mathpad'); }catch(_){}
+  });
+}
 
 function startApp(){
         forceHideOverlays();
@@ -1435,9 +1608,55 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
               </div>
             </div>
-          </section>`;
+          </section>
 
-        function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
+<div class="mathpad" id="mathPad">
+  <div class="mpHead">
+    <span class="kpill">MathPad</span>
+    <span class="note" style="font-weight:700;">(symbolic + numeric calculus)</span>
+  </div>
+  <div class="mpBody">
+    <div class="note" style="margin-bottom:8px">
+      Type an expression using MathJS style (examples: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">log(x)</span>). Use lowercase trig.
+    </div>
+
+    <textarea id="mpExpr" class="mpExpr" placeholder="Example: sin(x) + x^2"></textarea>
+
+    <div class="mpRow" style="margin-top:10px">
+      <label class="note" style="font-weight:900;min-width:90px">Variable</label>
+      <input id="mpVar" class="inp" value="x" style="max-width:120px">
+      <label class="note" style="font-weight:900;min-width:40px">a</label>
+      <input id="mpA" class="inp" value="0" style="max-width:120px">
+      <label class="note" style="font-weight:900;min-width:40px">b</label>
+      <input id="mpB" class="inp" value="1" style="max-width:120px">
+      <label class="note" style="font-weight:900;min-width:40px">N</label>
+      <input id="mpN" class="inp" value="400" style="max-width:120px">
+    </div>
+
+    <div class="mpRow" style="margin-top:10px">
+      <button class="mpBtn mpMini" id="mpEval">Evaluate</button>
+      <button class="mpBtn mpMini" id="mpDeriv">d/dx</button>
+      <button class="mpBtn mpMini" id="mpInt">∫ a→b</button>
+      <button class="mpBtn mpMini" id="mpClear">Clear</button>
+    </div>
+
+    <div class="mpOut" id="mpOut" style="display:none">
+      <div class="label">Result</div>
+      <pre id="mpOutText"></pre>
+    </div>
+
+    <details class="mpWork" id="mpWork" style="display:none">
+      <summary>Show work</summary>
+      <div class="workBody" id="mpWorkBody"></div>
+    </details>
+  </div>
+</div>
+
+`;
+
+        
+  try{ initMathPad(); }catch(e){ try{ dbgAdd('ERROR','MathPad: '+(e&&e.message?e.message:e)); }catch(_){} }
+function maybeLive(){ try{ if($('#liveTyping')?.checked || $('#autoPlot')?.checked) schedulePlot(); }catch(_){ } }
 
 
         const K = (window.matchMedia && window.matchMedia('(max-width: 520px)').matches)
@@ -2934,3 +3153,5 @@ function stageRow(nmValue='30', unit='nm'){
 </script>
 </body>
 </html>
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}

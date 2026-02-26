@@ -633,7 +633,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.69 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.70 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1716,6 +1716,31 @@ function renderTorque(){
               <div class="note">Uses the quick shop formula <b>T = K · F · D</b>. Good for estimates and “sanity checks” — always follow the service manual when a spec exists.</div>
 
               <div class="row" style="margin-top:10px">
+                <label style="flex:1;min-width:240px">
+                  <div class="note">Bolt size</div>
+                  <select id="tBoltSize" class="input">
+                    <option value="custom">Custom</option>
+                    <optgroup label="Metric">
+                      <option value="M6">M6</option>
+                      <option value="M8">M8</option>
+                      <option value="M10">M10</option>
+                      <option value="M12">M12</option>
+                      <option value="M14">M14</option>
+                      <option value="M16">M16</option>
+                    </optgroup>
+                    <optgroup label="SAE">
+                      <option value="1/4">1/4"</option>
+                      <option value="5/16">5/16"</option>
+                      <option value="3/8">3/8"</option>
+                      <option value="7/16">7/16"</option>
+                      <option value="1/2">1/2"</option>
+                      <option value="9/16">9/16"</option>
+                      <option value="5/8">5/8"</option>
+                      <option value="3/4">3/4"</option>
+                    </optgroup>
+                  </select>
+                </label>
+
                 <label style="flex:1;min-width:180px">
                   <div class="note">Bolt diameter D</div>
                   <input id="tBoltDia" class="input" type="number" inputmode="decimal" placeholder="e.g. 0.472 or 12">
@@ -1976,6 +2001,7 @@ function renderTorque(){
 
           // persist estimator inputs
           saveTorqueState({
+            boltSize: ($('#tBoltSize')?.value || 'custom'),
             boltDia: dEl.value,
             boltDiaUnit: duEl.value,
             k: kEl.value,
@@ -2114,8 +2140,55 @@ function stageRow(nmValue='30', unit='nm'){
         // restore estimator state
         (function initClampEstimator(){
           const st = loadTorqueState();
-          const dEl = $('#tBoltDia'); if(dEl && st.boltDia!=null) dEl.value = st.boltDia;
-          const duEl = $('#tBoltDiaUnit'); if(duEl && st.boltDiaUnit) duEl.value = st.boltDiaUnit;
+
+          const sizeEl = $('#tBoltSize');
+          const dEl = $('#tBoltDia');
+          const duEl = $('#tBoltDiaUnit');
+
+          const BOLT_SIZES = {
+            'M6':  {v: 6,   u:'mm'},
+            'M8':  {v: 8,   u:'mm'},
+            'M10': {v: 10,  u:'mm'},
+            'M12': {v: 12,  u:'mm'},
+            'M14': {v: 14,  u:'mm'},
+            'M16': {v: 16,  u:'mm'},
+            '1/4': {v: 0.25,   u:'in'},
+            '5/16':{v: 0.3125, u:'in'},
+            '3/8': {v: 0.375,  u:'in'},
+            '7/16':{v: 0.4375, u:'in'},
+            '1/2': {v: 0.5,    u:'in'},
+            '9/16':{v: 0.5625, u:'in'},
+            '5/8': {v: 0.625,  u:'in'},
+            '3/4': {v: 0.75,   u:'in'}
+          };
+
+          function applyBoltSize(key, shouldPersist=true){
+            if(!dEl || !duEl) return;
+            const rec = BOLT_SIZES[key];
+            if(!rec) return;
+            duEl.value = rec.u;
+            dEl.value = String(rec.v);
+            if(shouldPersist){
+              try{ saveTorqueState({ boltSize: key, boltDia: dEl.value, boltDiaUnit: duEl.value }); }catch(_){ }
+            }
+          }
+
+          if(sizeEl){
+            const savedSize = st.boltSize || 'custom';
+            sizeEl.value = savedSize;
+            if(savedSize !== 'custom') applyBoltSize(savedSize, false);
+            sizeEl.addEventListener('change', ()=>{
+              const key = sizeEl.value || 'custom';
+              if(key === 'custom'){
+                try{ saveTorqueState({ boltSize: 'custom' }); }catch(_){ }
+              }else{
+                applyBoltSize(key, true);
+              }
+              clampEstimatorUpdate();
+            });
+          }
+          if(dEl && st.boltDia!=null && (!st.boltSize || st.boltSize==='custom')) dEl.value = st.boltDia;
+          if(duEl && st.boltDiaUnit && (!st.boltSize || st.boltSize==='custom')) duEl.value = st.boltDiaUnit;
           const kEl = $('#tK'); if(kEl && st.k!=null) { kEl.value = st.k; kEl.dataset.auto = (st.kAuto ? '1':'0'); }
           const autoEl = $('#tKAuto'); if(autoEl && st.kAuto!=null) autoEl.checked = !!st.kAuto;
           const mEl = $('#tEstMode'); if(mEl && st.estMode) mEl.value = st.estMode;

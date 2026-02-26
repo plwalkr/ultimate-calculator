@@ -690,7 +690,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.78 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.79 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -873,7 +873,7 @@ function doPlot(){
 
   // GraphLab readouts (defaults)
   try{
-    const out0=document.getElementById('areaValue'); if(out0) out0.innerHTML='';
+    const out0=document.getElementById('glReadout'); if(out0) out0.innerHTML='';
     const det0=document.getElementById('areaDetails'); if(det0) det0.style.display='none';
     const math0=document.getElementById('areaMath'); if(math0) math0.textContent='(waiting for integral…)';
     const cref0=document.getElementById('glCalcRef'); if(cref0) cref0.style.display='none';
@@ -883,7 +883,7 @@ function doPlot(){
   }catch(_){}
 
 // GraphLab readouts (safe defaults)
-  const out0 = document.getElementById('areaValue');
+  const out0 = document.getElementById('glReadout');
   const det0 = document.getElementById('areaDetails');
   const math0 = document.getElementById('areaMath');
   if(out0) out0.innerHTML = '';
@@ -1028,7 +1028,7 @@ function doPlot(){
 
   // ---- Integral readout + "show the math" + reference sheet (safe) ----
   try{
-    const out = document.getElementById('areaValue');
+    const out = document.getElementById('glReadout');
     const det = document.getElementById('areaDetails');
     const mathBox = document.getElementById('areaMath');
     const cref = document.getElementById('glCalcRef');
@@ -1059,7 +1059,7 @@ function doPlot(){
   }catch(e){ try{ logErr(e); }catch(_){ } }
 
 
-  const out = document.getElementById('areaValue');
+  const out = document.getElementById('glReadout');
   const det = document.getElementById('areaDetails');
   const mathBox = document.getElementById('areaMath');
   if(out){
@@ -1133,7 +1133,7 @@ function doPlot(){
     xaxis: {range:[xmin,xmax], showgrid: gridOn, zeroline: true},
     yaxis: {showgrid: gridOn, zeroline: true},
     showlegend: false,
-    dragmode: 'pan',
+    dragmode: 'zoom',
   };
 
   const config = {displayModeBar:false, responsive:true, scrollZoom:true, doubleClick:'reset'};
@@ -1581,6 +1581,52 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                   <div id="chart" class="chart"></div>
                 </div>
                 <div id="glReadout" class="note" style="margin-top:8px"></div>
+
+                <details class="mathdetails" id="areaDetails" style="display:none;">
+                  <summary><span class="kbdpill">Show the math</span><span class="note" style="font-weight:700;">(Simpson’s Rule)</span></summary>
+                  <div class="mathbox" id="areaMath">(waiting for integral…)</div>
+                </details>
+
+                <details class="calcRef" id="glCalcRef" style="display:none;">
+                  <summary><span class="kpill">Calculus reference</span><span class="note" style="font-weight:700;">(dynamic + proof sketch)</span></summary>
+                  <div class="refBody">
+                    <div class="refGrid">
+                      <div class="refCard">
+                        <div class="refTitle">Signed area under a curve</div>
+                        <div class="refMath">A(a,b) = ∫<sub>a</sub><sup>b</sup> f(x) dx</div>
+                        <div class="refSmall">If f(x) is below the x‑axis, that portion contributes <b>negative</b> area (signed area).</div>
+                      </div>
+
+                      <div class="refCard">
+                        <div class="refTitle">Fundamental Theorem of Calculus</div>
+                        <div class="refMath">If F′(x)=f(x), then ∫<sub>a</sub><sup>b</sup> f(x) dx = F(b) − F(a)</div>
+                        <div class="refSmall">We compute numerically (Simpson’s Rule). This theorem is the “why” behind definite integrals.</div>
+                      </div>
+
+                      <div class="refCard">
+                        <div class="refTitle">Riemann sum definition</div>
+                        <div class="refMath">∫<sub>a</sub><sup>b</sup> f(x) dx = lim<sub>n→∞</sub> ∑<sub>i=1</sub><sup>n</sup> f(xᵢ*) · Δx</div>
+                        <div class="refSmall">Δx=(b−a)/n. Simpson’s Rule is a weighted sum built on the same idea.</div>
+                      </div>
+
+                      <div class="refCard">
+                        <div class="refTitle">Simpson’s Rule (what we use)</div>
+                        <div class="refMath">∫<sub>a</sub><sup>b</sup> f(x) dx ≈ (h/3)[ f(x₀)+4f(x₁)+2f(x₂)+…+4f(xₙ₋₁)+f(xₙ) ]</div>
+                        <div class="refSmall">n must be even. h=(b−a)/n.</div>
+                      </div>
+                    </div>
+
+                    <div class="hr"></div>
+
+                    <div class="refCard">
+                      <div class="refTitle">Your current values (live)</div>
+                      <div class="refSmall mono" id="glDynLine1">(turn on Definite Integral to populate)</div>
+                      <div class="refSmall mono" id="glDynLine2"></div>
+                      <div class="refSmall mono" id="glDynLine3"></div>
+                    </div>
+                  </div>
+                </details>
+
               </div>
 
               <div class="gllBottom">

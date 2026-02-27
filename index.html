@@ -738,13 +738,24 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 @media (min-width: 520px){ .mpBtns{grid-template-columns: repeat(4,1fr);} }
 @media (max-width: 520px){ .mpBtns{grid-template-columns: 1fr 1fr;} }
 
+
+/* --- MathPad: mini-keypad + nicer result typography --- */
+.mpKeypad{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mpKey{border-radius:12px;padding:10px 12px;font-weight:900;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);cursor:pointer;user-select:none}
+.theme-light .mpKey{background:#ffffff;border-color:#c9d7ef}
+.mpKey:active{transform:translateY(1px)}
+.mpOutTextBig{font-size:1.12rem;line-height:1.35}
+.mpOut .label{display:flex;align-items:center;gap:10px}
+.mpPill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:900}
+.theme-light .mpPill{border-color:#c9d7ef;background:#eef3ff}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.81 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.82 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -932,6 +943,18 @@ function initMathPad(){
     if(xEl) xEl.addEventListener(ev, save);
   });
 
+// Mini keypad insert
+try{
+  document.querySelectorAll('#mathPad .mpKey').forEach(k=>{
+    k.addEventListener('click', ()=>{
+      const ins = k.getAttribute('data-ins') || '';
+      insertAtCursor(exprEl, ins);
+      save();
+    });
+  });
+}catch(_){}
+
+
   
   const showOut = (label, val, workHtml, errMsg)=>{
     if(errBox){
@@ -951,7 +974,26 @@ function initMathPad(){
   };
 
 
-  const getExpr = ()=> (exprEl.value||'').trim();
+  
+const insertAtCursor = (el, ins)=>{
+  if(!el) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end   = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0,start) + ins + el.value.slice(end);
+  const pos = start + ins.length;
+  try{ el.focus(); el.setSelectionRange(pos,pos); }catch(_){}
+};
+
+const cleanExpr = (raw)=>{
+  let s = (raw||'').trim();
+  // allow users to type "y = ..." or "f(x) = ..." without breaking eval
+  s = s.replace(/^(y\s*=\s*)/i,'');
+  s = s.replace(/^f\s*\(\s*[a-zA-Z]\s*\)\s*=\s*/i,'');
+  // common: "f(x)=" specifically
+  s = s.replace(/^f\s*\(\s*x\s*\)\s*=\s*/i,'');
+  return s.trim();
+};
+const getExpr = ()=> cleanExpr(exprEl.value);
   const getVar  = ()=> (varEl.value||'x').trim() || 'x';
 
   const safeNum = (s)=>{
@@ -991,7 +1033,7 @@ function initMathPad(){
         );
       }
     }catch(e){
-      showOut('Evaluate', (e && e.message) ? e.message : String(e), '', 'Math error while evaluating.');
+      showOut('Evaluate', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error while evaluating.');
     }
   });
 
@@ -1006,7 +1048,7 @@ function initMathPad(){
          <div style="margin-top:6px"><b>Derivative</b>: f′(${escapeHtml(v)}) = <span class="mono">${escapeHtml(d)}</span></div>`
       );
     }catch(e){
-      showOut('Derivative', (e && e.message) ? e.message : String(e));
+      showOut('Derivative', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error');
     }
   });
 
@@ -1049,7 +1091,7 @@ function initMathPad(){
          <div class="note" style="margin-top:8px">Signed integral: portions below the axis subtract (negative contribution).</div>`
       );
     }catch(e){
-      showOut('Definite integral', (e && e.message) ? e.message : String(e));
+      showOut('Definite integral', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error');
     }
   });
 
@@ -1686,6 +1728,21 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         </div>
         <textarea id="mpExpr" class="mpExpr" placeholder="f(x) = ...  e.g.  sin(x) + x^2"></textarea>
 
+        <div class="mpKeypad" aria-label="MathPad keypad">
+          <div class="mpKey" data-ins="sin(">sin</div>
+          <div class="mpKey" data-ins="cos(">cos</div>
+          <div class="mpKey" data-ins="tan(">tan</div>
+          <div class="mpKey" data-ins="ln(">ln</div>
+          <div class="mpKey" data-ins="log(">log</div>
+          <div class="mpKey" data-ins="sqrt(">√</div>
+          <div class="mpKey" data-ins="pi">π</div>
+          <div class="mpKey" data-ins="e">e</div>
+          <div class="mpKey" data-ins="^">^</div>
+          <div class="mpKey" data-ins="(">(</div>
+          <div class="mpKey" data-ins=")">)</div>
+        </div>
+
+
         <div class="mpField" style="margin-top:12px">
           <label class="note">Evaluate at (optional)</label>
           <div class="mpRow">
@@ -1730,8 +1787,8 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
     <div id="mpErr" class="mpErr" style="display:none"></div>
 
     <div class="mpOut" id="mpOut" style="display:none">
-      <div class="label" id="mpOutLabel">Result</div>
-      <pre id="mpOutText"></pre>
+      <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
+      <pre id="mpOutText" class="mpOutTextBig"></pre>
     </div>
 
     <details class="mpWork" id="mpWork" style="display:none">

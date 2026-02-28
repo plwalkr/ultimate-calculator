@@ -749,13 +749,43 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpPill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:900}
 .theme-light .mpPill{border-color:#c9d7ef;background:#eef3ff}
 
+
+/* --- MathPad TI‑Nspire-ish style layer --- */
+.mathpad{background:rgba(0,0,0,.18)}
+.theme-light .mathpad{background:#ffffff}
+.mpHead{background:rgba(255,255,255,.04)}
+.theme-light .mpHead{background:#eef3ff}
+.mpCard{background:rgba(0,0,0,.14)}
+.theme-light .mpCard{background:#ffffff}
+.mpExpr{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+  font-size:1.12rem;background:rgba(0,0,0,.18)}
+.theme-light .mpExpr{background:#ffffff}
+.mpEntryLine{display:flex;gap:10px;align-items:center;margin-top:10px}
+.mpPrompt{font-weight:900;opacity:.9}
+.mpLineInp{flex:1;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.16);color:inherit;padding:12px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+  font-size:1.10rem}
+.theme-light .mpLineInp{background:#ffffff;border-color:#c9d7ef}
+.mpHist{margin-top:12px;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden}
+.theme-light .mpHist{border-color:#d6e3fb}
+.mpHistHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;font-weight:900;background:rgba(255,255,255,.04)}
+.theme-light .mpHistHead{background:#eef3ff}
+.mpHistBody{padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.06)}
+.theme-light .mpHistBody{background:#ffffff}
+.mpItem{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px 12px;background:rgba(0,0,0,.10)}
+.theme-light .mpItem{border-color:#d6e3fb;background:#ffffff}
+.mpItem .k{font-weight:900}
+.mpItem .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+.mpItem details{margin-top:8px}
+.mpItem summary{cursor:pointer;font-weight:900}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.82 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.83 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -914,12 +944,18 @@ function initMathPad(){
   const btnDer = document.getElementById('mpDeriv');
   const btnInt = document.getElementById('mpInt');
   const btnClr = document.getElementById('mpClear');
+  const lineEl = document.getElementById('mpLine');
+  const btnRun = document.getElementById('mpRun');
+  const histBox = document.getElementById('mpHist');
+  const histBody = document.getElementById('mpHistBody');
+  const btnHistClear = document.getElementById('mpHistClear');
   if(!exprEl || !btnEval) return;
 
   // Load/save
   try{
     const st = JSON.parse(localStorage.getItem('lc_mathpad')||'{}');
     if(st.expr && !exprEl.value) exprEl.value = st.expr;
+    if(lineEl && st.line!=null) lineEl.value = st.line;
     if(st.v) varEl.value = st.v;
     if(st.a!=null) aEl.value = st.a;
     if(st.b!=null) bEl.value = st.b;
@@ -929,7 +965,7 @@ function initMathPad(){
   const save = ()=>{
     try{
       localStorage.setItem('lc_mathpad', JSON.stringify({
-        expr: exprEl.value, v: varEl.value||'x',
+        expr: exprEl.value, line: (lineEl?lineEl.value:''), v: varEl.value||'x',
         a: aEl.value, b: bEl.value, n: nEl.value, x: (xEl?xEl.value:'')
       }));
     }catch(_){}
@@ -941,6 +977,7 @@ function initMathPad(){
     bEl.addEventListener(ev, save);
     nEl.addEventListener(ev, save);
     if(xEl) xEl.addEventListener(ev, save);
+    if(lineEl) lineEl.addEventListener(ev, save);
   });
 
 // Mini keypad insert
@@ -952,6 +989,37 @@ try{
       save();
     });
   });
+
+const addHist = (title, expr, out, workHtml)=>{
+  if(!histBox || !histBody) return;
+  histBox.style.display = 'block';
+  const el = document.createElement('div');
+  el.className = 'mpItem';
+  el.innerHTML = `
+    <div class="k">${escapeHtml(title)}</div>
+    <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${escapeHtml(expr)}</div>
+    <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${escapeHtml(out)}</div>
+    ${workHtml ? `<details><summary>Show work</summary><div style="margin-top:8px">${workHtml}</div></details>` : ``}
+  `;
+  histBody.prepend(el);
+};
+
+const runLine = ()=>{
+  const s = cleanExpr(lineEl ? lineEl.value : '');
+  if(!s) return;
+  exprEl.value = s;
+  try{ save(); }catch(_){}
+  btnEval.click();
+};
+if(btnRun) btnRun.addEventListener('click', runLine);
+if(lineEl) lineEl.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); runLine(); }
+});
+if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
+  if(histBody) histBody.innerHTML='';
+  if(histBox) histBox.style.display='none';
+});
+
 }catch(_){}
 
 
@@ -1731,6 +1799,21 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         <div class="mpKeypad" aria-label="MathPad keypad">
           <div class="mpKey" data-ins="sin(">sin</div>
           <div class="mpKey" data-ins="cos(">cos</div>
+
+        <div class="mpEntryLine">
+          <span class="mpPrompt">▶</span>
+          <input id="mpLine" class="mpLineInp" placeholder="Enter f(x) here…  e.g. sin(x)+x^2">
+          <button class="mpBtn" id="mpRun" style="min-width:120px">Enter</button>
+        </div>
+
+        <div class="mpHist" id="mpHist" style="display:none">
+          <div class="mpHistHead">
+            <span>History</span>
+            <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
+          </div>
+          <div class="mpHistBody" id="mpHistBody"></div>
+        </div>
+
           <div class="mpKey" data-ins="tan(">tan</div>
           <div class="mpKey" data-ins="ln(">ln</div>
           <div class="mpKey" data-ins="log(">log</div>

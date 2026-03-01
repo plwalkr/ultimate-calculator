@@ -551,7 +551,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     'right'
     'bottom';
 }
-@media (min-width: 980px){
+@media (min-width: 820px){
   .glgrid{
     grid-template-columns:420px 1fr;
     grid-template-areas: 'top right' 'bottom right';
@@ -611,7 +611,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .graphlab-grid{display:grid;gap:14px;}
 .graphlab-controls{min-width:0;}
 .graphlab-plot{min-width:0;}
-@media (min-width: 980px){
+@media (min-width: 820px){
   .graphlab-grid{grid-template-columns: 360px 1fr; align-items:start;}
   body.gl-hide-controls .graphlab-grid{grid-template-columns: 0 1fr;}
   body.gl-hide-controls .graphlab-controls{display:none;}
@@ -692,10 +692,11 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mathpad .mpBody{padding:12px;border-top:1px solid rgba(255,255,255,.10)}
 
 /* MathPad desktop two-column layout: controls left, outputs/work right */
-.mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+.mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
-@media (min-width: 980px){
-  .mpLayout{grid-template-columns:1.05fr .95fr;gap:14px}
+@media (min-width: 820px){
+  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px}
+  .mpRight{border-left:1px solid var(--border);padding-left:14px}
   .mpRight{padding-top:2px}
   .mpRight .mpOutTextBig{font-size:15px}
 }
@@ -970,7 +971,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.97 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.98 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>

@@ -785,7 +785,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.85 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.86 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -960,7 +960,10 @@ function initMathPad(){
   // Load/save
   try{
     const st = JSON.parse(localStorage.getItem('lc_mathpad')||'{}');
-    if(st.expr && !exprEl.value) exprEl.value = st.expr;
+    if(st.expr){
+      if(lineEl && !lineEl.value) lineEl.value = st.expr;
+      if(!exprEl.value) exprEl.value = st.expr;
+    }
     if(lineEl && st.line!=null) lineEl.value = st.line;
     if(st.v) varEl.value = st.v;
     if(st.a!=null) aEl.value = st.a;
@@ -971,7 +974,7 @@ function initMathPad(){
   const save = ()=>{
     try{
       localStorage.setItem('lc_mathpad', JSON.stringify({
-        expr: exprEl.value, line: (lineEl?lineEl.value:''), v: varEl.value||'x',
+        expr: (lineEl?lineEl.value:exprEl.value), line: (lineEl?lineEl.value:''), v: varEl.value||'x',
         a: aEl.value, b: bEl.value, n: nEl.value, x: (xEl?xEl.value:'')
       }));
     }catch(_){}
@@ -991,7 +994,7 @@ try{
   document.querySelectorAll('#mathPad .mpKey').forEach(k=>{
     k.addEventListener('click', ()=>{
       const ins = k.getAttribute('data-ins') || '';
-      insertAtCursor(exprEl, ins);
+      insertAtCursor(lineEl || exprEl, ins);
       save();
     });
   });
@@ -1796,11 +1799,11 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
     <div class="mpGrid">
       <div class="mpCard">
-        <div class="mpCardTitle">Expression</div>
+        <div class="mpCardTitle">Expression (TI-style)</div>
         <div class="note" style="margin-bottom:10px">
-          Use MathJS syntax (lowercase trig). Examples: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">log(x)</span>, <span class="mono">sqrt(x)</span>.
+          Type your expression in the <b>▶ line</b> below. Uses MathJS syntax (lowercase trig). Examples: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">log(x)</span>, <span class="mono">sqrt(x)</span>.
         </div>
-        <textarea id="mpExpr" class="mpExpr" placeholder="f(x) = ...  e.g.  sin(x) + x^2"></textarea>
+        <textarea id="mpExpr" class="mpExpr" style="display:none" aria-hidden="true"></textarea>
 
         <div class="mpKeypad" aria-label="MathPad keypad">
           <div class="mpKey" data-ins="sin(">sin</div>
@@ -1808,7 +1811,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
         <div class="mpEntryLine">
           <span class="mpPrompt">▶</span>
-          <input id="mpLine" class="mpLineInp" placeholder="Enter f(x) here…  e.g. sin(x)+x^2">
+          <input id="mpLine" class="mpLineInp" placeholder="Enter expression…  e.g. sin(x)+x^2">
           <button class="mpBtn" id="mpRun" style="min-width:120px">Enter</button>
         </div>
 

@@ -960,7 +960,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.91 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.92 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1108,6 +1108,16 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
+  // Pretty-ish math HTML for history/work display (safe: escapes first, then adds <sup>)
+  function mpPrettyHtml(s){
+    const esc = escapeHtml(s);
+    // Handle x^(...) first (non-nested parens), then x^2 / x^-2 / x^1.5
+    return esc
+      .replace(/\^\(([^()<>]+)\)/g, '<sup>($1)</sup>')
+      .replace(/\^([A-Za-z0-9+\-\.]+)\b/g, '<sup>$1</sup>');
+  }
+
+
 
 function initMathPad(){
   const exprEl = document.getElementById('mpExpr'); // hidden storage
@@ -1138,6 +1148,17 @@ function initMathPad(){
   const workBd = document.getElementById('mpWorkBody');
 
   if(!lineEl || !btnEval || !window.math) return;
+
+  // iPhone/iPad: hard-suppress the software keyboard (Keypad-only input)
+  try{
+    const ua = navigator.userAgent || '';
+    const isiOS = /iP(ad|hone|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if(isiOS){
+      lineEl.setAttribute('readonly','readonly');
+      lineEl.setAttribute('inputmode','none');
+      lineEl.setAttribute('enterkeyhint','done');
+    }
+  }catch(_){/* ignore */}
 
   let mpANS = null;
 
@@ -1190,8 +1211,8 @@ function initMathPad(){
     el.className = 'mpItem';
     el.innerHTML = `
       <div class="k">${escapeHtml(title)}</div>
-      <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${escapeHtml(expr)}</div>
-      <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${escapeHtml(out)}</div>
+      <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${mpPrettyHtml(expr)}</div>
+      <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${mpPrettyHtml(out)}</div>
       ${workHtml ? `<details ${((window.matchMedia&&window.matchMedia('(max-width:520px)').matches)?'':'open')}><summary>Show work</summary><div style="margin-top:8px">${workHtml}</div></details>` : ``}
     `;
     histBody.prepend(el);
@@ -1257,14 +1278,14 @@ function initMathPad(){
         const compiled = window.math.compile(expr);
         res = compiled.evaluate({[v]: xv});
         work = `
-          <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
+          <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
           <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
         `;
       }else{
         res = window.math.evaluate(expr);
         work = `
-          <div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
+          <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
         `;
       }
@@ -1309,7 +1330,7 @@ function initMathPad(){
       outs.push(`d/d${v}(${expr}) = ${d}`);
 
       let work = `
-        <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
+        <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
         <div style="margin-top:6px"><b>Symbolic derivative</b>:</div>
         <div class="mono" style="margin-top:6px">f′(${escapeHtml(v)}) = ${escapeHtml(d)}</div>
       `;
@@ -1331,7 +1352,7 @@ function initMathPad(){
 
       workAll.push(`
         <details style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)" class="mpWk">
-          <summary class="mono" style="cursor:pointer;font-weight:900">In: ${escapeHtml(expr)}</summary>
+          <summary class="mono" style="cursor:pointer;font-weight:900">In: ${mpPrettyHtml(expr)}</summary>
           <div style="margin-top:8px">${work}</div>
         </details>`);
     }
@@ -1389,7 +1410,7 @@ function initMathPad(){
 
       const work = `
         <div><b>Integral</b>: ∫<sub>${escapeHtml(String(lo))}</sub><sup>${escapeHtml(String(hi))}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
-        <div style="margin-top:6px"><b>f(${escapeHtml(v)})</b> = <span class="mono">${escapeHtml(expr)}</span></div>
+        <div style="margin-top:6px"><b>f(${escapeHtml(v)})</b> = <span class="mono">${mpPrettyHtml(expr)}</span></div>
         <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule</div>
         <div class="mono" style="margin-top:6px">h = (b−a)/N = ${(h).toPrecision(10)}</div>
         <div class="mono" style="margin-top:6px">Area ≈ (h/3) · Σ wᵢ f(xᵢ)</div>
@@ -1406,7 +1427,7 @@ function initMathPad(){
 
       workAll.push(`
         <details style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)" class="mpWk">
-          <summary class="mono" style="cursor:pointer;font-weight:900">In: ${escapeHtml(expr)}</summary>
+          <summary class="mono" style="cursor:pointer;font-weight:900">In: ${mpPrettyHtml(expr)}</summary>
           <div style="margin-top:8px">${work}</div>
         </details>`);
     }

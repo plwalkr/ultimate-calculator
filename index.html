@@ -949,7 +949,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.89 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.90 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1231,11 +1231,8 @@ function initMathPad(){
   const xraw = (xEl?.value||'').trim();
   const xv = (xraw !== '') ? Number(xraw) : null;
 
-  const lines = (lineEl.value||'').split(/
-?
-/).map(s=>cleanExpr(s)).filter(s=>s);
-  if(exprEl) exprEl.value = lines.join('
-');
+  const lines = (lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('\n');
   if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
 
   const results = [];
@@ -1264,8 +1261,7 @@ function initMathPad(){
       if(!firstWork) firstWork = work;
     }
 
-    const out = results.map(r=>`${r.expr} = ${r.res}`).join('
-');
+    const out = results.map(r=>`${r.expr} = ${r.res}`).join('\n');
     showOut((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', out, firstWork);
     mpANS = results[results.length-1].res;
     save();
@@ -1289,11 +1285,8 @@ function initMathPad(){
   const xraw = (xEl?.value||'').trim();
   const xv = (xraw !== '') ? Number(xraw) : null;
 
-  const lines = (lineEl.value||'').split(/
-?
-/).map(s=>cleanExpr(s)).filter(s=>s);
-  if(exprEl) exprEl.value = lines.join('
-');
+  const lines = (lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('\n');
   if(!lines.length) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
 
   try{
@@ -1332,8 +1325,7 @@ function initMathPad(){
         </div>`);
     }
 
-    const out = outs.join('
-');
+    const out = outs.join('\n');
     showOut(`Derivative d/d${v}`, out, workAll[0]||'');
     mpANS = outs[outs.length-1];
     save();
@@ -1351,11 +1343,8 @@ function initMathPad(){
   const b = safeNum(bEl?.value);
   let N = parseInt(nEl?.value||'400', 10);
 
-  const lines = (lineEl.value||'').split(/
-?
-/).map(s=>cleanExpr(s)).filter(s=>s);
-  if(exprEl) exprEl.value = lines.join('
-');
+  const lines = (lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('\n');
   if(!lines.length) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
   if(a===null || b===null) return showOut('Integral', 'Enter numeric a and b.', '', 'a and b must be numbers.');
   if(!Number.isFinite(N) || N<10) N = 400;
@@ -1411,8 +1400,7 @@ function initMathPad(){
         </div>`);
     }
 
-    const out = outs.join('
-');
+    const out = outs.join('\n');
     showOut('Integral ∫ a→b (signed)', out, workAll[0]||'');
     mpANS = outs[outs.length-1];
     save();

@@ -970,7 +970,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.93 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.94 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2122,8 +2122,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             <div class="mpBody">
               <div class="mpLayout">
                 <div class="mpLeft">
-                  <div class="mpGrid" style="margin-top:2px">
-                <div class="mpCard">
+                  <div class="mpCard">
                   <div class="mpCardTitle">Calculator Worksheet</div>
                   <div class="note" style="margin-bottom:10px">
                     One expression per line. MathJS syntax: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">sqrt(x)</span>, <span class="mono">log(x)</span>.
@@ -2175,7 +2174,9 @@ sin(x)+x^2
                   </div>
 <div class="mpHistBody" id="mpHistBody"></div>
                   </div>
+                </div>
 
+                <div class="mpRight">
                   <div class="mpField" style="margin-top:12px">
                     <label class="note">Evaluate/verify at (optional)</label>
                     <div class="mpRow">
@@ -2185,9 +2186,8 @@ sin(x)+x^2
                       <span class="note" style="font-weight:700;opacity:.85">blank = evaluate constants</span>
                     </div>
                   </div>
-                </div>
 
-                <div class="mpCard">
+                  <div class="mpCard">
                   <div class="mpCardTitle">Integral settings</div>
                   <div class="mpRow">
                     <div class="mpField" style="flex:1 1 120px">
@@ -2216,7 +2216,7 @@ sin(x)+x^2
                   </div>
                 </div>
 
-                <div class="mpRight">
+
                   <div class="mpHist" id="mpHist" style="display:none">
                     <div class="mpHistHead">
                       <span>History</span>

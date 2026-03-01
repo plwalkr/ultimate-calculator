@@ -982,7 +982,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.00 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.01 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1475,14 +1475,19 @@ function initMathPad(){
   const btnRun = document.getElementById('mpRun');
   if(btnRun) btnRun.addEventListener('click', runLine);
   lineEl.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter' && !e.shiftKey){
-    e.preventDefault();
-    runEvaluate();
+  // Worksheet typing behavior:
+  // - Enter = new line (for systems / multi-step work)
+  // - Ctrl+Enter / Cmd+Enter = Evaluate
+  if(e.key === 'Enter'){
+    if(e.ctrlKey || e.metaKey){
+      e.preventDefault();
+      runEvaluate();
+      return;
+    }
+    // default Enter inserts a newline in textarea; let it happen
   }
 });
-
-
-  if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
+if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
     if(histBody) histBody.innerHTML='';
     if(histBox) histBox.style.display='none';
   });

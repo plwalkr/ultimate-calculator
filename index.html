@@ -970,7 +970,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.94 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.95 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2127,53 +2127,6 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
                   <div class="note" style="margin-bottom:10px">
                     One expression per line. MathJS syntax: <span class="mono">sin(x)</span>, <span class="mono">x^2</span>, <span class="mono">sqrt(x)</span>, <span class="mono">log(x)</span>.
                   </div>
-
-                  <textarea id="mpExpr" class="mpExpr" style="display:none" aria-hidden="true"></textarea>
-
-                  <div class="mpScreen">
-                    <div class="mpScreenTop">
-                      <span class="mpPrompt">▶</span>
-                      <span class="note" style="font-weight:900">Input</span>
-                      <button class="mpBtn" id="mpAlpha" style="margin-left:auto;min-width:auto;padding:8px 10px">α</button>
-                    </div>
-
-                    <textarea id="mpLine" class="mpScreenInp" rows="7" spellcheck="false"
-                      autocapitalize="off" autocomplete="off" autocorrect="off"
-                      placeholder="Examples:
-sin(x)+x^2
-(x-1)^3
-2+2"></textarea>
-
-                    <div class="mpScreenActions">
-                      <button class="mpBtn" id="mpRun" style="min-width:140px">Enter</button>
-                      <span class="note">Tip: <span class="mono">pi</span> for π • <span class="mono">ANS</span> inserts last result</span>
-                    </div>
-                  </div>
-
-                  <div class="mpAlphaPad" id="mpAlphaPad" style="display:none" aria-label="Alphabet keypad">
-                    <div class="mpKey" data-ins="a">A</div><div class="mpKey" data-ins="b">B</div><div class="mpKey" data-ins="c">C</div><div class="mpKey" data-ins="d">D</div><div class="mpKey" data-ins="e">E</div>
-                    <div class="mpKey" data-ins="f">F</div><div class="mpKey" data-ins="g">G</div><div class="mpKey" data-ins="h">H</div><div class="mpKey" data-ins="i">I</div><div class="mpKey" data-ins="j">J</div>
-                    <div class="mpKey" data-ins="k">K</div><div class="mpKey" data-ins="l">L</div><div class="mpKey" data-ins="m">M</div><div class="mpKey" data-ins="n">N</div><div class="mpKey" data-ins="o">O</div>
-                    <div class="mpKey" data-ins="p">P</div><div class="mpKey" data-ins="q">Q</div><div class="mpKey" data-ins="r">R</div><div class="mpKey" data-ins="s">S</div><div class="mpKey" data-ins="t">T</div>
-                    <div class="mpKey" data-ins="u">U</div><div class="mpKey" data-ins="v">V</div><div class="mpKey" data-ins="w">W</div><div class="mpKey" data-ins="x">X</div><div class="mpKey" data-ins="y">Y</div>
-                    <div class="mpKey" data-ins="z">Z</div><div class="mpKey" data-ins="_">_</div><div class="mpKey" data-ins="=">=</div><div class="mpKey" data-ins=":">:</div><div class="mpKey" data-ins=" ">␠</div>
-                  </div>
-
-                  <div class="mpKeypad" aria-label="MathPad keypad">
-                    <div class="mpKey" data-ins="7">7</div><div class="mpKey" data-ins="8">8</div><div class="mpKey" data-ins="9">9</div><div class="mpKey" data-ins="+">+</div><div class="mpKey" data-ins="-">−</div>
-                    <div class="mpKey" data-ins="4">4</div><div class="mpKey" data-ins="5">5</div><div class="mpKey" data-ins="6">6</div><div class="mpKey" data-ins="*">×</div><div class="mpKey" data-ins="/">÷</div>
-                    <div class="mpKey" data-ins="1">1</div><div class="mpKey" data-ins="2">2</div><div class="mpKey" data-ins="3">3</div><div class="mpKey" data-ins="^">^</div><div class="mpKey" data-ins="(">(</div>
-                    <div class="mpKey" data-ins="0">0</div><div class="mpKey" data-ins=".">.</div><div class="mpKey" data-ins=")">)</div><div class="mpKey" data-ins=",">,</div><div class="mpKey" data-ins="ANS">ANS</div>
-
-                    <div class="mpKey" data-ins="sin(">sin</div><div class="mpKey" data-ins="cos(">cos</div><div class="mpKey" data-ins="tan(">tan</div><div class="mpKey" data-ins="sqrt(">√</div><div class="mpKey" data-ins="pi">π</div>
-                    <div class="mpKey" data-ins="ln(">ln</div><div class="mpKey" data-ins="log(">log</div><div class="mpKey" data-ins="abs(">abs</div><div class="mpKey" data-ins="exp(">e^</div><div class="mpKey" data-ins="e">e</div>
-
-                    <div class="mpKey" data-act="bksp">⌫</div>
-                    <div class="mpKey" data-act="clearline">CLR</div>
-                    <div class="mpKey" data-act="eval" style="grid-column: span 3">=</div>
-                  </div>
-<div class="mpHistBody" id="mpHistBody"></div>
-                  </div>
                 </div>
 
                 <div class="mpRight">
@@ -2194,28 +2147,6 @@ sin(x)+x^2
                       <label class="note">a</label>
                       <input id="mpA" class="inp" value="0">
                     </div>
-                    <div class="mpField" style="flex:1 1 120px">
-                      <label class="note">b</label>
-                      <input id="mpB" class="inp" value="1">
-                    </div>
-                    <div class="mpField" style="flex:1 1 140px">
-                      <label class="note">N (even)</label>
-                      <input id="mpN" class="inp" value="400">
-                    </div>
-                  </div>
-
-                  <div class="note" style="margin-top:10px">
-                    Definite integral uses <b>Simpson’s Rule</b> (signed). Bigger N = more accuracy but slower.
-                  </div>
-
-                  <div class="mpBtns" style="margin-top:12px">
-                    <button class="mpBtn" id="mpEval">Evaluate</button>
-                    <button class="mpBtn" id="mpDeriv">Derivative d/dx</button>
-                    <button class="mpBtn" id="mpInt">Integral ∫ a→b</button>
-                    <button class="mpBtn" id="mpClear">Clear</button>
-                  </div>
-                </div>
-
 
                   <div class="mpHist" id="mpHist" style="display:none">
                     <div class="mpHistHead">
@@ -2225,16 +2156,16 @@ sin(x)+x^2
 
                   <div id="mpErr" class="mpErr" style="display:none"></div>
 
-              <div class="mpOut" id="mpOut" style="display:none">
+                  <div class="mpOut" id="mpOut" style="display:none">
                 <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
-                <pre id="mpOutText" class="mpOutTextBig"></pre>
-              </div>
 
-              <details class="mpWork" id="mpWork" style="display:none">
+                  <details class="mpWork" id="mpWork" style="display:none">
                 <summary>Show work</summary>
                 <div class="workBody" id="mpWorkBody"></div>
+              </details>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         `;

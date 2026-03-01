@@ -690,6 +690,16 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .theme-light .mathpad{border-color:#c9d7ef;background:#ffffff}
 .mathpad .mpHead{display:flex;align-items:center;gap:10px;padding:12px 12px;font-weight:900}
 .mathpad .mpBody{padding:12px;border-top:1px solid rgba(255,255,255,.10)}
+
+/* MathPad desktop two-column layout: controls left, outputs/work right */
+.mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+.mpLeft,.mpRight{min-width:0}
+@media (min-width: 980px){
+  .mpLayout{grid-template-columns:1.05fr .95fr;gap:14px}
+  .mpRight{padding-top:2px}
+  .mpRight .mpOutTextBig{font-size:15px}
+}
+
 .theme-light .mathpad .mpBody{border-top-color:#d6e3fb}
 .mpRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .mpRow > *{flex:1 1 auto}
@@ -960,7 +970,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.92 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.93 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2110,7 +2120,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             </div>
 
             <div class="mpBody">
-              <div class="mpGrid" style="margin-top:2px">
+              <div class="mpLayout">
+                <div class="mpLeft">
+                  <div class="mpGrid" style="margin-top:2px">
                 <div class="mpCard">
                   <div class="mpCardTitle">Calculator Worksheet</div>
                   <div class="note" style="margin-bottom:10px">
@@ -2161,13 +2173,7 @@ sin(x)+x^2
                     <div class="mpKey" data-act="clearline">CLR</div>
                     <div class="mpKey" data-act="eval" style="grid-column: span 3">=</div>
                   </div>
-
-                  <div class="mpHist" id="mpHist" style="display:none">
-                    <div class="mpHistHead">
-                      <span>History</span>
-                      <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
-                    </div>
-                    <div class="mpHistBody" id="mpHistBody"></div>
+<div class="mpHistBody" id="mpHistBody"></div>
                   </div>
 
                   <div class="mpField" style="margin-top:12px">
@@ -2209,9 +2215,15 @@ sin(x)+x^2
                     <button class="mpBtn" id="mpClear">Clear</button>
                   </div>
                 </div>
-              </div>
 
-              <div id="mpErr" class="mpErr" style="display:none"></div>
+                <div class="mpRight">
+                  <div class="mpHist" id="mpHist" style="display:none">
+                    <div class="mpHistHead">
+                      <span>History</span>
+                      <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
+                    </div>
+
+                  <div id="mpErr" class="mpErr" style="display:none"></div>
 
               <div class="mpOut" id="mpOut" style="display:none">
                 <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
@@ -2221,7 +2233,8 @@ sin(x)+x^2
               <details class="mpWork" id="mpWork" style="display:none">
                 <summary>Show work</summary>
                 <div class="workBody" id="mpWorkBody"></div>
-              </details>
+                </div>
+              </div>
             </div>
           </div>
         `;

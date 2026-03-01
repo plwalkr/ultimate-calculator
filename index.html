@@ -779,13 +779,21 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpItem details{margin-top:8px}
 .mpItem summary{cursor:pointer;font-weight:900}
 
+
+/* --- MathPad keypad (TI-ish) --- */
+.mpKeypad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.mpKey{display:flex;align-items:center;justify-content:center;min-height:44px}
+@media (max-width:520px){
+  .mpKey{min-height:48px;font-size:1.05rem}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.86 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.87 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -933,210 +941,225 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
+
 function initMathPad(){
-  const exprEl = document.getElementById('mpExpr');
+  const exprEl = document.getElementById('mpExpr'); // hidden storage
+  const lineEl = document.getElementById('mpLine'); // single entry line (TI-style)
   const varEl  = document.getElementById('mpVar');
-  const aEl    = document.getElementById('mpA');
   const xEl    = document.getElementById('mpX');
+  const aEl    = document.getElementById('mpA');
   const bEl    = document.getElementById('mpB');
   const nEl    = document.getElementById('mpN');
-  const outBox = document.getElementById('mpOut');
-  const outLab = document.getElementById('mpOutLabel');
-  const errBox = document.getElementById('mpErr');
-  const outTxt = document.getElementById('mpOutText');
-  const workDet= document.getElementById('mpWork');
-  const workBd = document.getElementById('mpWorkBody');
+
   const btnEval= document.getElementById('mpEval');
   const btnDer = document.getElementById('mpDeriv');
   const btnInt = document.getElementById('mpInt');
   const btnClr = document.getElementById('mpClear');
-  const lineEl = document.getElementById('mpLine');
-  const btnRun = document.getElementById('mpRun');
+
+  const outBox = document.getElementById('mpOut');
+  const outLab = document.getElementById('mpOutLabel');
+  const outTxt = document.getElementById('mpOutText');
+  const errBox = document.getElementById('mpErr');
+
   const histBox = document.getElementById('mpHist');
-  const histBody = document.getElementById('mpHistBody');
+  const histBody= document.getElementById('mpHistBody');
   const btnHistClear = document.getElementById('mpHistClear');
-  if(!exprEl || !btnEval) return;
 
-  // Load/save
-  try{
-    const st = JSON.parse(localStorage.getItem('lc_mathpad')||'{}');
-    if(st.expr){
-      if(lineEl && !lineEl.value) lineEl.value = st.expr;
-      if(!exprEl.value) exprEl.value = st.expr;
-    }
-    if(lineEl && st.line!=null) lineEl.value = st.line;
-    if(st.v) varEl.value = st.v;
-    if(st.a!=null) aEl.value = st.a;
-    if(st.b!=null) bEl.value = st.b;
-    if(st.n!=null) nEl.value = st.n;
-    if(st.x!=null && xEl) xEl.value = st.x;
-  }catch(_){}
-  const save = ()=>{
-    try{
-      localStorage.setItem('lc_mathpad', JSON.stringify({
-        expr: (lineEl?lineEl.value:exprEl.value), line: (lineEl?lineEl.value:''), v: varEl.value||'x',
-        a: aEl.value, b: bEl.value, n: nEl.value, x: (xEl?xEl.value:'')
-      }));
-    }catch(_){}
-  };
-  ['input','change'].forEach(ev=>{
-    exprEl.addEventListener(ev, save);
-    varEl.addEventListener(ev, save);
-    aEl.addEventListener(ev, save);
-    bEl.addEventListener(ev, save);
-    nEl.addEventListener(ev, save);
-    if(xEl) xEl.addEventListener(ev, save);
-    if(lineEl) lineEl.addEventListener(ev, save);
-  });
+  const workDet= document.getElementById('mpWork');
+  const workBd = document.getElementById('mpWorkBody');
 
-// Mini keypad insert
-try{
-  document.querySelectorAll('#mathPad .mpKey').forEach(k=>{
-    k.addEventListener('click', ()=>{
-      const ins = k.getAttribute('data-ins') || '';
-      insertAtCursor(lineEl || exprEl, ins);
-      save();
-    });
-  });
+  if(!lineEl || !btnEval || !window.math) return;
 
-const addHist = (title, expr, out, workHtml)=>{
-  if(!histBox || !histBody) return;
-  histBox.style.display = 'block';
-  const el = document.createElement('div');
-  el.className = 'mpItem';
-  el.innerHTML = `
-    <div class="k">${escapeHtml(title)}</div>
-    <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${escapeHtml(expr)}</div>
-    <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${escapeHtml(out)}</div>
-    ${workHtml ? `<details><summary>Show work</summary><div style="margin-top:8px">${workHtml}</div></details>` : ``}
-  `;
-  histBody.prepend(el);
-};
+  let mpANS = null;
 
-const runLine = ()=>{
-  const s = cleanExpr(lineEl ? lineEl.value : '');
-  if(!s) return;
-  exprEl.value = s;
-  try{ save(); }catch(_){}
-  btnEval.click();
-};
-if(btnRun) btnRun.addEventListener('click', runLine);
-if(lineEl) lineEl.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter'){ e.preventDefault(); runLine(); }
-});
-if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
-  if(histBody) histBody.innerHTML='';
-  if(histBox) histBox.style.display='none';
-});
-
-}catch(_){}
-
-
-  
-  const showOut = (label, val, workHtml, errMsg)=>{
-    if(errBox){
-      if(errMsg){ errBox.style.display='block'; errBox.textContent = errMsg; }
-      else { errBox.style.display='none'; errBox.textContent=''; }
-    }
-    if(outLab) outLab.textContent = label;
-    outBox.style.display = 'block';
-    outTxt.textContent = val;
-    if(workHtml){
-      workDet.style.display='block';
-      workBd.innerHTML = workHtml;
-    }else{
-      workDet.style.display='none';
-      workBd.textContent='';
-    }
+  const insertAtCursor = (el, ins)=>{
+    if(!el) return;
+    const start = el.selectionStart ?? el.value.length;
+    const end   = el.selectionEnd ?? el.value.length;
+    el.value = el.value.slice(0,start) + ins + el.value.slice(end);
+    const pos = start + ins.length;
+    try{ el.focus(); el.setSelectionRange(pos,pos); }catch(_){}
   };
 
-
-  
-const insertAtCursor = (el, ins)=>{
-  if(!el) return;
-  const start = el.selectionStart ?? el.value.length;
-  const end   = el.selectionEnd ?? el.value.length;
-  el.value = el.value.slice(0,start) + ins + el.value.slice(end);
-  const pos = start + ins.length;
-  try{ el.focus(); el.setSelectionRange(pos,pos); }catch(_){}
-};
-
-const cleanExpr = (raw)=>{
-  let s = (raw||'').trim();
-  // allow users to type "y = ..." or "f(x) = ..." without breaking eval
-  s = s.replace(/^(y\s*=\s*)/i,'');
-  s = s.replace(/^f\s*\(\s*[a-zA-Z]\s*\)\s*=\s*/i,'');
-  // common: "f(x)=" specifically
-  s = s.replace(/^f\s*\(\s*x\s*\)\s*=\s*/i,'');
-  return s.trim();
-};
-const getExpr = ()=> cleanExpr(exprEl.value);
-  const getVar  = ()=> (varEl.value||'x').trim() || 'x';
+  const cleanExpr = (raw)=>{
+    let s = (raw||'').trim();
+    s = s.replace(/^(y\s*=\s*)/i,'');
+    s = s.replace(/^f\s*\(\s*[a-zA-Z]\s*\)\s*=\s*/i,'');
+    s = s.replace(/^f\s*\(\s*x\s*\)\s*=\s*/i,'');
+    return s.trim();
+  };
 
   const safeNum = (s)=>{
     const v = Number(s);
     return Number.isFinite(v) ? v : null;
   };
 
-  
-  btnEval.addEventListener('click', ()=>{
+  const setErr = (msg)=>{
+    if(!errBox) return;
+    if(msg){ errBox.style.display='block'; errBox.textContent = msg; }
+    else { errBox.style.display='none'; errBox.textContent=''; }
+  };
+
+  const showOut = (label, val, workHtml, errMsg)=>{
+    setErr(errMsg||'');
+    if(outLab) outLab.textContent = label || '—';
+    if(outBox) outBox.style.display = 'block';
+    if(outTxt) outTxt.textContent = val ?? '';
+    if(workHtml){
+      if(workDet){ workDet.style.display='block'; }
+      if(workBd){ workBd.innerHTML = workHtml; }
+    }else{
+      if(workDet){ workDet.style.display='none'; }
+      if(workBd){ workBd.textContent=''; }
+    }
+  };
+
+  const addHist = (title, expr, out, workHtml)=>{
+    if(!histBox || !histBody) return;
+    histBox.style.display = 'block';
+    const el = document.createElement('div');
+    el.className = 'mpItem';
+    el.innerHTML = `
+      <div class="k">${escapeHtml(title)}</div>
+      <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${escapeHtml(expr)}</div>
+      <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${escapeHtml(out)}</div>
+      ${workHtml ? `<details open><summary>Show work</summary><div style="margin-top:8px">${workHtml}</div></details>` : ``}
+    `;
+    histBody.prepend(el);
+  };
+
+  const save = ()=>{
+    try{
+      localStorage.setItem('lc_mathpad', JSON.stringify({
+        expr: lineEl.value,
+        v: (varEl?.value||'x'),
+        x: (xEl?.value||''),
+        a: (aEl?.value||'0'),
+        b: (bEl?.value||'1'),
+        n: (nEl?.value||'400'),
+        ans: mpANS
+      }));
+    }catch(_){}
+  };
+
+  // Load saved state
+  try{
+    const st = JSON.parse(localStorage.getItem('lc_mathpad')||'{}');
+    if(st.expr && !lineEl.value) lineEl.value = st.expr;
+    if(exprEl && st.expr && !exprEl.value) exprEl.value = st.expr;
+    if(varEl && st.v) varEl.value = st.v;
+    if(xEl && st.x!=null) xEl.value = st.x;
+    if(aEl && st.a!=null) aEl.value = st.a;
+    if(bEl && st.b!=null) bEl.value = st.b;
+    if(nEl && st.n!=null) nEl.value = st.n;
+    if(st.ans!=null) mpANS = st.ans;
+  }catch(_){}
+
+  // Persist on change
+  ['input','change'].forEach(ev=>{
+    lineEl.addEventListener(ev, save);
+    if(varEl) varEl.addEventListener(ev, save);
+    if(xEl) xEl.addEventListener(ev, save);
+    if(aEl) aEl.addEventListener(ev, save);
+    if(bEl) bEl.addEventListener(ev, save);
+    if(nEl) nEl.addEventListener(ev, save);
+  });
+
+  const getVar = ()=> (varEl?.value||'x').trim() || 'x';
+  const getExpr = ()=> cleanExpr(lineEl.value);
+
+  const runEvaluate = ()=>{
     const expr = getExpr();
     const v = getVar();
-    const xraw = (xEl && xEl.value ? xEl.value : '').trim();
-
-    if(!expr) return showOut('Evaluate', 'Enter an expression first.', '', 'No expression provided.');
+    const xraw = (xEl?.value||'').trim();
+    if(exprEl) exprEl.value = expr;
+    if(!expr) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
 
     try{
       let res;
+      let work = '';
       if(xraw !== ''){
         const xv = Number(xraw);
-        if(!Number.isFinite(xv)) return showOut('Evaluate', 'Enter a numeric value.', '', 'x must be a number.');
+        if(!Number.isFinite(xv)) return showOut('Evaluate', 'Enter a numeric x value.', '', 'x must be a number.');
         const compiled = window.math.compile(expr);
         res = compiled.evaluate({[v]: xv});
-        showOut(
-          `Evaluate at ${v}=${xv}`,
-          String(res),
-          `<div><b>f(${escapeHtml(v)})</b> = <span class="mono">${escapeHtml(expr)}</span></div>
-           <div style="margin-top:6px"><b>${escapeHtml(v)}</b> = ${escapeHtml(String(xv))}</div>
-           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
-        );
+        work = `
+          <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
+          <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
+          <div style="margin-top:6px"><b>Compute</b>: f(${escapeHtml(String(xv))})</div>
+          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+        `;
+        showOut(`Evaluate at ${v}=${xv}`, String(res), work);
       }else{
         res = window.math.evaluate(expr);
-        showOut(
-          'Evaluate',
-          String(res),
-          `<div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
-           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>`
-        );
+        work = `
+          <div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
+          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+        `;
+        showOut('Evaluate', String(res), work);
       }
+      mpANS = res;
+      save();
+      addHist(outLab?.textContent||'Evaluate', expr, String(res), work);
     }catch(e){
-      showOut('Evaluate', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error while evaluating.');
+      const msg = (e && e.message) ? e.message : String(e);
+      showOut('Evaluate', msg, '', msg);
     }
-  });
+  };
 
-  btnDer.addEventListener('click', ()=>{
+  const runDerivative = ()=>{
     const expr = getExpr();
     const v = getVar();
-    if(!expr) return showOut('Derivative', 'Enter an expression first.');
+    const xraw = (xEl?.value||'').trim();
+    if(exprEl) exprEl.value = expr;
+    if(!expr) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
+
     try{
       const d = window.math.derivative(expr, v).toString();
-      showOut(`Derivative d/d${v}`, d,
-        `<div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
-         <div style="margin-top:6px"><b>Derivative</b>: f′(${escapeHtml(v)}) = <span class="mono">${escapeHtml(d)}</span></div>`
-      );
-    }catch(e){
-      showOut('Derivative', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error');
-    }
-  });
+      let work = `
+        <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
+        <div style="margin-top:6px"><b>Symbolic derivative</b> (MathJS):</div>
+        <div class="mono" style="margin-top:6px">f′(${escapeHtml(v)}) = ${escapeHtml(d)}</div>
+      `;
 
-  btnInt.addEventListener('click', ()=>{
+      // Optional numeric verification at x (central difference)
+      if(xraw !== ''){
+        const xv = Number(xraw);
+        if(Number.isFinite(xv)){
+          const h = 1e-5;
+          const f = window.math.compile(expr);
+          const fp = (Number(f.evaluate({[v]: xv+h})) - Number(f.evaluate({[v]: xv-h}))) / (2*h);
+          const g = window.math.compile(d);
+          const gs = Number(g.evaluate({[v]: xv}));
+          if(Number.isFinite(fp) && Number.isFinite(gs)){
+            work += `
+              <div style="margin-top:10px"><b>Check at</b> ${escapeHtml(v)}=${escapeHtml(String(xv))}:</div>
+              <div class="mono" style="margin-top:6px">Finite diff ≈ ${fp.toPrecision(10)}</div>
+              <div class="mono" style="margin-top:6px">f′(${escapeHtml(String(xv))}) = ${gs.toPrecision(10)}</div>
+            `;
+          }
+        }
+      }
+
+      showOut(`Derivative d/d${v}`, d, work);
+      mpANS = d;
+      save();
+      addHist(`Derivative d/d${v}`, expr, d, work);
+    }catch(e){
+      const msg = (e && e.message) ? e.message : String(e);
+      showOut('Derivative', msg, '', msg);
+    }
+  };
+
+  const runIntegral = ()=>{
     const expr = getExpr();
     const v = getVar();
-    const a = safeNum(aEl.value);
-    const b = safeNum(bEl.value);
-    let N = parseInt(nEl.value, 10);
-    if(!expr) return showOut('Definite integral', 'Enter an expression first.');
-    if(a===null || b===null) return showOut('Definite integral', 'Enter numeric a and b.');
+    const a = safeNum(aEl?.value);
+    const b = safeNum(bEl?.value);
+    let N = parseInt(nEl?.value||'400', 10);
+    if(exprEl) exprEl.value = expr;
+    if(!expr) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
+    if(a===null || b===null) return showOut('Integral', 'Enter numeric a and b.', '', 'a and b must be numbers.');
     if(!Number.isFinite(N) || N<10) N = 400;
     if(N%2===1) N += 1;
 
@@ -1144,44 +1167,120 @@ const getExpr = ()=> cleanExpr(exprEl.value);
       const compiled = window.math.compile(expr);
       const lo = Math.min(a,b), hi = Math.max(a,b);
       const h = (hi - lo) / N;
-      let sum = 0;
 
+      let sum = 0;
+      const sample = [];
       for(let i=0;i<=N;i++){
         const x = lo + i*h;
-        let fx;
-        try{
-          fx = compiled.evaluate({[v]: x});
-        }catch(_){
-          fx = NaN;
-        }
-        fx = Number(fx);
+        let fx = Number(compiled.evaluate({[v]: x}));
         if(!Number.isFinite(fx)) fx = 0;
-        if(i===0 || i===N) sum += fx;
-        else if(i%2===0) sum += 2*fx;
-        else sum += 4*fx;
+        const w = (i===0 || i===N) ? 1 : (i%2===0 ? 2 : 4);
+        sum += w*fx;
+
+        // sample first 5 and last 3 rows for "work" (not 400 rows)
+        if(i<5 || i>N-3){
+          sample.push({i,x,fx,w});
+        }
       }
       const area = (h/3)*sum;
-      showOut(`Integral ∫ a→b (signed)`, area.toPrecision(10),
-        `<div><b>Integral</b>: ∫<sub>${lo}</sub><sup>${hi}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
-         <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule (N=${N}, h=${h.toPrecision(6)}, signed)</div>
-         <div style="margin-top:6px"><b>Result</b>: ${area.toPrecision(10)}</div>
-         <div class="note" style="margin-top:8px">Signed integral: portions below the axis subtract (negative contribution).</div>`
-      );
+
+      let rows = sample.map(r=>`
+        <tr>
+          <td class="mono">${r.i}</td>
+          <td class="mono">${r.x.toPrecision(7)}</td>
+          <td class="mono">${r.fx.toPrecision(10)}</td>
+          <td class="mono">${r.w}</td>
+        </tr>`).join('');
+
+      const work = `
+        <div><b>Integral</b>: ∫<sub>${escapeHtml(String(lo))}</sub><sup>${escapeHtml(String(hi))}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
+        <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule</div>
+        <div class="mono" style="margin-top:6px">h = (b−a)/N = ${(h).toPrecision(10)}</div>
+        <div class="mono" style="margin-top:6px">Area ≈ (h/3) · Σ wᵢ f(xᵢ)</div>
+        <div style="margin-top:10px"><b>Sample terms</b> (first 5 + last 3):</div>
+        <div style="overflow-x:auto;margin-top:6px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr><th align="left">i</th><th align="left">xᵢ</th><th align="left">f(xᵢ)</th><th align="left">wᵢ</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="mono" style="margin-top:10px">Σ wᵢ f(xᵢ) = ${sum.toPrecision(12)}</div>
+        <div class="mono" style="margin-top:6px">Area = (h/3)·sum = ${area.toPrecision(12)}</div>
+        <div class="note" style="margin-top:8px">Signed integral: area below x-axis subtracts.</div>
+      `;
+
+      showOut('Integral ∫ a→b (signed)', area.toPrecision(12), work);
+      mpANS = area;
+      save();
+      addHist('Integral ∫ a→b (signed)', expr, area.toPrecision(12), work);
     }catch(e){
-      showOut('Definite integral', (e && e.message) ? e.message : String(e), '', (e && e.message) ? e.message : 'Math error');
+      const msg = (e && e.message) ? e.message : String(e);
+      showOut('Integral', msg, '', msg);
     }
+  };
+
+  // Buttons + Enter key
+  btnEval.addEventListener('click', runEvaluate);
+  btnDer.addEventListener('click', runDerivative);
+  btnInt.addEventListener('click', runIntegral);
+
+  const runLine = ()=> runEvaluate();
+  const btnRun = document.getElementById('mpRun');
+  if(btnRun) btnRun.addEventListener('click', runLine);
+  lineEl.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); runLine(); }
   });
 
-  
+  if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
+    if(histBody) histBody.innerHTML='';
+    if(histBox) histBox.style.display='none';
+  });
+
   btnClr.addEventListener('click', ()=>{
-    exprEl.value='';
+    lineEl.value='';
     if(xEl) xEl.value='';
-    if(errBox){ errBox.style.display='none'; errBox.textContent=''; }
-    outBox.style.display='none';
-    workDet.style.display='none';
+    if(exprEl) exprEl.value='';
+    mpANS = null;
+    setErr('');
+    if(outBox) outBox.style.display='none';
+    if(workDet) workDet.style.display='none';
     try{ localStorage.removeItem('lc_mathpad'); }catch(_){}
   });
+
+  // Keypad: insert + actions
+  try{
+    document.querySelectorAll('#mathPad .mpKey').forEach(k=>{
+      k.addEventListener('click', ()=>{
+        const act = k.getAttribute('data-act');
+        let ins = k.getAttribute('data-ins') || '';
+        if(act === 'eval'){ runEvaluate(); return; }
+        if(act === 'bksp'){
+          const el = lineEl;
+          const start = el.selectionStart ?? el.value.length;
+          const end = el.selectionEnd ?? el.value.length;
+          if(start !== end){
+            el.value = el.value.slice(0,start) + el.value.slice(end);
+            try{ el.setSelectionRange(start,start); }catch(_){}
+          }else if(start>0){
+            el.value = el.value.slice(0,start-1) + el.value.slice(start);
+            try{ el.setSelectionRange(start-1,start-1); }catch(_){}
+          }
+          save(); return;
+        }
+        if(act === 'clearline'){
+          lineEl.value='';
+          save(); return;
+        }
+        if(ins === 'ANS'){ ins = (mpANS==null) ? '0' : String(mpANS); }
+        // Replace pretty symbols
+        ins = ins.replace('×','*').replace('÷','/').replace('−','-');
+        insertAtCursor(lineEl, ins);
+        save();
+      });
+    });
+  }catch(_){}
 }
+
 
 function startApp(){
         forceHideOverlays();
@@ -1766,31 +1865,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function renderCalc(){
         const view=$('#view');
         view.innerHTML=`
-          <section class="surface calc-grid">
-            <div>
-              <div class="screen">
-                <div class="expr" id="expr"></div>
-                <div class="result" id="res">0</div>
-              </div>
-              <div class="keys" id="keys"></div>
-            </div>
-            <div>
-              <div class="section-title">History</div>
-              <div class="surface" style="padding:10px">
-                <div class="tape" id="tape"></div>
-                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-                  <button class="btn" id="copyTape">Copy</button>
-                  <button class="btn" id="clearTape">Clear</button>
-                  <button class="btn" id="clearSavedCalc" title="Forget saved history">Clear Saved</button>
-                </div>
-              </div>
-            </div>
-              </div>
-            </div>
-          </section>
-
-
-<div class="mathpad" id="mathPad">
+          <div class="mathpad" id="mathPad">
   <div class="mpHead">
     <span class="kpill">MathPad</span>
     <span class="note" style="font-weight:800;">Evaluate • Derivative • Definite Integral</span>
@@ -1805,8 +1880,21 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         </div>
         <textarea id="mpExpr" class="mpExpr" style="display:none" aria-hidden="true"></textarea>
 
-        <div class="mpKeypad" aria-label="MathPad keypad">
-          <div class="mpKey" data-ins="sin(">sin</div>
+        
+<div class="mpKeypad" aria-label="MathPad keypad">
+  <div class="mpKey" data-ins="7">7</div><div class="mpKey" data-ins="8">8</div><div class="mpKey" data-ins="9">9</div><div class="mpKey" data-ins="+">+</div><div class="mpKey" data-ins="-">−</div>
+  <div class="mpKey" data-ins="4">4</div><div class="mpKey" data-ins="5">5</div><div class="mpKey" data-ins="6">6</div><div class="mpKey" data-ins="*">×</div><div class="mpKey" data-ins="/">÷</div>
+  <div class="mpKey" data-ins="1">1</div><div class="mpKey" data-ins="2">2</div><div class="mpKey" data-ins="3">3</div><div class="mpKey" data-ins="^">^</div><div class="mpKey" data-ins="(">(</div>
+  <div class="mpKey" data-ins="0">0</div><div class="mpKey" data-ins=".">.</div><div class="mpKey" data-ins=")">)</div><div class="mpKey" data-ins=",">,</div><div class="mpKey" data-ins="ANS">ANS</div>
+
+  <div class="mpKey" data-ins="sin(">sin</div><div class="mpKey" data-ins="cos(">cos</div><div class="mpKey" data-ins="tan(">tan</div><div class="mpKey" data-ins="sqrt(">√</div><div class="mpKey" data-ins="pi">π</div>
+  <div class="mpKey" data-ins="ln(">ln</div><div class="mpKey" data-ins="log(">log</div><div class="mpKey" data-ins="abs(">abs</div><div class="mpKey" data-ins="exp(">e^</div><div class="mpKey" data-ins="e">e</div>
+
+  <div class="mpKey" data-act="bksp">⌫</div>
+  <div class="mpKey" data-act="clearline">CLR</div>
+  <div class="mpKey" data-act="eval" style="grid-column: span 3;min-width:120px">=</div>
+</div>
+
           <div class="mpKey" data-ins="cos(">cos</div>
 
         <div class="mpEntryLine">

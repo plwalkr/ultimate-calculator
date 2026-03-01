@@ -982,7 +982,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.01 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.02 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1154,6 +1154,7 @@ function initMathPad(){
   const btnDer = document.getElementById('mpDeriv');
   const btnInt = document.getElementById('mpInt');
   const btnClr = document.getElementById('mpClear');
+  const btnGraph= document.getElementById('mpGraph');
 
   const outBox = document.getElementById('mpOut');
   const outLab = document.getElementById('mpOutLabel');
@@ -1501,6 +1502,29 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
     if(outBox) outBox.style.display='none';
     if(workDet) workDet.style.display='none';
     try{ localStorage.removeItem('lc_mathpad'); }catch(_){}
+  });
+
+  // GraphLab bridge: send current worksheet lines to GraphLab and jump there
+  if(btnGraph) btnGraph.addEventListener('click', ()=>{
+    try{
+      const raw = String(lineEl?.value || '');
+      const lines = raw.split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
+      const norm = lines.map(s=>{
+        // allow TI-ish "y=" or "f(x)=" prefixes
+        if(/^y\s*=\s*/i.test(s)) return s.replace(/^y\s*=\s*/i,'').trim();
+        if(/^f\(x\)\s*=\s*/i.test(s)) return s.replace(/^f\(x\)\s*=\s*/i,'').trim();
+        return s;
+      }).filter(Boolean);
+      const gx = norm.join('\n');
+      if(!gx){ toast('Nothing to graph'); return; }
+      const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
+      const prev = loadTab('graphlab', def) || def;
+      saveTab('graphlab', {...prev, gx, glLines:null, livePlot: prev.livePlot ?? '1'});
+      switchTab('graphlab');
+    }catch(e){
+      console.error(e);
+      toast('Graph send failed');
+    }
   });
 
   // Keypad: insert + actions
@@ -2231,6 +2255,7 @@ sin(x)+x^2
                     <button class="mpBtn" id="mpEval">Evaluate</button>
                     <button class="mpBtn" id="mpDeriv">Derivative d/dx</button>
                     <button class="mpBtn" id="mpInt">Integral ∫ a→b</button>
+                    <button class="mpBtn" id="mpGraph">Graph</button>
                     <button class="mpBtn" id="mpClear">Clear</button>
                   </div>
                 </div>

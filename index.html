@@ -914,13 +914,42 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   background: rgba(255,86,86,.12);
 }
 
+
+/* --- TI screen + compact keypad tweaks --- */
+#mathPad.tiSkin .mpScreen{margin-top:10px;border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
+  background:linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.08));}
+#mathPad.tiSkin .mpScreenTop{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(180deg, rgba(11,15,20,.92), rgba(18,24,32,.88));}
+#mathPad.tiSkin .mpScreenInp{width:100%;border:none;outline:none;resize:vertical;min-height:140px;
+  padding:12px 12px;background:rgba(0,0,0,.10);color:var(--ti-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+  font-size:1.12rem;line-height:1.35}
+#mathPad.tiSkin .mpScreenActions{display:flex;gap:12px;align-items:center;padding:10px 12px;border-top:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.10)}
+#mathPad.tiSkin .mpKeypad{margin-top:12px}
+#mathPad.tiSkin .mpKey{min-height:40px;font-size:.98rem;border-radius:12px}
+#mathPad.tiSkin .mpKey[data-ins="sin("],
+#mathPad.tiSkin .mpKey[data-ins="cos("],
+#mathPad.tiSkin .mpKey[data-ins="tan("],
+#mathPad.tiSkin .mpKey[data-ins="ln("],
+#mathPad.tiSkin .mpKey[data-ins="log("],
+#mathPad.tiSkin .mpKey[data-ins="sqrt("],
+#mathPad.tiSkin .mpKey[data-ins="pi"],
+#mathPad.tiSkin .mpKey[data-ins="e"]{font-weight:900;opacity:.92}
+#mathPad.tiSkin .mpAlphaPad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+#mathPad.tiSkin .mpAlphaPad .mpKey{min-height:38px;font-size:.92rem}
+@media (max-width:520px){
+  #mathPad.tiSkin .mpScreenInp{min-height:170px;font-size:1.10rem}
+  #mathPad.tiSkin .mpKey{min-height:46px;font-size:1.02rem}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.88 • 2026-02-25</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.4.89 • 2026-02-25</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1091,6 +1120,8 @@ function initMathPad(){
   const histBox = document.getElementById('mpHist');
   const histBody= document.getElementById('mpHistBody');
   const btnHistClear = document.getElementById('mpHistClear');
+  const btnAlpha = document.getElementById('mpAlpha');
+  const alphaPad = document.getElementById('mpAlphaPad');
 
   const workDet= document.getElementById('mpWork');
   const workBd = document.getElementById('mpWorkBody');
@@ -1196,131 +1227,169 @@ function initMathPad(){
   const getExpr = ()=> cleanExpr(lineEl.value);
 
   const runEvaluate = ()=>{
-    const expr = getExpr();
-    const v = getVar();
-    const xraw = (xEl?.value||'').trim();
-    if(exprEl) exprEl.value = expr;
-    if(!expr) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
+  const v = getVar();
+  const xraw = (xEl?.value||'').trim();
+  const xv = (xraw !== '') ? Number(xraw) : null;
 
-    try{
+  const lines = (lineEl.value||'').split(/
+?
+/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('
+');
+  if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
+
+  const results = [];
+  let firstWork = '';
+  try{
+    for(const expr of lines){
       let res;
       let work = '';
       if(xraw !== ''){
-        const xv = Number(xraw);
-        if(!Number.isFinite(xv)) return showOut('Evaluate', 'Enter a numeric x value.', '', 'x must be a number.');
+        if(!Number.isFinite(xv)) throw new Error('x must be a number.');
         const compiled = window.math.compile(expr);
         res = compiled.evaluate({[v]: xv});
         work = `
           <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
           <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
-          <div style="margin-top:6px"><b>Compute</b>: f(${escapeHtml(String(xv))})</div>
           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
         `;
-        showOut(`Evaluate at ${v}=${xv}`, String(res), work);
       }else{
         res = window.math.evaluate(expr);
         work = `
           <div><b>Expression</b>: <span class="mono">${escapeHtml(expr)}</span></div>
           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
         `;
-        showOut('Evaluate', String(res), work);
       }
-      mpANS = res;
-      save();
-      addHist(outLab?.textContent||'Evaluate', expr, String(res), work);
-    }catch(e){
-      const msg = (e && e.message) ? e.message : String(e);
-      showOut('Evaluate', msg, '', msg);
+      results.push({expr,res,work});
+      if(!firstWork) firstWork = work;
     }
-  };
+
+    const out = results.map(r=>`${r.expr} = ${r.res}`).join('
+');
+    showOut((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', out, firstWork);
+    mpANS = results[results.length-1].res;
+    save();
+
+    // History: one entry containing all lines + separate work blocks inside
+    const workAll = results.map(r=>`
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)">
+        <div class="mono"><b>In:</b> ${escapeHtml(r.expr)}</div>
+        <div style="margin-top:6px">${r.work}</div>
+      </div>`).join('');
+    addHist((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', lines.join(' ; '), out, workAll);
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    showOut('Evaluate', msg, '', msg);
+  }
+};
+
 
   const runDerivative = ()=>{
-    const expr = getExpr();
-    const v = getVar();
-    const xraw = (xEl?.value||'').trim();
-    if(exprEl) exprEl.value = expr;
-    if(!expr) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
+  const v = getVar();
+  const xraw = (xEl?.value||'').trim();
+  const xv = (xraw !== '') ? Number(xraw) : null;
 
-    try{
+  const lines = (lineEl.value||'').split(/
+?
+/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('
+');
+  if(!lines.length) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
+
+  try{
+    const outs = [];
+    const workAll = [];
+
+    for(const expr of lines){
       const d = window.math.derivative(expr, v).toString();
+      outs.push(`d/d${v}(${expr}) = ${d}`);
+
       let work = `
         <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${escapeHtml(expr)}</span></div>
-        <div style="margin-top:6px"><b>Symbolic derivative</b> (MathJS):</div>
+        <div style="margin-top:6px"><b>Symbolic derivative</b>:</div>
         <div class="mono" style="margin-top:6px">f′(${escapeHtml(v)}) = ${escapeHtml(d)}</div>
       `;
 
-      // Optional numeric verification at x (central difference)
-      if(xraw !== ''){
-        const xv = Number(xraw);
-        if(Number.isFinite(xv)){
-          const h = 1e-5;
-          const f = window.math.compile(expr);
-          const fp = (Number(f.evaluate({[v]: xv+h})) - Number(f.evaluate({[v]: xv-h}))) / (2*h);
-          const g = window.math.compile(d);
-          const gs = Number(g.evaluate({[v]: xv}));
-          if(Number.isFinite(fp) && Number.isFinite(gs)){
-            work += `
-              <div style="margin-top:10px"><b>Check at</b> ${escapeHtml(v)}=${escapeHtml(String(xv))}:</div>
-              <div class="mono" style="margin-top:6px">Finite diff ≈ ${fp.toPrecision(10)}</div>
-              <div class="mono" style="margin-top:6px">f′(${escapeHtml(String(xv))}) = ${gs.toPrecision(10)}</div>
-            `;
-          }
+      if(xraw !== '' && Number.isFinite(xv)){
+        const h = 1e-5;
+        const f = window.math.compile(expr);
+        const fp = (Number(f.evaluate({[v]: xv+h})) - Number(f.evaluate({[v]: xv-h}))) / (2*h);
+        const g = window.math.compile(d);
+        const gs = Number(g.evaluate({[v]: xv}));
+        if(Number.isFinite(fp) && Number.isFinite(gs)){
+          work += `
+            <div style="margin-top:10px"><b>Check at</b> ${escapeHtml(v)}=${escapeHtml(String(xv))}:</div>
+            <div class="mono" style="margin-top:6px">Finite diff ≈ ${fp.toPrecision(10)}</div>
+            <div class="mono" style="margin-top:6px">f′(${escapeHtml(String(xv))}) = ${gs.toPrecision(10)}</div>
+          `;
         }
       }
 
-      showOut(`Derivative d/d${v}`, d, work);
-      mpANS = d;
-      save();
-      addHist(`Derivative d/d${v}`, expr, d, work);
-    }catch(e){
-      const msg = (e && e.message) ? e.message : String(e);
-      showOut('Derivative', msg, '', msg);
+      workAll.push(`
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)">
+          <div class="mono"><b>In:</b> ${escapeHtml(expr)}</div>
+          <div style="margin-top:6px">${work}</div>
+        </div>`);
     }
-  };
+
+    const out = outs.join('
+');
+    showOut(`Derivative d/d${v}`, out, workAll[0]||'');
+    mpANS = outs[outs.length-1];
+    save();
+    addHist(`Derivative d/d${v}`, lines.join(' ; '), out, workAll.join(''));
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    showOut('Derivative', msg, '', msg);
+  }
+};
+
 
   const runIntegral = ()=>{
-    const expr = getExpr();
-    const v = getVar();
-    const a = safeNum(aEl?.value);
-    const b = safeNum(bEl?.value);
-    let N = parseInt(nEl?.value||'400', 10);
-    if(exprEl) exprEl.value = expr;
-    if(!expr) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
-    if(a===null || b===null) return showOut('Integral', 'Enter numeric a and b.', '', 'a and b must be numbers.');
-    if(!Number.isFinite(N) || N<10) N = 400;
-    if(N%2===1) N += 1;
+  const v = getVar();
+  const a = safeNum(aEl?.value);
+  const b = safeNum(bEl?.value);
+  let N = parseInt(nEl?.value||'400', 10);
 
-    try{
+  const lines = (lineEl.value||'').split(/
+?
+/).map(s=>cleanExpr(s)).filter(s=>s);
+  if(exprEl) exprEl.value = lines.join('
+');
+  if(!lines.length) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
+  if(a===null || b===null) return showOut('Integral', 'Enter numeric a and b.', '', 'a and b must be numbers.');
+  if(!Number.isFinite(N) || N<10) N = 400;
+  if(N%2===1) N += 1;
+
+  try{
+    const lo = Math.min(a,b), hi = Math.max(a,b);
+    const h = (hi - lo) / N;
+
+    const outs = [];
+    const workAll = [];
+
+    for(const expr of lines){
       const compiled = window.math.compile(expr);
-      const lo = Math.min(a,b), hi = Math.max(a,b);
-      const h = (hi - lo) / N;
-
       let sum = 0;
       const sample = [];
+
       for(let i=0;i<=N;i++){
         const x = lo + i*h;
         let fx = Number(compiled.evaluate({[v]: x}));
         if(!Number.isFinite(fx)) fx = 0;
         const w = (i===0 || i===N) ? 1 : (i%2===0 ? 2 : 4);
         sum += w*fx;
-
-        // sample first 5 and last 3 rows for "work" (not 400 rows)
-        if(i<5 || i>N-3){
-          sample.push({i,x,fx,w});
-        }
+        if(i<5 || i>N-3) sample.push({i,x,fx,w});
       }
       const area = (h/3)*sum;
+      outs.push(`∫[${lo}→${hi}] ${expr} d${v} ≈ ${area.toPrecision(12)}`);
 
-      let rows = sample.map(r=>`
-        <tr>
-          <td class="mono">${r.i}</td>
-          <td class="mono">${r.x.toPrecision(7)}</td>
-          <td class="mono">${r.fx.toPrecision(10)}</td>
-          <td class="mono">${r.w}</td>
-        </tr>`).join('');
+      const rows = sample.map(r=>`
+        <tr><td class="mono">${r.i}</td><td class="mono">${r.x.toPrecision(7)}</td><td class="mono">${r.fx.toPrecision(10)}</td><td class="mono">${r.w}</td></tr>`).join('');
 
       const work = `
         <div><b>Integral</b>: ∫<sub>${escapeHtml(String(lo))}</sub><sup>${escapeHtml(String(hi))}</sup> f(${escapeHtml(v)}) d${escapeHtml(v)}</div>
+        <div style="margin-top:6px"><b>f(${escapeHtml(v)})</b> = <span class="mono">${escapeHtml(expr)}</span></div>
         <div style="margin-top:6px"><b>Method</b>: Simpson’s Rule</div>
         <div class="mono" style="margin-top:6px">h = (b−a)/N = ${(h).toPrecision(10)}</div>
         <div class="mono" style="margin-top:6px">Area ≈ (h/3) · Σ wᵢ f(xᵢ)</div>
@@ -1333,18 +1402,27 @@ function initMathPad(){
         </div>
         <div class="mono" style="margin-top:10px">Σ wᵢ f(xᵢ) = ${sum.toPrecision(12)}</div>
         <div class="mono" style="margin-top:6px">Area = (h/3)·sum = ${area.toPrecision(12)}</div>
-        <div class="note" style="margin-top:8px">Signed integral: area below x-axis subtracts.</div>
       `;
 
-      showOut('Integral ∫ a→b (signed)', area.toPrecision(12), work);
-      mpANS = area;
-      save();
-      addHist('Integral ∫ a→b (signed)', expr, area.toPrecision(12), work);
-    }catch(e){
-      const msg = (e && e.message) ? e.message : String(e);
-      showOut('Integral', msg, '', msg);
+      workAll.push(`
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)">
+          <div class="mono"><b>In:</b> ${escapeHtml(expr)}</div>
+          <div style="margin-top:6px">${work}</div>
+        </div>`);
     }
-  };
+
+    const out = outs.join('
+');
+    showOut('Integral ∫ a→b (signed)', out, workAll[0]||'');
+    mpANS = outs[outs.length-1];
+    save();
+    addHist('Integral ∫ a→b (signed)', lines.join(' ; '), out, workAll.join(''));
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    showOut('Integral', msg, '', msg);
+  }
+};
+
 
   // Buttons + Enter key
   btnEval.addEventListener('click', runEvaluate);
@@ -1355,8 +1433,12 @@ function initMathPad(){
   const btnRun = document.getElementById('mpRun');
   if(btnRun) btnRun.addEventListener('click', runLine);
   lineEl.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter'){ e.preventDefault(); runLine(); }
-  });
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    runEvaluate();
+  }
+});
+
 
   if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
     if(histBody) histBody.innerHTML='';
@@ -1406,6 +1488,14 @@ function initMathPad(){
       });
     });
   }catch(_){}
+// Alpha toggle
+if(btnAlpha && alphaPad){
+  btnAlpha.addEventListener('click', ()=>{
+    const on = alphaPad.style.display !== 'none';
+    alphaPad.style.display = on ? 'none' : 'grid';
+  });
+}
+
 }
 
 
@@ -2024,13 +2114,23 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
           <div class="mpKey" data-ins="cos(">cos</div>
 
-        <div class="mpEntryLine">
-          <span class="mpPrompt">▶</span>
-          <input id="mpLine" class="mpLineInp" placeholder="Enter expression…  e.g. sin(x)+x^2">
-          <button class="mpBtn" id="mpRun" style="min-width:120px">Enter</button>
-        </div>
-
-        <div class="mpHist" id="mpHist" style="display:none">
+          <div class="mpScreen">
+    <div class="mpScreenTop">
+      <span class="mpPrompt">▶</span>
+      <span class="note" style="font-weight:900">Document input (one expression per line)</span>
+      <button class="mpBtn" id="mpAlpha" style="margin-left:auto;min-width:auto;padding:8px 10px">α</button>
+    </div>
+    <textarea id="mpLine" class="mpScreenInp" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+      placeholder="Examples:
+sin(x)+x^2
+(x-1)^3
+2+2"></textarea>
+    <div class="mpScreenActions">
+      <button class="mpBtn" id="mpRun" style="min-width:120px">Enter</button>
+      <span class="note">Tip: use lowercase trig (sin, cos, tan). Use pi for π.</span>
+    </div>
+  </div>
+<div class="mpHist" id="mpHist" style="display:none">
           <div class="mpHistHead">
             <span>History</span>
             <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
@@ -2060,6 +2160,16 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           </div>
         </div>
       </div>
+<div class="mpAlphaPad" id="mpAlphaPad" style="display:none" aria-label="Alphabet keypad">
+  <div class="mpKey" data-ins="a">A</div><div class="mpKey" data-ins="b">B</div><div class="mpKey" data-ins="c">C</div><div class="mpKey" data-ins="d">D</div><div class="mpKey" data-ins="e">E</div>
+  <div class="mpKey" data-ins="f">F</div><div class="mpKey" data-ins="g">G</div><div class="mpKey" data-ins="h">H</div><div class="mpKey" data-ins="i">I</div><div class="mpKey" data-ins="j">J</div>
+  <div class="mpKey" data-ins="k">K</div><div class="mpKey" data-ins="l">L</div><div class="mpKey" data-ins="m">M</div><div class="mpKey" data-ins="n">N</div><div class="mpKey" data-ins="o">O</div>
+  <div class="mpKey" data-ins="p">P</div><div class="mpKey" data-ins="q">Q</div><div class="mpKey" data-ins="r">R</div><div class="mpKey" data-ins="s">S</div><div class="mpKey" data-ins="t">T</div>
+  <div class="mpKey" data-ins="u">U</div><div class="mpKey" data-ins="v">V</div><div class="mpKey" data-ins="w">W</div><div class="mpKey" data-ins="x">X</div><div class="mpKey" data-ins="y">Y</div>
+  <div class="mpKey" data-ins="z">Z</div><div class="mpKey" data-ins="_">_</div><div class="mpKey" data-ins="=">=</div><div class="mpKey" data-ins=":">:</div><div class="mpKey" data-ins=" ">␠</div>
+</div>
+
+</div>
 
       <div class="mpCard">
         <div class="mpCardTitle">Integral settings</div>

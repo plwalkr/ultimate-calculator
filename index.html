@@ -990,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.13 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.14 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1264,6 +1264,32 @@ function initMathPad(){
     histBody.prepend(el);
   };
 
+  const isGhostLine = (s)=>{
+    const t = String(s||'').trim();
+    if(!t) return false;
+    // ignore divider lines like ----, ______, =====, or box-drawing ────
+    if(/^[-_=]{3,}$/.test(t)) return true;
+    if(/^[─━]{3,}$/.test(t)) return true;
+    return false;
+  };
+  const appendGhostDivider = ()=>{
+    try{
+      if(!lineEl) return;
+      const v = String(lineEl.value||'');
+      const divider = '────────────';
+      // avoid stacking dividers
+      const lines = v.split(/\r?\n/);
+      const tail = (lines[lines.length-1]||'').trim();
+      const tail2 = (lines[lines.length-2]||'').trim();
+      if(isGhostLine(tail) || isGhostLine(tail2)) return;
+      const needsNL = (v.length && !v.endsWith('\n')) ? '\n' : '';
+      lineEl.value = v + needsNL + divider + '\n';
+      lineEl.scrollTop = lineEl.scrollHeight;
+      const end = lineEl.value.length;
+      lineEl.setSelectionRange(end, end);
+    }catch(_){}
+  };
+
 
   // GraphLab bridge (Option B): click 📈 on any history entry to send to GraphLab
   if(histBody && !histBody.dataset.glBridge){
@@ -1523,6 +1549,7 @@ function initMathPad(){
     mpANS = outs[outs.length-1];
     save();
     addHist('Integral ∫ a→b (signed)', lines.join(' ; '), out, workAll.join('\n'));
+      appendGhostDivider();
   }catch(e){
     const msg = (e && e.message) ? e.message : String(e);
     showOut('Integral', msg, '', msg);

@@ -990,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.09 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.10 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1288,7 +1288,7 @@ function initMathPad(){
           const raw = localStorage.getItem('legendcalc_graphlab');
           if(raw) prev = {...def, ...JSON.parse(raw)};
         }catch(_){ prev = def; }
-        const next = {...prev, gx, glLines:null};
+        const next = {...prev, gx, glLines:[{on:true, expr:gx, color:(prev.glLines&&prev.glLines[0]&&prev.glLines[0].color)||'#3cf' }]};
         try{ localStorage.setItem('legendcalc_graphlab', JSON.stringify(next)); }catch(_){}
 
         // switch to GraphLab using the app router
@@ -1580,7 +1580,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
-        if(which==='sound'){ renderCalc(); openSettings(true); return; }
+        if(which==='sound'){ renderCalc(); if(typeof openSettings==='function') openSettings(true); return; }
         if(which==='torque') return renderTorque();
         return renderCalc();
       }

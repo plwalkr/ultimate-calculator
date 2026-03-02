@@ -703,6 +703,12 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
   .mpRight .mpHistBody{gap:14px}
   .mpRight .mpItem{padding:12px 14px}
+
+.mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
+.mpMiniBtn:hover{background:rgba(255,255,255,.06)}
+.mpMiniBtn:active{transform:translateY(1px)}
+
   .mpRight .mono{font-size:14px; line-height:1.35}
   .mpRight pre{line-height:1.35}
 
@@ -982,7 +988,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.03 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.04 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1230,14 +1236,41 @@ function initMathPad(){
   const addHist = (title, expr, out, workHtml)=>{
     if(!histBox || !histBody) return;
     histBox.style.display = 'block';
+
+    const rawExpr = String(expr||'').trim();
+    const normExpr = rawExpr
+      .replace(/^y\s*=\s*/i,'')
+      .replace(/^f\(x\)\s*=\s*/i,'')
+      .trim();
+
     const el = document.createElement('div');
     el.className = 'mpItem';
     el.innerHTML = `
-      <div class="k">${escapeHtml(title)}</div>
-      <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${mpPrettyHtml(expr)}</div>
+      <div class="mpRowTop">
+        <div class="k">${escapeHtml(title)}</div>
+        <button class="mpMiniBtn" type="button" title="Send to GraphLab" aria-label="Send to GraphLab">📈</button>
+      </div>
+      <div class="mono" style="margin-top:6px"><span style="opacity:.8">In:</span> ${mpPrettyHtml(rawExpr)}</div>
       <div class="mono" style="margin-top:6px"><span style="opacity:.8">Out:</span> ${mpPrettyHtml(out)}</div>
       ${workHtml ? `<details ${((window.matchMedia&&window.matchMedia('(max-width:520px)').matches)?'':'open')}><summary>Show work</summary><div style="margin-top:8px">${workHtml}</div></details>` : ``}
     `;
+
+    // Per-entry GraphLab bridge (Option B): click 📈 to graph this expression
+    const btn = el.querySelector('.mpMiniBtn');
+    if(btn) btn.addEventListener('click', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      try{
+        const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
+        const prev = loadTab('graphlab', def) || def;
+        const gx = normExpr ? normExpr : rawExpr;
+        if(!gx){ console.warn('GraphLab: empty expr'); return; }
+        saveTab('graphlab', {...prev, gx, glLines:null});
+        switchTab('graphlab');
+      }catch(err){
+        console.error(err);
+      }
+    });
+
     histBody.prepend(el);
   };
 

@@ -708,6 +708,8 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
 .mpMiniBtn:hover{background:rgba(255,255,255,.06)}
 .mpMiniBtn:active{transform:translateY(1px)}
+.mpSent{box-shadow:0 0 0 3px rgba(0,255,200,.18), 0 0 18px rgba(0,255,200,.22); border-color: rgba(0,255,200,.35) !important}
+
 
   .mpRight .mono{font-size:14px; line-height:1.35}
   .mpRight pre{line-height:1.35}
@@ -988,14 +990,13 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.04 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.05 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
         <button class="tab" data-tab="units">Units</button>
         <button class="tab" data-tab="time">Time</button>
-        <button class="tab" data-tab="sound">Sound</button>
-        <button class="tab" data-tab="torque">Torque</button>
+                <button class="tab" data-tab="torque">Torque</button>
 </div>
       <div class="theme-picker">
         <span class="note">Theme</span>
@@ -1262,10 +1263,35 @@ function initMathPad(){
       try{
         const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
         const prev = loadTab('graphlab', def) || def;
-        const gx = normExpr ? normExpr : rawExpr;
+        const gx = (normExpr ? normExpr : rawExpr).trim();
         if(!gx){ console.warn('GraphLab: empty expr'); return; }
+
+        // quick "sent" feedback
+        btn.classList.add('mpSent');
+        setTimeout(()=>btn.classList.remove('mpSent'), 320);
+
+        // persist for GraphLab
         saveTab('graphlab', {...prev, gx, glLines:null});
-        switchTab('graphlab');
+
+        // activate GraphLab tab + render it
+        document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+        const gtab = document.querySelector('.tab[data-tab="graphlab"]');
+        if(gtab) gtab.classList.add('active');
+        render('graphlab');
+
+        // ensure live GraphLab UI picks it up even if already rendered
+        setTimeout(()=>{
+          const gxEl = document.getElementById('gx');
+          if(gxEl){
+            gxEl.value = gx;
+            gxEl.dispatchEvent(new Event('input', {bubbles:true}));
+            gxEl.dispatchEvent(new Event('change', {bubbles:true}));
+          }
+        }, 60);
+      }catch(err){
+        console.error(err);
+      }
+    });switchTab('graphlab');
       }catch(err){
         console.error(err);
       }
@@ -2165,7 +2191,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
-        if(which==='sound') return renderSound();
+        if(which==='sound'){ renderCalc(); openSettings(true); return; }
         if(which==='torque') return renderTorque();
         return renderCalc();
       }

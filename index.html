@@ -982,7 +982,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.02 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.03 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1516,14 +1516,14 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
         return s;
       }).filter(Boolean);
       const gx = norm.join('\n');
-      if(!gx){ toast('Nothing to graph'); return; }
+      if(!gx){ if(typeof toast==="function"){toast('Nothing to graph');}else{console.warn("Toast:",'Nothing to graph');} return; }
       const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
       const prev = loadTab('graphlab', def) || def;
       saveTab('graphlab', {...prev, gx, glLines:null, livePlot: prev.livePlot ?? '1'});
       switchTab('graphlab');
     }catch(e){
       console.error(e);
-      toast('Graph send failed');
+      if(typeof toast==="function"){toast('Graph send failed');}else{console.warn("Toast:",'Graph send failed');}
     }
   });
 
@@ -1635,7 +1635,7 @@ function doPlot(){
   const samplesEl = document.getElementById('samples');
   if(!chartEl || !gxEl || !xminEl || !xmaxEl || !samplesEl) return;
 
-  if(!(window.math && window.Plotly)) { toast('GraphLab: loading libs...'); return; }
+  if(!(window.math && window.Plotly)) { if(typeof toast==="function"){toast('GraphLab: loading libs...');}else{console.warn("Toast:",'GraphLab: loading libs...');} return; }
 
   // Prefer structured line state (colors + enabled), fallback to gx textarea
   const st = (typeof loadTab==='function') ? loadTab('graphlab', {}) : {};
@@ -1910,7 +1910,7 @@ function waitForGraphLibs(cb, tries=40){
         const iv=setInterval(()=>{
           n++;
           if(graphLibsReady()){ clearInterval(iv); cb(); }
-          else if(n>=tries){ clearInterval(iv); toast('GraphLab: libs not ready'); dbgAdd('ERROR','GraphLab libs not ready (math/Plotly)'); }
+          else if(n>=tries){ clearInterval(iv); if(typeof toast==="function"){toast('GraphLab: libs not ready');}else{console.warn("Toast:",'GraphLab: libs not ready');} dbgAdd('ERROR','GraphLab libs not ready (math/Plotly)'); }
         }, 125);
       }
       window.waitForGraphLibs = waitForGraphLibs;
@@ -1974,15 +1974,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
           const text = (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)';
-          try{ await navigator.clipboard.writeText(text); toast('Debug log copied'); }
+          try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast('Debug log copied');}else{console.warn("Toast:",'Debug log copied');} }
           catch(_){
             try{
               const ta=document.createElement('textarea');
               ta.value=text; document.body.appendChild(ta);
               ta.select(); document.execCommand('copy');
               document.body.removeChild(ta);
-              toast('Debug log copied');
-            }catch(__){ toast('Copy failed'); }
+              if(typeof toast==="function"){toast('Debug log copied');}else{console.warn("Toast:",'Debug log copied');}
+            }catch(__){ if(typeof toast==="function"){toast('Copy failed');}else{console.warn("Toast:",'Copy failed');} }
           }
           // visually select the log so it feels like a real copy
           const pre=$('#dbgLog');
@@ -2017,11 +2017,11 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
         const tClick=$('#setTestClick');
         tClick && tClick.addEventListener('click', ()=>{
-          try{ ensureAudio(); beep(220, 0.05, 'square', 0.02, 0); toast('Test: Click'); }catch(_){}
+          try{ ensureAudio(); beep(220, 0.05, 'square', 0.02, 0); if(typeof toast==="function"){toast('Test: Click');}else{console.warn("Toast:",'Test: Click');} }catch(_){}
         });
         const tFan=$('#setTestFanfare');
         tFan && tFan.addEventListener('click', ()=>{
-          try{ ensureAudio(); beep(392,0.12,'triangle',0.03,0.00); beep(494,0.12,'triangle',0.03,0.10); beep(587,0.16,'triangle',0.035,0.20); toast('Test: Fanfare'); }catch(_){}
+          try{ ensureAudio(); beep(392,0.12,'triangle',0.03,0.00); beep(494,0.12,'triangle',0.03,0.10); beep(587,0.16,'triangle',0.035,0.20); if(typeof toast==="function"){toast('Test: Fanfare');}else{console.warn("Toast:",'Test: Fanfare');} }catch(_){}
         });
       }
 
@@ -2092,7 +2092,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function setBigUI(on){
         const p=loadPrefs(); p.bigUI=!!on; savePrefs(p);
         applyBigUI();
-        toast(`Big UI: ${on?'On':'Off'}`);
+        if(typeof toast==="function"){toast(`Big UI: ${on?'On':'Off'}`);}else{console.warn("Toast:",`Big UI: ${on?'On':'Off'}`);}
         syncSettingsUI();
       }
       function applyBigUI(){
@@ -2104,7 +2104,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function setOneHand(mode){
         const p=loadPrefs(); p.oneHand=(mode==='left'?'left':'right'); savePrefs(p);
         applyOneHand();
-        toast(`One-hand: ${p.oneHand==='left'?'Left':'Right'}`);
+        if(typeof toast==="function"){toast(`One-hand: ${p.oneHand==='left'?'Left':'Right'}`);}else{console.warn("Toast:",`One-hand: ${p.oneHand==='left'?'Left':'Right'}`);}
         syncSettingsUI();
       }
       function applyOneHand(){
@@ -2630,7 +2630,7 @@ sin(x)+x^2
           $('#glClearLines')?.addEventListener('click', ()=>{
             lines.splice(0, lines.length, {on:true, expr:''});
             glSyncTextarea(lines); persist(); glRenderLines(lines);
-            toast('Lines cleared');
+            if(typeof toast==="function"){toast('Lines cleared');}else{console.warn("Toast:",'Lines cleared');}
             if($('#livePlot')?.checked) schedulePlot();
           });
 
@@ -3640,14 +3640,14 @@ function stageRow(nmValue='30', unit='nm'){
         $('#goalH').addEventListener('input',()=>{ recompute(); persist(); });
         $('#paidL').addEventListener('change',()=>{ recompute(); persist(); });
         // Shift planner listeners
-        function setSP(h){ $('#spTarget').value=String(h); toast(`Target: ${h}h`); recompute(); persist(); }
+        function setSP(h){ $('#spTarget').value=String(h); if(typeof toast==="function"){toast(`Target: ${h}h`);}else{console.warn("Toast:",`Target: ${h}h`);} recompute(); persist(); }
         $('#sp12')?.addEventListener('click', ()=>setSP(12));
         $('#sp36')?.addEventListener('click', ()=>setSP(36));
         $('#sp40')?.addEventListener('click', ()=>setSP(40));
         ;['spTarget','spIn1','spOut1','spIn2'].forEach(id=>{ $('#'+id)?.addEventListener('input', ()=>{ recompute(); persist(); }); });
 
         function setGoal(h){
-          toast(`Target total: ${h}h`);
+          if(typeof toast==="function"){toast(`Target total: ${h}h`);}else{console.warn("Toast:",`Target total: ${h}h`);}
           recompute(); persist();
         }
 
@@ -3718,8 +3718,8 @@ function stageRow(nmValue='30', unit='nm'){
         $$('input[name="soundMode"]').forEach(r=>{
           r.addEventListener('change', ()=> setSoundMode(r.value));
         });
-        $('#testClick').addEventListener('click', ()=>{ ensureAudio(); beep(220,0.05,'square',0.02,0); toast('Click'); });
-        $('#testFanfare').addEventListener('click', ()=>{ ensureAudio(); fanfareSound(); toast('Fanfare'); });
+        $('#testClick').addEventListener('click', ()=>{ ensureAudio(); beep(220,0.05,'square',0.02,0); if(typeof toast==="function"){toast('Click');}else{console.warn("Toast:",'Click');} });
+        $('#testFanfare').addEventListener('click', ()=>{ ensureAudio(); fanfareSound(); if(typeof toast==="function"){toast('Fanfare');}else{console.warn("Toast:",'Fanfare');} });
       }
 
       render('calc');

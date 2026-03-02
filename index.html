@@ -53,7 +53,7 @@
     }
 
     *{box-sizing:border-box}
-    html,html,body{height:auto;min-height:100%;overflow-x:hidden}
+    html,body{height:auto;min-height:100%;overflow-x:hidden}
     body{min-height:100vh}
     body{margin:0;background:linear-gradient(180deg,var(--bg),#0e121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
@@ -103,7 +103,7 @@
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:900px){.two-col{grid-template-columns:1fr}}
 
-    .chart{width:100%;height:380px;min-height:320px;height:380px;width:100%;}
+    .chart{width:100%;height:380px;min-height:320px;}
 
     .ok{color:var(--ok)} .err{color:var(--error)}
     .tests{margin-top:12px;font-size:.9rem}
@@ -695,30 +695,25 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
 @media (min-width: 820px){
-  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px
+  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px;}
   /* Desktop holy-sh*t factor: keep outputs visible + readable */
-  .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px}
+  .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px; border-left:1px solid var(--border); padding-left:14px; padding-top:2px;}
   .mpRight::-webkit-scrollbar{width:10px}
   .mpRight::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
   .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
   .mpRight .mpHistBody{gap:14px}
   .mpRight .mpItem{padding:12px 14px}
 
-.mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
-.mpMiniBtn:hover{background:rgba(255,255,255,.06)}
-.mpMiniBtn:active{transform:translateY(1px)}
-.mpSent{box-shadow:0 0 0 3px rgba(0,255,200,.18), 0 0 18px rgba(0,255,200,.22); border-color: rgba(0,255,200,.35) !important}
-
+  .mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
+  .mpMiniBtn:hover{background:rgba(255,255,255,.06)}
+  .mpMiniBtn:active{transform:translateY(1px)}
+  .mpSent{box-shadow:0 0 0 3px rgba(0,255,200,.18), 0 0 18px rgba(0,255,200,.22); border-color: rgba(0,255,200,.35) !important}
 
   .mpRight .mono{font-size:14px; line-height:1.35}
   .mpRight pre{line-height:1.35}
+}
 
-}
-  .mpRight{border-left:1px solid var(--border);padding-left:14px}
-  .mpRight{padding-top:2px}
-  .mpRight .mpOutTextBig{font-size:15px}
-}
 
 .theme-light .mathpad .mpBody{border-top-color:#d6e3fb}
 .mpRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}

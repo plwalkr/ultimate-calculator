@@ -990,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.05 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.06 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1273,7 +1273,7 @@ function initMathPad(){
         // persist for GraphLab
         saveTab('graphlab', {...prev, gx, glLines:null});
 
-        // activate GraphLab tab + render it
+        // activate GraphLab tab + render it (LegendCalc router)
         document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
         const gtab = document.querySelector('.tab[data-tab="graphlab"]');
         if(gtab) gtab.classList.add('active');
@@ -1288,10 +1288,6 @@ function initMathPad(){
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
         }, 60);
-      }catch(err){
-        console.error(err);
-      }
-    });switchTab('graphlab');
       }catch(err){
         console.error(err);
       }
@@ -1579,7 +1575,7 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
       const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
       const prev = loadTab('graphlab', def) || def;
       saveTab('graphlab', {...prev, gx, glLines:null, livePlot: prev.livePlot ?? '1'});
-      switchTab('graphlab');
+      
     }catch(e){
       console.error(e);
       if(typeof toast==="function"){toast('Graph send failed');}else{console.warn("Toast:",'Graph send failed');}

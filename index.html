@@ -990,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.14 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.15 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1600,12 +1600,12 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
       const raw = String(lineEl?.value || '');
       const lines = raw.split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
       const norm = lines.map(s=>{
-        // allow TI-ish "y=" or "f(x)=" prefixes
         if(/^y\s*=\s*/i.test(s)) return s.replace(/^y\s*=\s*/i,'').trim();
         if(/^f\(x\)\s*=\s*/i.test(s)) return s.replace(/^f\(x\)\s*=\s*/i,'').trim();
         return s;
-      }).filter(Boolean);
-      const gx = norm.join('\n');
+      }).filter(s=>s && String(s).trim() && !(typeof isGhostLine==='function' && isGhostLine(s)));
+
+      const gx = norm.join('\n').trim();
       if(!gx){
         if(typeof toast==="function") toast('Nothing to graph');
         else console.warn("Toast:", 'Nothing to graph');
@@ -1613,36 +1613,41 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
       }
 
       const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
-      const prev = loadTab('graphlab', def) || def;
+      const prev = (typeof loadTab==='function') ? (loadTab('graphlab', def) || def) : def;
 
-      // Build structured lines so GraphLab immediately has enable/color state
       const pal = (window.GL_PALETTE && window.GL_PALETTE.length) ? window.GL_PALETTE : ['#7fd6ff','#38d996','#ffd166','#ff5c5c','#b98bff'];
       const glLines = norm.map((expr, i)=>({ on:true, expr:String(expr||'').trim(), color: pal[i % pal.length] }));
 
-      saveTab('graphlab', {...prev, gx, glLines, livePlot: (prev.livePlot ?? '1')});
+      if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
 
-      // Navigate using the existing tab click flow (keeps routing consistent)
+      // HARD switch to GraphLab using the same logic as the nav bar (no reliance on a click event)
       const gtab = document.querySelector('.tab[data-tab="graphlab"]');
-      if(gtab) gtab.click(); else render('graphlab');
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      if(gtab) gtab.classList.add('active');
 
-      // If GraphLab is already in DOM, push value to gx textarea to trigger plot
+      if(typeof render==='function') render('graphlab');
+
+      // After render, push gx to textarea and trigger a plot
       setTimeout(()=>{
-        const gxEl = document.getElementById('gx');
-        if(gxEl){
-          gxEl.value = gx;
-          gxEl.dispatchEvent(new Event('input', {bubbles:true}));
-          gxEl.dispatchEvent(new Event('change', {bubbles:true}));
-        }
-      }, 90);
+        try{
+          const gxEl = document.getElementById('gx');
+          if(gxEl){
+            gxEl.value = gx;
+            gxEl.dispatchEvent(new Event('input', {bubbles:true}));
+            gxEl.dispatchEvent(new Event('change', {bubbles:true}));
+          }
+          if(typeof doPlot==='function') doPlot();
+        }catch(_){}
+      }, 120);
 
       if(typeof toast==="function") toast('Sent to GraphLab');
+      else console.warn("Toast:", 'Sent to GraphLab');
     }catch(e){
       console.error(e);
       if(typeof toast==="function") toast('Graph send failed');
       else console.warn("Toast:", 'Graph send failed');
     }
   });
-
   // Keypad: insert + actions
   try{
     document.querySelectorAll('#mathPad .mpKey').forEach(k=>{
@@ -2248,7 +2253,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
-        if(which==='sound'){ renderCalc(); openSettings(true); return; }
+        if(which==='sound'){ renderCalc(); if(typeof openSettings==='function') openSettings(true); return; }
         if(which==='torque') return renderTorque();
         return renderCalc();
       }

@@ -990,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.10 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.11 • 2026-03-01</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1291,20 +1291,20 @@ function initMathPad(){
         const next = {...prev, gx, glLines:[{on:true, expr:gx, color:(prev.glLines&&prev.glLines[0]&&prev.glLines[0].color)||'#3cf' }]};
         try{ localStorage.setItem('legendcalc_graphlab', JSON.stringify(next)); }catch(_){}
 
-        // switch to GraphLab using the app router
-        document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+        // switch to GraphLab using the app's native tab click flow (render() is scoped elsewhere)
         const gtab = document.querySelector('.tab[data-tab="graphlab"]');
-        if(gtab) gtab.classList.add('active');
-        render('graphlab');
+        if(gtab) gtab.click();
 
-        // nudge GraphLab to re-parse immediately (even if already mounted)
+        // nudge GraphLab to re-parse immediately (if it is already mounted)
         setTimeout(()=>{
-          const gxEl = document.getElementById('gx');
-          if(gxEl){
-            gxEl.value = gx;
-            gxEl.dispatchEvent(new Event('input', {bubbles:true}));
-            gxEl.dispatchEvent(new Event('change', {bubbles:true}));
-          }
+          try{
+            const gxEl = document.getElementById('gx');
+            if(gxEl){
+              gxEl.value = gx;
+              gxEl.dispatchEvent(new Event('input', {bubbles:true}));
+              gxEl.dispatchEvent(new Event('change', {bubbles:true}));
+            }
+          }catch(_){}
         }, 120);
       }catch(err){
         console.error(err);

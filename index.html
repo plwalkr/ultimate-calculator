@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.0 • 2026-03-03</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.1 • 2026-03-03</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1446,12 +1446,12 @@ function initMathPad(){
     const xv = (xraw !== '') ? Number(xraw) : null;
 
     // OPTION A: evaluate only the *current* line (last non-empty line in the input box)
-    const rawLines = String(lineEl.value||'').split(/
-?
-/);
+    const rawLines = String(lineEl.value||'').split(/\r?\n/);
+
+
     const cleaned = rawLines.map(s=>cleanExpr(s)).filter(s=>s);
-    if(exprEl) exprEl.value = cleaned.join('
-'); // keep for persistence only
+    if(exprEl) exprEl.value = cleaned.join('\n'); // keep for persistence only
+
     const expr = cleaned.length ? cleaned[cleaned.length-1] : '';
     if(!expr) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
 
@@ -1512,12 +1512,12 @@ function initMathPad(){
     const xraw = (xEl?.value||'').trim();
     const xv = (xraw !== '') ? Number(xraw) : null;
 
-    const rawLines = String(lineEl.value||'').split(/
-?
-/);
+    const rawLines = String(lineEl.value||'').split(/\r?\n/);
+
+
     const cleaned = rawLines.map(s=>cleanExpr(s)).filter(s=>s);
-    if(exprEl) exprEl.value = cleaned.join('
-');
+    if(exprEl) exprEl.value = cleaned.join('\n');
+
     const expr = cleaned.length ? cleaned[cleaned.length-1] : '';
     if(!expr) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
 
@@ -1556,12 +1556,12 @@ At ${v}=${xv}: ${gs}`;
     const a = safeNum(aEl?.value);
     const b = safeNum(bEl?.value);
 
-    const rawLines = String(lineEl.value||'').split(/
-?
-/);
+    const rawLines = String(lineEl.value||'').split(/\r?\n/);
+
+
     const cleaned = rawLines.map(s=>cleanExpr(s)).filter(s=>s);
-    if(exprEl) exprEl.value = cleaned.join('
-');
+    if(exprEl) exprEl.value = cleaned.join('\n');
+
     const expr = cleaned.length ? cleaned[cleaned.length-1] : '';
     if(!expr) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
 
@@ -3964,7 +3964,6 @@ function stageRow(nmValue='30', unit='nm'){
         try{ if(window.__LC_clickSound) window.__LC_clickSound(); }catch(_){ }
   }, {passive:true});
 })();
-
 </script>
 </body>
 </html>

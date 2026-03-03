@@ -309,7 +309,7 @@ button{
 }
 
 
-/* ---------- v1.3.5 Mobile layout upgrade (keeps desktop the same) ---------- */
+/* ---------- v1.3.6 Mobile layout upgrade (keeps desktop the same) ---------- */
 .titleline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ver{font-size:.85rem;font-weight:800;opacity:1;color:var(--muted);white-space:nowrap}
 @media (max-width: 900px){
@@ -695,7 +695,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
 @media (min-width: 820px){
-  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px}
+  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px
   /* Desktop holy-sh*t factor: keep outputs visible + readable */
   .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px}
   .mpRight::-webkit-scrollbar{width:10px}
@@ -703,7 +703,6 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
   .mpRight .mpHistBody{gap:14px}
   .mpRight .mpItem{padding:12px 14px}
-}
 
 .mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
@@ -991,7 +990,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.15 • 2026-03-01</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.5.16 • 2026-03-03</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1204,10 +1203,9 @@ function initMathPad(){
 
   const cleanExpr = (raw)=>{
     let s = (raw||'').trim();
-    // Strip common prompt/answer prefixes (TI-style)
-    s = s.replace(/^[=＞>\u2192\u27A4\u279C\u203A\u00BB\s]+/g,'').trim();
-    // Normalize common keypad symbols
-    s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'pi');
+    // Ignore worksheet divider / ghost lines
+    if(/^[─━]{3,}$/.test(s)) return '';
+    if(typeof isGhostLine==='function' && isGhostLine(s)) return '';
     s = s.replace(/^(y\s*=\s*)/i,'');
     s = s.replace(/^f\s*\(\s*[a-zA-Z]\s*\)\s*=\s*/i,'');
     s = s.replace(/^f\s*\(\s*x\s*\)\s*=\s*/i,'');
@@ -1375,159 +1373,65 @@ function initMathPad(){
   const getVar = ()=> (varEl?.value||'x').trim() || 'x';
   const getExpr = ()=> cleanExpr(lineEl.value);
 
-  // --- TI-Nspire-style worksheet helpers ---
-  const MP_DIVIDER = '────────────'; // light separator line
-
-  function mpNormalizeForGraph(expr){
-    let s = String(expr||'').trim();
-    if(!s) return '';
-    // Convert pretty symbols to mathjs-friendly
-    s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
-    // If user typed "y=..." or "f(x)=..." keep RHS
-    if(s.includes('=')){
-      const parts = s.split('=');
-      s = parts.slice(1).join('=').trim();
-    }
-    // Remove leading function name like "f(x)" if present
-    s = s.replace(/^[a-zA-Z]\s*\(\s*[a-zA-Z]\s*\)\s*/,'').trim();
-    return s;
-  }
-
-  function mpAppendResultsToWorksheet(results){
-    try{
-      if(!Array.isArray(results) || results.length===0) return;
-      let v = String(lineEl.value||'');
-      if(v && !v.endsWith('\n')) v += '\n';
-      const outLines = results.map(r=>`= ${r.res}`);
-      v += outLines.join('\n') + '\n' + MP_DIVIDER + '\n';
-      lineEl.value = v;
-      try{ lineEl.setSelectionRange(lineEl.value.length, lineEl.value.length); }catch(_){}
-    }catch(_){}
-  }
-
-  function mpAutoSendToGraphLab(results, varName, xRaw){
-    try{
-      // If user is doing numeric substitution (x given), don't auto-graph.
-      if(String(xRaw||'').trim()!=='') return false;
-
-      const v = String(varName||'x').trim() || 'x';
-      const candidates = (results||[])
-        .map(r=>mpNormalizeForGraph(r.expr))
-        .filter(s=>s);
-
-      // Only graph expressions that look like functions of the chosen variable
-      const varRe = new RegExp(`\\b${v.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')}\\b`);
-      const fx = candidates.filter(s=>varRe.test(s));
-
-      if(!fx.length) return false;
-
-      const defGL = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
-      const gl = loadTab('graphlab', defGL) || defGL;
-
-      // Hydrate existing lines (prefer glLines, else gx)
-      let lines = [];
-      if(Array.isArray(gl.glLines)){
-        lines = gl.glLines.map(l=>({on:!!l.on, expr:String(l.expr||''), color:(l.color||null)}));
-      }else{
-        lines = String(gl.gx||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean).map(s=>{
-          let on=true;
-          if(s.startsWith('#') || s.startsWith('//')){ on=false; s=s.replace(/^(#+|\/\/+)\s*/,''); }
-          return {on, expr:s, color:null};
-        });
-      }
-      if(!lines.length) lines = [{on:true, expr:''}];
-
-      // Overwrite/append from the top, preserving existing colors
-      fx.forEach((expr, idx)=>{
-        if(lines[idx]){
-          lines[idx].expr = expr;
-          lines[idx].on = true;
-        }else{
-          lines.push({on:true, expr, color:null});
-        }
-      });
-
-      const gxText = lines.map(l=>{
-        const e = String(l.expr||'').trim();
-        if(!e) return '';
-        return l.on ? e : ('# ' + e);
-      }).filter(Boolean).join('\n');
-
-      localStorage.setItem('legendcalc_graphlab', JSON.stringify({
-        ...gl,
-        gx: gxText,
-        glLines: lines
-      }));
-
-      // If GraphLab is currently open, replot immediately.
-      if(document.getElementById('chart') && typeof doPlot==='function'){
-        try{ doPlot(); }catch(_){}
-      }
-
-      toast(`Sent ${fx.length} to GraphLab`);
-      return true;
-    }catch(_){
-      return false;
-    }
-  }
-
-  
   const runEvaluate = ()=>{
-    const v = getVar();
-    const xraw = (xEl?.value||'').trim();
-    const xv = (xraw !== '') ? Number(xraw) : null;
+  const v = getVar();
+  const xraw = (xEl?.value||'').trim();
+  const xv = (xraw !== '') ? Number(xraw) : null;
 
-    const lines = String(lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
-    if(exprEl) exprEl.value = lines.join('\n');
-    if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
+  const rawLines = String(lineEl.value||'').split(/
+?
+/).map(s=>String(s||'').trim());
+  const lines = rawLines
+    .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
+    .map(s=>cleanExpr(s))
+    .filter(s=>s);
 
-    const results = [];
-    let firstWork = '';
-    try{
-      for(const expr of lines){
-        let res;
-        let work = '';
-        if(xraw !== ''){
-          if(!Number.isFinite(xv)) throw new Error('x must be a number.');
-          const compiled = window.math.compile(expr);
-          res = compiled.evaluate({[v]: xv});
-          work = `
-            <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
-            <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
-            <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
-          `;
-        }else{
-          res = window.math.evaluate(expr);
-          work = `
-            <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
-            <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
-          `;
-        }
-        results.push({expr,res,work});
-        if(!firstWork) firstWork = work;
+  if(exprEl) exprEl.value = lines.join('\n');
+  if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
+
+  const results = [];
+  let firstWork = '';
+  try{
+    for(const expr of lines){
+      let res;
+      let work = '';
+      if(xraw !== ''){
+        if(!Number.isFinite(xv)) throw new Error('x must be a number.');
+        const compiled = window.math.compile(expr);
+        res = compiled.evaluate({[v]: xv});
+        work = `
+          <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
+          <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
+          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+        `;
+      }else{
+        res = window.math.evaluate(expr);
+        work = `
+          <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
+          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+        `;
       }
-
-      const out = results.map(r=>`${r.expr} = ${r.res}`).join('\n');
-
-      // Update ANS (like TI)
-      mpANS = results[results.length-1].res;
-
-      // Main screen: append answers + a light divider, so the next entry starts clean
-      mpAppendResultsToWorksheet(results);
-
-      // Auto-populate GraphLab (only when it looks like a function of your chosen variable)
-      mpAutoSendToGraphLab(results, v, xraw);
-
-      // Right-side output + history
-      showOut('Evaluate', out, firstWork, '');
-      addHistory('Evaluate', out);
-
-      save();
-    }catch(e){
-      showOut('Evaluate', '', '', String(e?.message||e));
+      results.push({expr,res,work});
+      if(!firstWork) firstWork = work;
     }
-  };
-;
+
+    const out = results.map(r=>`${r.expr} = ${r.res}`).join('\n');
+    showOut((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', out, firstWork);
+    mpANS = results[results.length-1].res;
+    save();
+
+    // History: one entry containing all lines + separate work blocks inside
+    const workAll = results.map(r=>`
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)">
+        <div class="mono"><b>In:</b> ${escapeHtml(r.expr)}</div>
+        <div style="margin-top:6px">${r.work}</div>
+      </div>`).join('\n');
+    addHist((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', lines.join(' ; '), out, workAll);
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    showOut('Evaluate', msg, '', msg);
+  }
+};
 
 
   const runDerivative = ()=>{
@@ -1535,7 +1439,14 @@ function initMathPad(){
   const xraw = (xEl?.value||'').trim();
   const xv = (xraw !== '') ? Number(xraw) : null;
 
-  const lines = String(lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+  const rawLines = String(lineEl.value||'').split(/
+?
+/).map(s=>String(s||'').trim());
+  const lines = rawLines
+    .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
+    .map(s=>cleanExpr(s))
+    .filter(s=>s);
+
   if(exprEl) exprEl.value = lines.join('\n');
   if(!lines.length) return showOut('Derivative', 'Enter an expression.', '', 'No expression provided.');
 
@@ -1593,7 +1504,14 @@ function initMathPad(){
   const b = safeNum(bEl?.value);
   let N = parseInt(nEl?.value||'400', 10);
 
-  const lines = String(lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+  const rawLines = String(lineEl.value||'').split(/
+?
+/).map(s=>String(s||'').trim());
+  const lines = rawLines
+    .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
+    .map(s=>cleanExpr(s))
+    .filter(s=>s);
+
   if(exprEl) exprEl.value = lines.join('\n');
   if(!lines.length) return showOut('Integral', 'Enter an expression.', '', 'No expression provided.');
   if(a===null || b===null) return showOut('Integral', 'Enter numeric a and b.', '', 'a and b must be numbers.');
@@ -1704,7 +1622,9 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
   if(btnGraph) btnGraph.addEventListener('click', ()=>{
     try{
       const raw = String(lineEl?.value || '');
-      const lines = raw.split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
+      const lines = raw.split(/
+?
+/).map(s=>String(s||'').trim()).filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)));
       const norm = lines.map(s=>{
         if(/^y\s*=\s*/i.test(s)) return s.replace(/^y\s*=\s*/i,'').trim();
         if(/^f\(x\)\s*=\s*/i.test(s)) return s.replace(/^f\(x\)\s*=\s*/i,'').trim();
@@ -1726,11 +1646,14 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
 
       if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
 
-      // HARD switch to GraphLab
-      if(typeof window.goTab==='function') window.goTab('graphlab');
-      else if(typeof render==='function') render('graphlab');
+      // HARD switch to GraphLab using the same logic as the nav bar (no reliance on a click event)
+      const gtab = document.querySelector('.tab[data-tab="graphlab"]');
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      if(gtab) gtab.classList.add('active');
 
-// After render, push gx to textarea and trigger a plot
+      if(typeof render==='function') render('graphlab');
+
+      // After render, push gx to textarea and trigger a plot
       setTimeout(()=>{
         try{
           const gxEl = document.getElementById('gx');
@@ -2350,25 +2273,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       /* ---------- Router & theme ---------- */
       const tabs=$$('.tab');
-
-      function goTab(which){
-        // Ensure visible content switches even if something inside the target tab errors later
-        try{
-          tabs.forEach(b=>b.classList.remove('active'));
-          const btn = document.querySelector(`.tab[data-tab="${which}"]`);
-          if(btn) btn.classList.add('active');
-        }catch(_){}
-        try{
-          render(which);
-        }catch(e){
-          try{ note('Tab Error', String(e?.message||e), 'err'); }catch(_){}
-          // Keep app usable even if a tab has a render issue
+      tabs.forEach(t=>t.addEventListener('click',()=>{
+        tabs.forEach(b=>b.classList.remove('active'));
+        t.classList.add('active');
+        try{ render(t.dataset.tab); }
+        catch(err){
+          console.error(err);
+          try{ toast('Tab error: ' + (err?.message||err)); }catch(_){ }
         }
-      }
-
-      tabs.forEach(t=>t.addEventListener('click',()=>goTab(t.dataset.tab)));
-      // Expose for other modules (e.g., MathPad auto-send)
-      try{ window.goTab = goTab; }catch(_){ }
+      }));
 
       function render(which){
         if(which==='graphlab') return renderGraphLab();
@@ -2508,21 +2421,17 @@ sin(x)+x^2
                       <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
                     </div>
                     <div class="mpHistBody" id="mpHistBody"></div>
-                  </div>
 
                   <div id="mpErr" class="mpErr" style="display:none"></div>
 
                   <div class="mpOut" id="mpOut" style="display:none">
-                    <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
-                    <pre class="mpOutText" id="mpOutText"></pre>
+                <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
 
-                    <details class="mpWork" id="mpWork" style="display:none">
-                      <summary>Show work</summary>
-                      <div class="workBody" id="mpWorkBody"></div>
-                    </details>
-                  </div>
-
-</div>
+                  <details class="mpWork" id="mpWork" style="display:none">
+                <summary>Show work</summary>
+                <div class="workBody" id="mpWorkBody"></div>
+              </details>
+                </div>
               </div>
             </div>
           </div>

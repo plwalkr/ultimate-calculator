@@ -1378,9 +1378,7 @@ function initMathPad(){
   const xraw = (xEl?.value||'').trim();
   const xv = (xraw !== '') ? Number(xraw) : null;
 
-  const rawLines = String(lineEl.value||'').split(/
-?
-/).map(s=>String(s||'').trim());
+  const rawLines = String(lineEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim());
   const lines = rawLines
     .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
     .map(s=>cleanExpr(s))
@@ -1439,9 +1437,7 @@ function initMathPad(){
   const xraw = (xEl?.value||'').trim();
   const xv = (xraw !== '') ? Number(xraw) : null;
 
-  const rawLines = String(lineEl.value||'').split(/
-?
-/).map(s=>String(s||'').trim());
+  const rawLines = String(lineEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim());
   const lines = rawLines
     .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
     .map(s=>cleanExpr(s))
@@ -1504,9 +1500,7 @@ function initMathPad(){
   const b = safeNum(bEl?.value);
   let N = parseInt(nEl?.value||'400', 10);
 
-  const rawLines = String(lineEl.value||'').split(/
-?
-/).map(s=>String(s||'').trim());
+  const rawLines = String(lineEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim());
   const lines = rawLines
     .filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)))
     .map(s=>cleanExpr(s))
@@ -1622,9 +1616,7 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
   if(btnGraph) btnGraph.addEventListener('click', ()=>{
     try{
       const raw = String(lineEl?.value || '');
-      const lines = raw.split(/
-?
-/).map(s=>String(s||'').trim()).filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)));
+      const lines = raw.split(/\r?\n/).map(s=>String(s||'').trim()).filter(s=>s && !(/^[─━]{3,}$/.test(s)) && !(typeof isGhostLine==='function' && isGhostLine(s)));
       const norm = lines.map(s=>{
         if(/^y\s*=\s*/i.test(s)) return s.replace(/^y\s*=\s*/i,'').trim();
         if(/^f\(x\)\s*=\s*/i.test(s)) return s.replace(/^f\(x\)\s*=\s*/i,'').trim();

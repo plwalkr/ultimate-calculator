@@ -1204,6 +1204,10 @@ function initMathPad(){
 
   const cleanExpr = (raw)=>{
     let s = (raw||'').trim();
+    // Strip common prompt/answer prefixes (TI-style)
+    s = s.replace(/^[=＞>\u2192\u27A4\u279C\u203A\u00BB\s]+/g,'').trim();
+    // Normalize common keypad symbols
+    s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'pi');
     s = s.replace(/^(y\s*=\s*)/i,'');
     s = s.replace(/^f\s*\(\s*[a-zA-Z]\s*\)\s*=\s*/i,'');
     s = s.replace(/^f\s*\(\s*x\s*\)\s*=\s*/i,'');
@@ -1722,14 +1726,11 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
 
       if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
 
-      // HARD switch to GraphLab using the same logic as the nav bar (no reliance on a click event)
-      const gtab = document.querySelector('.tab[data-tab="graphlab"]');
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      if(gtab) gtab.classList.add('active');
+      // HARD switch to GraphLab
+      if(typeof window.goTab==='function') window.goTab('graphlab');
+      else if(typeof render==='function') render('graphlab');
 
-      if(typeof render==='function') render('graphlab');
-
-      // After render, push gx to textarea and trigger a plot
+// After render, push gx to textarea and trigger a plot
       setTimeout(()=>{
         try{
           const gxEl = document.getElementById('gx');
@@ -2349,7 +2350,25 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       /* ---------- Router & theme ---------- */
       const tabs=$$('.tab');
-      tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
+
+      function goTab(which){
+        // Ensure visible content switches even if something inside the target tab errors later
+        try{
+          tabs.forEach(b=>b.classList.remove('active'));
+          const btn = document.querySelector(`.tab[data-tab="${which}"]`);
+          if(btn) btn.classList.add('active');
+        }catch(_){}
+        try{
+          render(which);
+        }catch(e){
+          try{ note('Tab Error', String(e?.message||e), 'err'); }catch(_){}
+          // Keep app usable even if a tab has a render issue
+        }
+      }
+
+      tabs.forEach(t=>t.addEventListener('click',()=>goTab(t.dataset.tab)));
+      // Expose for other modules (e.g., MathPad auto-send)
+      try{ window.goTab = goTab; }catch(_){ }
 
       function render(which){
         if(which==='graphlab') return renderGraphLab();

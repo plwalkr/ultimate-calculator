@@ -1370,58 +1370,159 @@ function initMathPad(){
   const getVar = ()=> (varEl?.value||'x').trim() || 'x';
   const getExpr = ()=> cleanExpr(lineEl.value);
 
-  const runEvaluate = ()=>{
-  const v = getVar();
-  const xraw = (xEl?.value||'').trim();
-  const xv = (xraw !== '') ? Number(xraw) : null;
+  // --- TI-Nspire-style worksheet helpers ---
+  const MP_DIVIDER = '────────────'; // light separator line
 
-  const lines = String(lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
-  if(exprEl) exprEl.value = lines.join('\n');
-  if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
-
-  const results = [];
-  let firstWork = '';
-  try{
-    for(const expr of lines){
-      let res;
-      let work = '';
-      if(xraw !== ''){
-        if(!Number.isFinite(xv)) throw new Error('x must be a number.');
-        const compiled = window.math.compile(expr);
-        res = compiled.evaluate({[v]: xv});
-        work = `
-          <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
-          <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
-          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
-        `;
-      }else{
-        res = window.math.evaluate(expr);
-        work = `
-          <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
-          <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
-        `;
-      }
-      results.push({expr,res,work});
-      if(!firstWork) firstWork = work;
+  function mpNormalizeForGraph(expr){
+    let s = String(expr||'').trim();
+    if(!s) return '';
+    // Convert pretty symbols to mathjs-friendly
+    s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+    // If user typed "y=..." or "f(x)=..." keep RHS
+    if(s.includes('=')){
+      const parts = s.split('=');
+      s = parts.slice(1).join('=').trim();
     }
-
-    const out = results.map(r=>`${r.expr} = ${r.res}`).join('\n');
-    showOut((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', out, firstWork);
-    mpANS = results[results.length-1].res;
-    save();
-
-    // History: one entry containing all lines + separate work blocks inside
-    const workAll = results.map(r=>`
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)">
-        <div class="mono"><b>In:</b> ${escapeHtml(r.expr)}</div>
-        <div style="margin-top:6px">${r.work}</div>
-      </div>`).join('\n');
-    addHist((xraw!=='')?`Evaluate at ${v}=${xv}`:'Evaluate', lines.join(' ; '), out, workAll);
-  }catch(e){
-    const msg = (e && e.message) ? e.message : String(e);
-    showOut('Evaluate', msg, '', msg);
+    // Remove leading function name like "f(x)" if present
+    s = s.replace(/^[a-zA-Z]\s*\(\s*[a-zA-Z]\s*\)\s*/,'').trim();
+    return s;
   }
-};
+
+  function mpAppendResultsToWorksheet(results){
+    try{
+      if(!Array.isArray(results) || results.length===0) return;
+      let v = String(lineEl.value||'');
+      if(v && !v.endsWith('\n')) v += '\n';
+      const outLines = results.map(r=>`= ${r.res}`);
+      v += outLines.join('\n') + '\n' + MP_DIVIDER + '\n';
+      lineEl.value = v;
+      try{ lineEl.setSelectionRange(lineEl.value.length, lineEl.value.length); }catch(_){}
+    }catch(_){}
+  }
+
+  function mpAutoSendToGraphLab(results, varName, xRaw){
+    try{
+      // If user is doing numeric substitution (x given), don't auto-graph.
+      if(String(xRaw||'').trim()!=='') return false;
+
+      const v = String(varName||'x').trim() || 'x';
+      const candidates = (results||[])
+        .map(r=>mpNormalizeForGraph(r.expr))
+        .filter(s=>s);
+
+      // Only graph expressions that look like functions of the chosen variable
+      const varRe = new RegExp(`\\b${v.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')}\\b`);
+      const fx = candidates.filter(s=>varRe.test(s));
+
+      if(!fx.length) return false;
+
+      const defGL = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
+      const gl = loadTab('graphlab', defGL) || defGL;
+
+      // Hydrate existing lines (prefer glLines, else gx)
+      let lines = [];
+      if(Array.isArray(gl.glLines)){
+        lines = gl.glLines.map(l=>({on:!!l.on, expr:String(l.expr||''), color:(l.color||null)}));
+      }else{
+        lines = String(gl.gx||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean).map(s=>{
+          let on=true;
+          if(s.startsWith('#') || s.startsWith('//')){ on=false; s=s.replace(/^(#+|\/\/+)\s*/,''); }
+          return {on, expr:s, color:null};
+        });
+      }
+      if(!lines.length) lines = [{on:true, expr:''}];
+
+      // Overwrite/append from the top, preserving existing colors
+      fx.forEach((expr, idx)=>{
+        if(lines[idx]){
+          lines[idx].expr = expr;
+          lines[idx].on = true;
+        }else{
+          lines.push({on:true, expr, color:null});
+        }
+      });
+
+      const gxText = lines.map(l=>{
+        const e = String(l.expr||'').trim();
+        if(!e) return '';
+        return l.on ? e : ('# ' + e);
+      }).filter(Boolean).join('\n');
+
+      localStorage.setItem('legendcalc_graphlab', JSON.stringify({
+        ...gl,
+        gx: gxText,
+        glLines: lines
+      }));
+
+      // If GraphLab is currently open, replot immediately.
+      if(document.getElementById('chart') && typeof doPlot==='function'){
+        try{ doPlot(); }catch(_){}
+      }
+
+      toast(`Sent ${fx.length} to GraphLab`);
+      return true;
+    }catch(_){
+      return false;
+    }
+  }
+
+  
+  const runEvaluate = ()=>{
+    const v = getVar();
+    const xraw = (xEl?.value||'').trim();
+    const xv = (xraw !== '') ? Number(xraw) : null;
+
+    const lines = String(lineEl.value||'').split(/\r?\n/).map(s=>cleanExpr(s)).filter(s=>s);
+    if(exprEl) exprEl.value = lines.join('\n');
+    if(!lines.length) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
+
+    const results = [];
+    let firstWork = '';
+    try{
+      for(const expr of lines){
+        let res;
+        let work = '';
+        if(xraw !== ''){
+          if(!Number.isFinite(xv)) throw new Error('x must be a number.');
+          const compiled = window.math.compile(expr);
+          res = compiled.evaluate({[v]: xv});
+          work = `
+            <div><b>Given</b>: f(${escapeHtml(v)}) = <span class="mono">${mpPrettyHtml(expr)}</span></div>
+            <div style="margin-top:6px"><b>Substitute</b>: ${escapeHtml(v)} = ${escapeHtml(String(xv))}</div>
+            <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+          `;
+        }else{
+          res = window.math.evaluate(expr);
+          work = `
+            <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
+            <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
+          `;
+        }
+        results.push({expr,res,work});
+        if(!firstWork) firstWork = work;
+      }
+
+      const out = results.map(r=>`${r.expr} = ${r.res}`).join('\n');
+
+      // Update ANS (like TI)
+      mpANS = results[results.length-1].res;
+
+      // Main screen: append answers + a light divider, so the next entry starts clean
+      mpAppendResultsToWorksheet(results);
+
+      // Auto-populate GraphLab (only when it looks like a function of your chosen variable)
+      mpAutoSendToGraphLab(results, v, xraw);
+
+      // Right-side output + history
+      showOut('Evaluate', out, firstWork, '');
+      addHistory('Evaluate', out);
+
+      save();
+    }catch(e){
+      showOut('Evaluate', '', '', String(e?.message||e));
+    }
+  };
+;
 
 
   const runDerivative = ()=>{

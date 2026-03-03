@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.1 • 2026-03-03</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.2 • 2026-03-03</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1105,9 +1105,22 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         if(false && DI.classList.contains('expanded')) DI.querySelector('.diag-msg').textContent = DI.dataset.full; else DI.querySelector('.diag-msg').textContent = DI.dataset.full.length>42 ? (DI.dataset.full.slice(0,42)+'…') : DI.dataset.full; }
       });
 
-    const libs=[
-      {global:'math', local:'./libs/math.min.js', cdn:'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js', name:'math.js'},
-      {global:'Plotly', local:'./libs/plotly.min.js', cdn:'https://cdn.plot.ly/plotly-2.35.2.min.js', name:'Plotly'}
+    const libs = [
+      {global:'math', local:'./libs/math.min.js',
+       cdns:[
+         'https://cdn.jsdelivr.net/npm/mathjs@12.4.2/lib/browser/math.js',
+         'https://unpkg.com/mathjs@12.4.2/lib/browser/math.js',
+         'https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js'
+       ],
+       name:'math.js'},
+      {global:'Plotly', local:'./libs/plotly.min.js',
+       cdns:[
+         'https://cdn.plot.ly/plotly-2.35.2.min.js',
+         'https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js',
+         'https://unpkg.com/plotly.js-dist-min@2.35.2/plotly.min.js',
+         'https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js'
+       ],
+       name:'Plotly'}
     ];
     function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load failed: '+src)); document.head.appendChild(s); }); }
 
@@ -1116,7 +1129,15 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         for(const L of libs){
           if(!(L.global in window)){
             try{ await loadScript(L.local); if(!(L.global in window)) throw new Error('local missing'); }
-            catch(eLocal){ await loadScript(L.cdn); }
+            catch(eLocal){
+            const cdnList = Array.isArray(L.cdns) ? L.cdns : [L.cdn].filter(Boolean);
+            let lastErr;
+            for (const u of cdnList){
+              try{ await loadScript(u); lastErr = null; break; }
+              catch(e){ lastErr = e; }
+            }
+            if(lastErr) throw lastErr;
+          }
           }
         }
         // libs loaded — keep the loader banner hidden (show only on error)
@@ -1125,7 +1146,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         startApp();
       }catch(e){
         console.error(e);
-        note('err','Libs failed','Could not load libraries. If offline, put math.min.js and plotly.min.js in ./libs, or allow CDN.');
+        note('err','Libs failed', 'Missing: ' + libs.filter(L=>!(L.global in window)).map(L=>L.name).join(', ') + '.\n\nFix: (1) make sure you are online and your network allows CDNs, or (2) create a folder named libs next to this HTML and drop math.min.js + plotly.min.js into it, then reload.');
       }
     })();
 

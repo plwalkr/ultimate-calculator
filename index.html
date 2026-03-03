@@ -695,7 +695,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 .mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
 @media (min-width: 820px){
-  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px
+  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px}
   /* Desktop holy-sh*t factor: keep outputs visible + readable */
   .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px}
   .mpRight::-webkit-scrollbar{width:10px}
@@ -703,6 +703,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
   .mpRight .mpHistBody{gap:14px}
   .mpRight .mpItem{padding:12px 14px}
+}
 
 .mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
@@ -2488,17 +2489,21 @@ sin(x)+x^2
                       <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
                     </div>
                     <div class="mpHistBody" id="mpHistBody"></div>
+                  </div>
 
                   <div id="mpErr" class="mpErr" style="display:none"></div>
 
                   <div class="mpOut" id="mpOut" style="display:none">
-                <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
+                    <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
+                    <pre class="mpOutText" id="mpOutText"></pre>
 
-                  <details class="mpWork" id="mpWork" style="display:none">
-                <summary>Show work</summary>
-                <div class="workBody" id="mpWorkBody"></div>
-              </details>
-                </div>
+                    <details class="mpWork" id="mpWork" style="display:none">
+                      <summary>Show work</summary>
+                      <div class="workBody" id="mpWorkBody"></div>
+                    </details>
+                  </div>
+
+</div>
               </div>
             </div>
           </div>

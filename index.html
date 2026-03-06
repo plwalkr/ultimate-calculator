@@ -1189,6 +1189,7 @@ function initMathPad(){
   const nEl    = document.getElementById('mpN');
 
   const btnEval= document.getElementById('mpRun') || document.getElementById('mpEval');
+  window.btnEval = btnEval;
   const btnDer = document.getElementById('mpDeriv');
   const btnInt = document.getElementById('mpInt');
   const btnClr = document.getElementById('mpClear');
@@ -3990,3 +3991,4 @@ function stageRow(nmValue='30', unit='nm'){
 </html>
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
+

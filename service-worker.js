@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ultimate-calculator-cache-v2';
+const CACHE_NAME = 'ultimate-calculator-cache-v10';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -22,4 +22,5 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
 

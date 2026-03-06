@@ -2472,56 +2472,6 @@ sin(x)+x^2
 
         try{ initMathPad(); }catch(e){ try{ dbgAdd('ERROR','MathPad: '+(e&&e.message?e.message:e)); }catch(_){} }
       
-  // ---- Option A bindings (single input -> history display) ----
-  if(btnEval){
-    btnEval.addEventListener('click', (e)=>{ e.preventDefault(); runEvaluate(); });
-  }
-  if(btnDer){
-    btnDer.addEventListener('click', (e)=>{ e.preventDefault(); runDerivative(); });
-  }
-  if(btnInt){
-    btnInt.addEventListener('click', (e)=>{ e.preventDefault(); runIntegral(); });
-  }
-  if(lineEl){
-    lineEl.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' && !e.shiftKey){
-        e.preventDefault();
-        runEvaluate();
-      }
-    });
-  }
-  if(btnGraph){
-    btnGraph.addEventListener('click', (e)=>{
-      e.preventDefault();
-      const v = getVar();
-      const xraw = (xEl?.value||'').trim();
-      const rawLines = String(lineEl.value||'').split(/\r?\n/);
-      const cleaned = rawLines.map(s=>cleanExpr(s)).filter(s=>s);
-      const expr = cleaned.length ? cleaned[cleaned.length-1] : '';
-      if(xraw!=='' || !expr){
-        if(typeof toast==="function") toast('Nothing to graph');
-        return;
-      }
-      if(!shouldAutoGraph(expr, v)){
-        if(typeof toast==="function") toast('Not a function of '+v);
-        return;
-      }
-      mpSendToGraphLab([expr]);
-    });
-  }
-  if(btnClr){
-    btnClr.addEventListener('click', (e)=>{
-      e.preventDefault();
-      lineEl.value = '';
-      if(exprEl) exprEl.value = '';
-      const ws = document.getElementById('mpWorksheet');
-      if(ws) ws.innerHTML = '';
-      showOut('Ready', '', '', '');
-      save();
-      lineEl.focus();
-    });
-  }
-}
 
       /* ---------- Calculus ---------- */
       function renderCalculus(){
@@ -3991,4 +3941,3 @@ function stageRow(nmValue='30', unit='nm'){
 </html>
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
-

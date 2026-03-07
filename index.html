@@ -1233,7 +1233,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.36 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.37 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -3004,9 +3004,12 @@ sin(x)+x^2
         function numericLimit(F,a){ const eps=1e-6; const left=F(a-eps); const right=F(a+eps); return (left+right)/2; }
         function setCalcOut(html){
           const raw = String(html||'');
+          const host = $('#calcOut');
+          if(!host) return;
+
           const isErr = /class=['"]err['"]/.test(raw) || /^\s*<div class=['"]err['"]/.test(raw);
           if(isErr){
-            $('#calcOut').innerHTML = `<div class="calcResultWrap"><div class="calcResultError">${raw.replace(/<\/?div[^>]*>/g,'')}</div></div>`;
+            host.innerHTML = `<div class="calcResultWrap"><div class="calcResultError">${raw.replace(/<\/?div[^>]*>/g,'')}</div></div>`;
             return;
           }
 
@@ -3015,13 +3018,10 @@ sin(x)+x^2
           else if(/∫/.test(raw)) title = 'Integral';
           else if(/lim<sub>x→/.test(raw)) title = 'Limit';
 
-          const valueMatch =
-            raw.match(/<b>([\s\S]*?)<\/b>/) ||
-            raw.match(/=\s*<b>([\s\S]*?)<\/b>/);
-
+          const valueMatch = raw.match(/=\s*<b>([\s\S]*?)<\/b>/) || raw.match(/<b>([\s\S]*?)<\/b>/);
           const heroValue = valueMatch ? valueMatch[1] : raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
 
-          $('#calcOut').innerHTML = `
+          host.innerHTML = `
             <div class="calcResultWrap">
               <div class="calcResultHero">
                 <div class="calcResultTop">

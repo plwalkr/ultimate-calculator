@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.28 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.29 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1543,13 +1543,7 @@ function initMathPad(){
             gxEl.dispatchEvent(new Event('input', {bubbles:true}));
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
-          const firstExpr = document.querySelector('#glLines .expr');
-          if(firstExpr){
-            firstExpr.value = normalizedGx;
-            firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
-            firstExpr.dispatchEvent(new Event('change', {bubbles:true}));
-            try{ dbgLine('INFO', 'Visible GraphLab row synced from transfer path | ' + normalizedGx); }catch(_){}
-          }
+          syncVisibleGraphRow(normalizedGx, (glLines[0] && glLines[0].color) ? glLines[0].color : null);
           try{
             if(typeof glSetStatus==='function'){
               glSetStatus('ok', 'Plotting…', 'Sending your expression to GraphLab.', ['source: MathPad'], [normalizedGx]);
@@ -1822,18 +1816,7 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
 
-          const firstExpr = document.querySelector('#glLines .expr');
-          if(firstExpr){
-            firstExpr.value = normalizedGx;
-            firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
-            firstExpr.dispatchEvent(new Event('change', {bubbles:true}));
-            try{ dbgLine('INFO', 'Visible GraphLab row synced from Graph button | ' + normalizedGx); }catch(_){}
-          }
-
-          if(typeof saveTab==='function'){
-            const fresh = loadTab('graphlab', prev) || prev;
-            saveTab('graphlab', {...fresh, gx: normalizedGx, glLines:[{ on:true, expr: normalizedGx, color: (glLines[0] && glLines[0].color) ? glLines[0].color : null }]});
-          }
+          syncVisibleGraphRow(normalizedGx, (glLines[0] && glLines[0].color) ? glLines[0].color : null);
 
           if(typeof doPlot==='function') doPlot();
         }catch(_){}
@@ -2805,6 +2788,39 @@ sin(x)+x^2
       /* ---------- Graphing (with hotkeys) ---------- */
       
       window.doPlot = doPlot;
+
+      function syncVisibleGraphRow(expr, color){
+        const normalized = normalizeExpr(expr);
+        let tries = 0;
+        const tick = ()=>{
+          tries += 1;
+          try{
+            const firstExpr = document.querySelector('#glLines .expr');
+            if(firstExpr){
+              firstExpr.value = normalized;
+              firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
+              firstExpr.dispatchEvent(new Event('change', {bubbles:true}));
+              try{ dbgLine('INFO', 'Visible GraphLab row synced | ' + normalized + ' | tries=' + tries); }catch(_){}
+
+              try{
+                const st = (typeof loadTab==='function') ? (loadTab('graphlab', {}) || {}) : {};
+                if(typeof saveTab==='function'){
+                  saveTab('graphlab', Object.assign({}, st, {
+                    gx: normalized,
+                    glLines: [{ on:true, expr: normalized, color: color || ((st.glLines && st.glLines[0] && st.glLines[0].color) ? st.glLines[0].color : null) }]
+                  }));
+                }
+              }catch(_){}
+              return;
+            }
+          }catch(_){}
+          if(tries < 12) setTimeout(tick, 80);
+          else{
+            try{ dbgLine('WARN', 'Visible GraphLab row sync timed out | ' + normalized); }catch(_){}
+          }
+        };
+        tick();
+      }
 
       function renderGraphLab(){
         const view=$('#view');

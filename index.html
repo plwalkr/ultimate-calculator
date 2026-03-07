@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.11 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.12 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1180,6 +1180,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 
 function initMathPad(){
+  try{ dbgLine('INFO','initMathPad() entered'); }catch(_){}
   const exprEl = document.getElementById('mpExpr'); // hidden storage
   const lineEl = document.getElementById('mpLine'); // single entry line (TI-style)
   const varEl  = document.getElementById('mpVar');
@@ -1755,6 +1756,7 @@ if(btnAlpha && alphaPad){
 
 
 function startApp(){
+        try{ dbgLine('INFO','startApp() entered'); }catch(_){}
         forceHideOverlays();
     window.window.GL_PALETTE = window.window.GL_PALETTE || ['#7fd6ff','#38d996','#ffd166','#ff5c5c','#b98bff'];
 
@@ -1790,6 +1792,7 @@ function startApp(){
       let glPlotTimer=null;
 
 function doPlot(){
+        try{ const gxv=(document.getElementById('gx')?.value||'').slice(0,120); dbgLine('INFO','doPlot() called' + (gxv?(' | gx=' + gxv):'')); }catch(_){}
   // GraphLab plotter (multi-line, Desmos-ish)
   const chartEl = document.getElementById('chart');
   
@@ -2128,9 +2131,55 @@ function waitForGraphLibs(cb, tries=40){
         const t=new Date();
         const stamp=t.toLocaleTimeString();
         DBG.push(`[${stamp}] ${level}: ${msg}`);
-        if(DBG.length>200) DBG.shift();
+        if(DBG.length>600) DBG.shift();
         const pre=$('#dbgLog');
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
+      }
+
+      function dbgState(){
+        let activeTab='(unknown)';
+        try{ activeTab = document.querySelector('.tab.active')?.dataset?.tab || activeTab; }catch(_){}
+        let gx=''; let mp='';
+        try{ gx = (document.getElementById('gx')?.value || '').slice(0,120); }catch(_){}
+        try{ mp = (document.getElementById('mpLine')?.value || '').slice(0,120); }catch(_){}
+        return {
+          version: document.getElementById('verTag')?.textContent || '(missing)',
+          activeTab,
+          hasMath: !!window.math,
+          hasPlotly: !!window.Plotly,
+          hasGX: !!document.getElementById('gx'),
+          hasGraphBtn: !!document.getElementById('mpGraph'),
+          hasView: !!document.getElementById('view'),
+          gx,
+          mp,
+          sw: ('serviceWorker' in navigator)
+        };
+      }
+
+      function dbgReport(){
+        const s = dbgState();
+        return [
+          'LegendCalc Debug Report',
+          'Version: ' + s.version,
+          'Active tab: ' + s.activeTab,
+          'math loaded: ' + s.hasMath,
+          'Plotly loaded: ' + s.hasPlotly,
+          'gx field exists: ' + s.hasGX,
+          'Graph button exists: ' + s.hasGraphBtn,
+          'View exists: ' + s.hasView,
+          'Graph input preview: ' + (s.gx || '(empty)'),
+          'MathPad input preview: ' + (s.mp || '(empty)'),
+          'ServiceWorker API: ' + s.sw,
+          '',
+          'Log:',
+          (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)'
+        ].join('\n');
+      }
+
+      function dbgAction(label, extra){
+        try{
+          dbgLine('ACTION', label + (extra ? ' | ' + extra : ''));
+        }catch(_){}
       }
       
       // v1.4.36: helper so plotting code can report errors without crashing
@@ -2150,14 +2199,19 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
         if(!btn || !panel) return;
         const open=()=>{ panel.style.display='block';
-          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened'); };
+          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened');
+          try{
+            const s=dbgState();
+            dbgLine('STATE', `tab=${s.activeTab} math=${s.hasMath} plotly=${s.hasPlotly} gx=${s.hasGX} graphBtn=${s.hasGraphBtn}`);
+          }catch(_){}
+        };
         const shut=()=>{ panel.style.display='none';
           panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); };
         btn.addEventListener('click', open);
         panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
-          const text = (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)';
+          const text = dbgReport();
           try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast('Debug log copied');}else{console.warn("Toast:",'Debug log copied');} }
           catch(_){
             try{
@@ -2216,6 +2270,20 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         const p=loadPrefs(); p.soundMode=mode; savePrefs(p);
         toast(`Sound: ${mode==='off'?'Off':(mode==='clicks'?'Clicks':'Fanfare')}`);
         syncSoundUI();
+      try{
+        const viewEl = document.getElementById('view');
+        if(viewEl && !window.__legendcalcDbgObs){
+          window.__legendcalcDbgObs = new MutationObserver(()=>{
+            try{
+              const active = document.querySelector('.tab.active')?.dataset?.tab || '(unknown)';
+              dbgLine('VIEW', 'view updated | active=' + active + ' | chars=' + String(viewEl.textContent||'').trim().length);
+            }catch(_){}
+          });
+          window.__legendcalcDbgObs.observe(viewEl, { childList:true, subtree:false });
+          dbgLine('INFO','View observer armed');
+        }
+      }catch(_){}
+
       }
       function ensureAudio(){
         try{
@@ -2313,6 +2381,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
 
       function render(which){
+        try{ dbgLine('INFO',`render(${which}) called`); }catch(_){}
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
         if(which==='time') return renderTime();
@@ -3867,6 +3936,23 @@ function stageRow(nmValue='30', unit='nm'){
 
       armAudioUnlock();
       initDebugUI();
+      try{
+        document.addEventListener('click', (e)=>{
+          const t = e.target && e.target.closest ? e.target.closest('#mpGraph,.tab,#dbgBtn,#dbgCopy') : null;
+          if(!t) return;
+          if(t.id==='mpGraph'){
+            const expr=(document.getElementById('mpLine')?.value||'').trim().slice(0,120);
+            dbgAction('Graph button clicked', expr || '(empty input)');
+          }else if(t.classList && t.classList.contains('tab')){
+            dbgAction('Tab clicked', t.dataset?.tab || t.textContent || '(unknown)');
+          }else if(t.id==='dbgBtn'){
+            dbgAction('Debug button clicked');
+          }else if(t.id==='dbgCopy'){
+            dbgAction('Debug copy clicked');
+          }
+        }, true);
+      }catch(_){}
+
       initSettingsUI();
       applyBigUI();
       applyOneHand();

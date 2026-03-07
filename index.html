@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.26 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.27 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1437,7 +1437,7 @@ function initMathPad(){
         const gtab = document.querySelector('.tab[data-tab="graphlab"]');
         if(gtab) gtab.click(); else render('graphlab');
 
-        // after GraphLab renders, sync gx input and trigger plot
+        // after GraphLab renders, force-sync BOTH gx and the visible editable row, then trigger plot
         setTimeout(()=>{
           const gxEl = document.getElementById('gx');
           if(gxEl){
@@ -1445,6 +1445,24 @@ function initMathPad(){
             gxEl.dispatchEvent(new Event('input', {bubbles:true}));
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
+
+          try{
+            const exprInput = document.querySelector('#glLines .expr');
+            if(exprInput){
+              exprInput.value = normalized;
+              exprInput.dispatchEvent(new Event('input', {bubbles:true}));
+              exprInput.dispatchEvent(new Event('change', {bubbles:true}));
+              try{ dbgLine('INFO', 'Visible GraphLab row forced to transferred expr | ' + normalized); }catch(_){}
+            }
+
+            const st = (typeof loadTab==='function') ? (loadTab('graphlab', {}) || {}) : {};
+            if(typeof saveTab==='function'){
+              saveTab('graphlab', Object.assign({}, st, {
+                gx: normalized,
+                glLines: [{ on:true, expr: normalized, color: (st.glLines && st.glLines[0] && st.glLines[0].color) ? st.glLines[0].color : null }]
+              }));
+            }
+          }catch(_){}
         }, 90);
       }catch(err){
         console.error(err);

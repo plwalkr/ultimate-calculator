@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.12 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.13 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2389,6 +2389,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         if(which==='torque') return renderTorque();
         return renderCalc();
       }
+      window.render = render;
 
       (function initTheme(){
         const prefs=loadPrefs();
@@ -2635,6 +2636,8 @@ sin(x)+x^2
 
       /* ---------- Graphing (with hotkeys) ---------- */
       
+      window.doPlot = doPlot;
+
       function renderGraphLab(){
         const view=$('#view');
         view.innerHTML=`

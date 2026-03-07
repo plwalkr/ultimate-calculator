@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.14 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.15 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1839,6 +1839,7 @@ function doPlot(){
     expr: String(l.expr||'').trim(),
     color: l.color || null
   }));
+  try{ dbgLine('INFO', `GraphLab enabled=${enabled.length} exprs=${enabled.map(e=>e.expr).join(' | ').slice(0,220)}`); }catch(_){}
 
   let xmin = parseFloat(xminEl.value); if(!isFinite(xmin)) xmin=-10;
   let xmax = parseFloat(xmaxEl.value); if(!isFinite(xmax)) xmax=10;
@@ -1876,10 +1877,21 @@ function doPlot(){
         name: expr,
         line: { width: 2, color: (item.color || palette[idx % palette.length]) }
       });
+      try{
+        const validPoints = ys.filter(v => v !== null).length;
+        dbgLine('INFO', `trace built expr=${expr} validPoints=${validPoints}`);
+      }catch(_){}
     }catch(e){
       try{ dbgAdd('ERROR', 'GraphLab parse: ' + expr + ' → ' + (e && e.message ? e.message : e)); }catch(_){}
     }
   });
+  try{ dbgLine('INFO', `GraphLab traces=${traces.length}`); }catch(_){}
+  if(!traces.length){
+    try{
+      const ro=document.getElementById('glReadout');
+      if(ro) ro.textContent = 'No plottable traces were generated';
+    }catch(_){}
+  }
 
   // Optional overlays
   const d1On = !!document.getElementById('d1')?.checked;
@@ -2066,8 +2078,13 @@ function doPlot(){
 
   try{
     window.Plotly.newPlot(chartEl, traces.length? traces : [{x:[0],y:[0],mode:'lines',line:{width:0}}], layout, config);
+    try{ dbgLine('INFO', 'Plotly.newPlot succeeded'); }catch(_){}
   }catch(e){
     try{ dbgAdd('ERROR', 'Plotly: ' + (e && e.message ? e.message : e)); }catch(_){}
+    try{
+      const ro=document.getElementById('glReadout');
+      if(ro) ro.textContent = 'Plotly error: ' + (e && e.message ? e.message : e);
+    }catch(_){}
   }
 
   // small legend
@@ -2180,6 +2197,10 @@ function waitForGraphLibs(cb, tries=40){
         try{
           dbgLine('ACTION', label + (extra ? ' | ' + extra : ''));
         }catch(_){}
+      }
+
+      function dbgAdd(level, msg){
+        try{ dbgLine(level || 'INFO', msg || ''); }catch(_){}
       }
       
       // v1.4.36: helper so plotting code can report errors without crashing

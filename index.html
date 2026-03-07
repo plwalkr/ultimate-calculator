@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.17 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.18 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1519,7 +1519,8 @@ function initMathPad(){
     const cleaned = rawLines.map(s=>cleanExpr(s)).filter(s=>s);
     if(exprEl) exprEl.value = cleaned.join('\n'); // keep for persistence only
 
-    const expr = cleaned.length ? cleaned[cleaned.length-1] : '';
+    const exprRaw = cleaned.length ? cleaned[cleaned.length-1] : '';
+    const expr = normalizeExpr(exprRaw);
     if(!expr) return showOut('Evaluate', 'Enter an expression.', '', 'No expression provided.');
 
     try{
@@ -1535,6 +1536,17 @@ function initMathPad(){
           <div style="margin-top:6px"><b>Result</b>: ${escapeHtml(String(res))}</div>
         `;
       }else{
+        // If the expression still contains a variable, don't leave the user with a vague blank result.
+        const hasVar = new RegExp(`\\b${v}\\b`).test(expr);
+        if(hasVar){
+          return showOut(
+            'Evaluate',
+            `Expression contains ${v}`,
+            `<div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
+             <div style="margin-top:6px"><b>Tip</b>: Enter a value for ${escapeHtml(v)} above, or use <b>Graph</b>, <b>Derivative</b>, or <b>Integral</b>.</div>`,
+            `Expression contains ${v}; provide a value for ${v} or graph it.`
+          );
+        }
         res = window.math.evaluate(expr);
         work = `
           <div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
@@ -1675,16 +1687,16 @@ At ${v}=${xv}: ${gs}`;
   const btnRun = document.getElementById('mpRun');
   if(btnRun) btnRun.addEventListener('click', runLine);
   lineEl.addEventListener('keydown', (e)=>{
-  // Worksheet typing behavior:
-  // - Enter = new line (for systems / multi-step work)
-  // - Ctrl+Enter / Cmd+Enter = Evaluate
+  // Calculator typing behavior:
+  // - Enter = Evaluate
+  // - Shift+Enter = new line
   if(e.key === 'Enter'){
-    if(e.ctrlKey || e.metaKey){
-      e.preventDefault();
-      runEvaluate();
-      return;
+    if(e.shiftKey){
+      return; // allow newline
     }
-    // default Enter inserts a newline in textarea; let it happen
+    e.preventDefault();
+    runEvaluate();
+    return;
   }
 });
 if(btnHistClear) btnHistClear.addEventListener('click', ()=>{

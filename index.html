@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.9 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.10 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1439,8 +1439,9 @@ function initMathPad(){
       if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
 
       const gtab = document.querySelector('.tab[data-tab="graphlab"]');
-      if(gtab) gtab.click();
-      else if(typeof render==='function') render('graphlab');
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      if(gtab) gtab.classList.add('active');
+      if(typeof render==='function') render('graphlab');
 
       setTimeout(()=>{
         try{
@@ -1452,7 +1453,7 @@ function initMathPad(){
           }
           if(typeof doPlot==='function') doPlot();
         }catch(_){}
-      }, 180);
+      }, 120);
 
       if(typeof toast==="function") toast('Sent to GraphLab');
     }catch(e){
@@ -2471,6 +2472,9 @@ sin(x)+x^2
 
         try{ initMathPad(); }catch(e){ try{ dbgAdd('ERROR','MathPad: '+(e&&e.message?e.message:e)); }catch(_){} }
       
+    // duplicate broken Option A bindings removed
+
+}
 
       /* ---------- Calculus ---------- */
       function renderCalculus(){
@@ -3940,5 +3944,3 @@ function stageRow(nmValue='30', unit='nm'){
 </html>
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
-
-

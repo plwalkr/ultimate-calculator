@@ -1126,7 +1126,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.34 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.33 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2888,17 +2888,6 @@ sin(x)+x^2
 
       /* ---------- Graphing (with hotkeys) ---------- */
       
-      let __lastDoPlotAt = 0;
-      const __origDoPlot = doPlot;
-      function doPlot(){
-        const now = Date.now();
-        if(now - __lastDoPlotAt < 120){
-          try{ dbgLine('INFO', 'doPlot() skipped duplicate trigger'); }catch(_){}
-          return;
-        }
-        __lastDoPlotAt = now;
-        return __origDoPlot();
-      }
       window.doPlot = doPlot;
 
       function syncVisibleGraphRow(expr, color){

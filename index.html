@@ -579,6 +579,28 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 
 /* GraphLab legend overlay */
 .chartwrap{position:relative;}
+.glStatusCard{
+  margin-top:10px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  padding:12px 14px;
+}
+.theme-light .glStatusCard{border-color:#d6e3fb;background:#ffffff}
+.glStatusTop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.glStatusTitle{font-weight:900}
+.glStatusPill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:900}
+.theme-light .glStatusPill{border-color:#c9d7ef;background:#eef3ff}
+.glStatusMeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.glExprList{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.glExprChip{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);padding:7px 11px;border-radius:999px;background:rgba(0,0,0,.12);font-weight:800}
+.theme-light .glExprChip{border-color:#c9d7ef;background:#ffffff}
+.glStatusBody{margin-top:8px;color:var(--muted);line-height:1.35}
+.glWarn{border-color:rgba(255,107,107,.35)!important;background:rgba(255,107,107,.08)!important}
+.glOkDot,.glWarnDot{width:10px;height:10px;border-radius:999px;display:inline-block}
+.glOkDot{background:var(--ok)}
+.glWarnDot{background:var(--error)}
+
 .glegend{position:absolute;top:10px;left:10px;max-width:70%;
   padding:8px 10px;border-radius:12px;
   background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);
@@ -1000,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.19 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.20 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1510,8 +1532,14 @@ function initMathPad(){
             gxEl.dispatchEvent(new Event('input', {bubbles:true}));
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
-          const ro = document.getElementById('glReadout');
-          if(ro) ro.textContent = 'Plotting: ' + normalizeExpr(gx);
+          try{
+            if(typeof glSetStatus==='function'){
+              glSetStatus('ok', 'Plotting…', 'Sending your expression to GraphLab.', ['source: MathPad'], [normalizeExpr(gx)]);
+            }else{
+              const ro = document.getElementById('glReadout');
+              if(ro) ro.textContent = 'Plotting: ' + normalizeExpr(gx);
+            }
+          }catch(_){}
           if(typeof doPlot==='function') doPlot();
         }catch(_){}
       }, 180);
@@ -2767,7 +2795,15 @@ sin(x)+x^2
                   <div id="glLegend" class="glegend" style="display:none"></div>
                   <div id="chart" class="chart"></div>
                 </div>
-                <div id="glReadout" class="note" style="margin-top:8px"></div>
+                <div id="glReadout" class="glStatusCard">
+                  <div class="glStatusTop">
+                    <div class="glStatusTitle">Graph status</div>
+                    <div class="glStatusPill"><span class="glOkDot"></span><span id="glStatusBadge">Ready</span></div>
+                  </div>
+                  <div class="glStatusBody" id="glStatusText">Enter a function and plot it.</div>
+                  <div class="glStatusMeta" id="glStatusMeta"></div>
+                  <div class="glExprList" id="glExprList"></div>
+                </div>
 
                 <details class="mathdetails" id="areaDetails" style="display:none;">
                   <summary><span class="kbdpill">Show the math</span><span class="note" style="font-weight:700;">(Simpson’s Rule)</span></summary>
@@ -2873,6 +2909,21 @@ sin(x)+x^2
               return l.on ? e : ('# ' + e);
             }).filter(Boolean).join('\n');
           }
+
+          function glSetStatus(kind, title, body, metaList, exprList){
+            const box = $('#glReadout');
+            const badge = $('#glStatusBadge');
+            const textEl = $('#glStatusText');
+            const metaEl = $('#glStatusMeta');
+            const exprEl = $('#glExprList');
+            if(!box || !badge || !textEl || !metaEl || !exprEl) return;
+
+            box.classList.toggle('glWarn', kind==='warn');
+            badge.textContent = title || 'Ready';
+            textEl.textContent = body || '';
+            metaEl.innerHTML = (metaList||[]).filter(Boolean).map(x=>`<span class="glStatusPill">${x}</span>`).join('');
+            exprEl.innerHTML = (exprList||[]).filter(Boolean).map(x=>`<span class="glExprChip">${escapeHtml(String(x))}</span>`).join('');
+          }
           function glRenderLines(lines){
             const host=$('#glLines'); if(!host) return;
             host.innerHTML='';
@@ -2922,6 +2973,16 @@ sin(x)+x^2
                 persist();
                 if($('#livePlot')?.checked) schedulePlot();
               });
+              inp.addEventListener('blur', ()=>{
+                const norm = normalizeExpr(inp.value);
+                if(norm !== inp.value){
+                  inp.value = norm;
+                  l.expr = norm;
+                  glSyncTextarea(lines);
+                  persist();
+                  if($('#livePlot')?.checked) schedulePlot();
+                }
+              });
               del.addEventListener('click', ()=>{
                 lines.splice(idx,1);
                 if(lines.length===0) lines.push({on:true, expr:''});
@@ -2958,6 +3019,7 @@ sin(x)+x^2
           if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
           glSyncTextarea(lines);
           glRenderLines(lines);
+          try{ glSetStatus('ok', 'Ready', 'Plot a function to see a live graph and details here.', ['Live ' + ($('#livePlot')?.checked ? 'on' : 'off')], lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>normalizeExpr(l.expr))); }catch(_){ }
 
           // restore controls
           if($('#xmin')) $('#xmin').value = saved.xmin || '-10';

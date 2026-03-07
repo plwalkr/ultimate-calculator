@@ -110,6 +110,10 @@
     .tests .pass{color:#5bd38e}
     .tests .fail{color:#ff6b6b}
 
+/* Phase 1 cleanup: keep self-tests/dev clutter out of normal user view */
+#selfTests{display:none !important;}
+
+
     table{width:100%;border-collapse:collapse}
     th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
     th{color:#9bd3ff}
@@ -1022,7 +1026,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.31 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.32 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -4275,5 +4279,3 @@ function stageRow(nmValue='30', unit='nm'){
 </script>
 </body>
 </html>
-
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}

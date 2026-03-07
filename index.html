@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.10 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.11 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1439,9 +1439,8 @@ function initMathPad(){
       if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
 
       const gtab = document.querySelector('.tab[data-tab="graphlab"]');
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      if(gtab) gtab.classList.add('active');
-      if(typeof render==='function') render('graphlab');
+      if(gtab) gtab.click();
+      else if(typeof render==='function') render('graphlab');
 
       setTimeout(()=>{
         try{
@@ -1453,7 +1452,7 @@ function initMathPad(){
           }
           if(typeof doPlot==='function') doPlot();
         }catch(_){}
-      }, 120);
+      }, 180);
 
       if(typeof toast==="function") toast('Sent to GraphLab');
     }catch(e){

@@ -113,6 +113,106 @@
 /* Phase 1 cleanup: keep self-tests/dev clutter out of normal user view */
 #selfTests{display:none !important;}
 
+/* Phase 1b: spacing + hierarchy polish (logic-safe) */
+.surface{
+  padding:20px;
+}
+
+.surface > * + *{
+  margin-top:14px;
+}
+
+#view .surface{
+  border-radius:20px;
+}
+
+#view .surface details + details,
+#view .surface .surface + .surface{
+  margin-top:14px;
+}
+
+#view .surface .row{
+  gap:12px;
+}
+
+#view .surface .two-col{
+  gap:18px;
+}
+
+#view .surface .input,
+#view .surface select,
+#view .surface textarea{
+  min-height:46px;
+}
+
+#view .surface textarea{
+  line-height:1.4;
+}
+
+#view .surface .btn{
+  min-height:46px;
+}
+
+#view .surface .note{
+  line-height:1.35;
+}
+
+#view .surface .section-title{
+  margin:10px 0 12px;
+}
+
+#view .surface details{
+  border-radius:16px;
+  overflow:hidden;
+}
+
+#view .surface details > summary{
+  padding:10px 12px;
+}
+
+#view .surface details[open] > summary{
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.theme-light #view .surface details[open] > summary{
+  border-bottom-color:#d6e3fb;
+}
+
+/* Units page: feel less empty, more intentional */
+#view .surface > .row:first-of-type{
+  align-items:end;
+}
+
+#view .surface table{
+  margin-top:10px;
+}
+
+/* Time / Torque readability */
+#view .surface .mathbox,
+#view .surface .calcRef,
+#view .surface .tests{
+  border-radius:14px;
+}
+
+#view .surface .mathbox{
+  padding:12px 14px;
+}
+
+#view .surface .calcRef summary,
+#view .surface .mathdetails summary{
+  font-weight:800;
+}
+
+#view .surface hr{
+  margin:18px 0;
+  opacity:.25;
+}
+
+/* Better bottom finish */
+#view{
+  padding-bottom:20px;
+}
+
 
     table{width:100%;border-collapse:collapse}
     th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
@@ -1026,7 +1126,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.32 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.33 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>

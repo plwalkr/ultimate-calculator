@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.21 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.22 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1421,22 +1421,20 @@ function initMathPad(){
       setTimeout(()=>btn.classList.remove('mpSent'), 320);
 
       try{
+        const normalized = normalizeExpr(gx);
         const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
         const prev = loadTab('graphlab', def) || def;
-        saveTab('graphlab', {...prev, gx, glLines:null});
+
+        // Save both gx and the editable right-side line state BEFORE GraphLab renders.
+        saveTab('graphlab', {...prev, gx: normalized, glLines:[{ on:true, expr: normalized, color: null }]});
+        try{ dbgLine('INFO', 'Graph transfer preloaded into GraphLab rows | ' + normalized); }catch(_){}
 
         // use existing tab click flow (most reliable)
         const gtab = document.querySelector('.tab[data-tab="graphlab"]');
         if(gtab) gtab.click(); else render('graphlab');
 
-        // if GraphLab already rendered, push value into gx input to trigger plot
+        // after GraphLab renders, sync gx input and trigger plot
         setTimeout(()=>{
-          const normalized = normalizeExpr(gx);
-          try{
-            const st = (typeof loadTab==='function') ? loadTab('graphlab', {}) : {};
-            const nextLines = [{ on:true, expr: normalized, color: null }];
-            if(typeof saveTab==='function') saveTab('graphlab', Object.assign({}, st, { glLines: nextLines }));
-          }catch(_){ }
           const gxEl = document.getElementById('gx');
           if(gxEl){
             gxEl.value = normalized;

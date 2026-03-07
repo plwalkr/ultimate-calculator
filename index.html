@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.16 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.17 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1175,6 +1175,49 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     return esc
       .replace(/\^\(([^()<>]+)\)/g, '<sup>($1)</sup>')
       .replace(/\^([A-Za-z0-9+\-\.]+)\b/g, '<sup>$1</sup>');
+  }
+
+  function normalizeExpr(raw){
+    let s = String(raw||'').trim();
+    if(!s) return s;
+
+    // common function-name normalization (case-insensitive)
+    s = s
+      .replace(/\bCos\s*\(/g, 'cos(')
+      .replace(/\bSin\s*\(/g, 'sin(')
+      .replace(/\bTan\s*\(/g, 'tan(')
+      .replace(/\bSec\s*\(/g, 'sec(')
+      .replace(/\bCsc\s*\(/g, 'csc(')
+      .replace(/\bCot\s*\(/g, 'cot(')
+      .replace(/\bAcos\s*\(/g, 'acos(')
+      .replace(/\bAsin\s*\(/g, 'asin(')
+      .replace(/\bAtan\s*\(/g, 'atan(')
+      .replace(/\bSqrt\s*\(/g, 'sqrt(')
+      .replace(/\bLog\s*\(/g, 'log(')
+      .replace(/\bLn\s*\(/g, 'ln(')
+      .replace(/\bAbs\s*\(/g, 'abs(')
+      .replace(/\bExp\s*\(/g, 'exp(');
+
+    // constants
+    s = s.replace(/\bPI\b/g, 'pi').replace(/\bPi\b/g, 'pi');
+
+    // implicit multiplication:
+    // 3x -> 3*x
+    s = s.replace(/(\d)([A-Za-z])/g, '$1*$2');
+    // 2( -> 2*(
+    s = s.replace(/(\d)\s*\(/g, '$1*(');
+    // )( -> )*(
+    s = s.replace(/\)\s*\(/g, ')*(');
+    // x( -> x*(
+    s = s.replace(/([A-Za-z])\s*\(/g, '$1*(');
+    // )x -> )*x
+    s = s.replace(/\)\s*([A-Za-z])/g, ')*$1');
+
+    // undo function corruption from x( rule: cos( -> cos(
+    s = s
+      .replace(/\b(cos|sin|tan|sec|csc|cot|acos|asin|atan|sqrt|log|ln|abs|exp)\*\(/g, '$1(');
+
+    return s;
   }
 
 
@@ -1352,7 +1395,7 @@ function initMathPad(){
         setTimeout(()=>{
           const gxEl = document.getElementById('gx');
           if(gxEl){
-            gxEl.value = gx;
+            gxEl.value = normalizeExpr(gx);
             gxEl.dispatchEvent(new Event('input', {bubbles:true}));
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
@@ -1451,6 +1494,8 @@ function initMathPad(){
             gxEl.dispatchEvent(new Event('input', {bubbles:true}));
             gxEl.dispatchEvent(new Event('change', {bubbles:true}));
           }
+          const ro = document.getElementById('glReadout');
+          if(ro) ro.textContent = 'Plotting: ' + normalizeExpr(gx);
           if(typeof doPlot==='function') doPlot();
         }catch(_){}
       }, 180);
@@ -1520,7 +1565,7 @@ function initMathPad(){
 
       // Auto-send to GraphLab ONLY when it looks like a function of the graph variable
       if(xraw==='' && shouldAutoGraph(expr, v)){
-        mpSendToGraphLab([expr]);
+        mpSendToGraphLab([normalizeExpr(expr)]);
       }
     }catch(e){
       const msg = (e && e.message) ? e.message : String(e);
@@ -1832,7 +1877,7 @@ function doPlot(){
     return rawLines.map(s=>{
       let on=true, expr=s;
       if(expr.startsWith('#') || expr.startsWith('//')){ on=false; expr=expr.replace(/^(#+|\/\/+)\s*/,''); }
-      return {on, expr, color:null};
+      return {on, expr: normalizeExpr(expr), color:null};
     });
   };
 
@@ -1848,7 +1893,7 @@ function doPlot(){
   }
 
   const enabled = lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>({
-    expr: String(l.expr||'').trim(),
+    expr: normalizeExpr(String(l.expr||'').trim()),
     color: l.color || null
   }));
   try{ dbgLine('INFO', `GraphLab enabled=${enabled.length} exprs=${enabled.map(e=>e.expr).join(' | ').slice(0,220)}`); }catch(_){}

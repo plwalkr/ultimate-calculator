@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.25 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.26 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1198,6 +1198,8 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
       .replace(/\^\(([^()<>]+)\)/g, '<sup>($1)</sup>')
       .replace(/\^([A-Za-z0-9+\-\.]+)\b/g, '<sup>$1</sup>');
   }
+
+  window.__glTransfer = window.__glTransfer || null;
 
   function normalizeExpr(raw){
     let s = String(raw||'').trim();
@@ -1425,9 +1427,11 @@ function initMathPad(){
         const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
         const prev = loadTab('graphlab', def) || def;
 
-        // Save both gx and the editable right-side line state BEFORE GraphLab renders.
-        saveTab('graphlab', {...prev, gx: normalized, glLines:[{ on:true, expr: normalized, color: null }]});
-        try{ dbgLine('INFO', 'Graph transfer preloaded into GraphLab rows | ' + normalized); }catch(_){}
+        // Save fresh state and also publish a one-shot transfer object so GraphLab's first render uses THIS expression.
+        const freshLines = [{ on:true, expr: normalized, color: null }];
+        saveTab('graphlab', {...prev, gx: normalized, glLines:freshLines});
+        window.__glTransfer = { gx: normalized, glLines: freshLines };
+        try{ dbgLine('INFO', 'Graph transfer armed | ' + normalized); }catch(_){}
 
         // use existing tab click flow (most reliable)
         const gtab = document.querySelector('.tab[data-tab="graphlab"]');
@@ -1523,6 +1527,8 @@ function initMathPad(){
       const glLines = norm.map((ex, i)=>({ on:true, expr:String(ex||'').trim(), color: pal[i % pal.length] }));
 
       if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
+      window.__glTransfer = { gx, glLines };
+      try{ dbgLine('INFO', 'Graph transfer armed | ' + gx); }catch(_){}
 
       const gtab = document.querySelector('.tab[data-tab="graphlab"]');
       if(gtab) gtab.click();
@@ -3006,6 +3012,10 @@ sin(x)+x^2
           }
 
           const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null});
+          const incoming = window.__glTransfer && typeof window.__glTransfer === 'object' ? window.__glTransfer : null;
+          if(incoming){
+            try{ dbgLine('INFO', 'renderGraphLab consumed armed transfer | ' + (incoming.gx || '')); }catch(_){}
+          }
 
           function parseLinesFromGx(gxText){
             const out=[];
@@ -3019,18 +3029,22 @@ sin(x)+x^2
             return out.length? out : [{on:true, expr:'sin(x)'}];
           }
 
-          let lines = Array.isArray(saved.glLines) ? glSerialize(saved.glLines) : [];
+          let lines = incoming && Array.isArray(incoming.glLines)
+            ? glSerialize(incoming.glLines)
+            : (Array.isArray(saved.glLines) ? glSerialize(saved.glLines) : []);
           const visibleLineCount = Array.isArray(lines)
             ? lines.filter(l=>l && String(l.expr||'').trim()).length
             : 0;
 
-          // If saved glLines exists but only contains blank rows, seed the visible editor rows from saved gx.
+          // Prefer the armed transfer gx first, then saved gx.
           if(!lines.length || visibleLineCount===0){
-            lines = parseLinesFromGx(saved.gx);
-            try{ dbgLine('INFO', 'renderGraphLab rows seeded from saved gx | count=' + lines.length); }catch(_){}
+            const seedGx = incoming && incoming.gx ? incoming.gx : saved.gx;
+            lines = parseLinesFromGx(seedGx);
+            try{ dbgLine('INFO', 'renderGraphLab rows seeded from gx | count=' + lines.length + ' | gx=' + seedGx); }catch(_){}
           }
 
           if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
+          window.__glTransfer = null;
           glSyncTextarea(lines);
           glRenderLines(lines);
           try{ glSetStatus('ok', 'Ready', 'Plot a function to see a live graph and details here. The editable function list on the right should mirror what is being plotted.', ['Live ' + ($('#livePlot')?.checked ? 'on' : 'off')], lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>normalizeExpr(l.expr))); }catch(_){ }

@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.15 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.16 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1826,15 +1826,27 @@ function doPlot(){
 
   // Prefer structured line state (colors + enabled), fallback to gx textarea
   const st = (typeof loadTab==='function') ? loadTab('graphlab', {}) : {};
-  let lines = Array.isArray(st.glLines) ? st.glLines : null;
-  if(!lines){
-    const rawLines = String(gxEl.value||'').split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
-    lines = rawLines.map(s=>{
+  const gxRawNow = String(gxEl.value||'');
+  const parseGxLines = (raw)=>{
+    const rawLines = String(raw||'').split(/\r?\n/).map(s=>String(s||'').trim()).filter(Boolean);
+    return rawLines.map(s=>{
       let on=true, expr=s;
       if(expr.startsWith('#') || expr.startsWith('//')){ on=false; expr=expr.replace(/^(#+|\/\/+)\s*/,''); }
       return {on, expr, color:null};
     });
+  };
+
+  let lines = Array.isArray(st.glLines) ? st.glLines : null;
+
+  // If saved glLines is missing OR present-but-empty, fall back to the live gx textarea.
+  const savedEnabledCount = Array.isArray(lines)
+    ? lines.filter(l=>l && l.on && String(l.expr||'').trim()).length
+    : 0;
+
+  if(!lines || savedEnabledCount===0){
+    lines = parseGxLines(gxRawNow);
   }
+
   const enabled = lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>({
     expr: String(l.expr||'').trim(),
     color: l.color || null

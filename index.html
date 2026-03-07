@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.29 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.30 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -3083,9 +3083,22 @@ sin(x)+x^2
           }
 
           if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
+          const initialGraphExpr = normalizeExpr((incoming && incoming.gx) ? incoming.gx : (saved.gx || $('#gx')?.value || ''));
           window.__glTransfer = null;
           glSyncTextarea(lines);
           glRenderLines(lines);
+
+          // UI-only force sync: make the first visible editable row mirror the current gx/transfer expression.
+          try{
+            const firstExpr = document.querySelector('#glLines .expr');
+            if(firstExpr && initialGraphExpr){
+              firstExpr.value = initialGraphExpr;
+              firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
+              firstExpr.dispatchEvent(new Event('change', {bubbles:true}));
+              try{ dbgLine('INFO', 'renderGraphLab visible row initialized from current expression | ' + initialGraphExpr); }catch(_){}
+            }
+          }catch(_){}
+
           try{ glSetStatus('ok', 'Ready', 'Plot a function to see a live graph and details here. The editable function list on the right should mirror what is being plotted.', ['Live ' + ($('#livePlot')?.checked ? 'on' : 'off')], lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>normalizeExpr(l.expr))); }catch(_){ }
 
           // restore controls

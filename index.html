@@ -1022,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.24 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.25 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -3020,10 +3020,16 @@ sin(x)+x^2
           }
 
           let lines = Array.isArray(saved.glLines) ? glSerialize(saved.glLines) : [];
-          if(!lines.length){
+          const visibleLineCount = Array.isArray(lines)
+            ? lines.filter(l=>l && String(l.expr||'').trim()).length
+            : 0;
+
+          // If saved glLines exists but only contains blank rows, seed the visible editor rows from saved gx.
+          if(!lines.length || visibleLineCount===0){
             lines = parseLinesFromGx(saved.gx);
             try{ dbgLine('INFO', 'renderGraphLab rows seeded from saved gx | count=' + lines.length); }catch(_){}
           }
+
           if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
           glSyncTextarea(lines);
           glRenderLines(lines);

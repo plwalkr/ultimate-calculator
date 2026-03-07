@@ -1000,7 +1000,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.18 • 2026-03-06</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.19 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1255,6 +1255,20 @@ function initMathPad(){
 
   if(!lineEl || !btnEval || !window.math) return;
 
+  const normalizeTextarea = ()=>{
+    const before = String(lineEl.value || '');
+    const after = before
+      .split(/\r?\n/)
+      .map(s => normalizeExpr(s))
+      .join('\n');
+    if(after !== before){
+      lineEl.value = after;
+      if(exprEl) exprEl.value = after;
+      try{ dbgLine('INFO', 'MathPad input normalized | ' + after.slice(0,120)); }catch(_){}
+    }
+    return after;
+  };
+
   // iPhone/iPad: hard-suppress the software keyboard (Keypad-only input)
   try{
     const ua = navigator.userAgent || '';
@@ -1265,6 +1279,8 @@ function initMathPad(){
       lineEl.setAttribute('enterkeyhint','done');
     }
   }catch(_){/* ignore */}
+
+  lineEl.addEventListener('blur', ()=>{ try{ normalizeTextarea(); }catch(_){} });
 
   let mpANS = null;
 
@@ -1543,7 +1559,7 @@ function initMathPad(){
             'Evaluate',
             `Expression contains ${v}`,
             `<div><b>Expression</b>: <span class="mono">${mpPrettyHtml(expr)}</span></div>
-             <div style="margin-top:6px"><b>Tip</b>: Enter a value for ${escapeHtml(v)} above, or use <b>Graph</b>, <b>Derivative</b>, or <b>Integral</b>.</div>`,
+             <div style="margin-top:6px"><b>Tip</b>: This expression still has the variable <b>${escapeHtml(v)}</b>. Enter a value for ${escapeHtml(v)} above for a numeric answer, or use <b>Graph</b>, <b>Derivative</b>, or <b>Integral</b>.</div>`,
             `Expression contains ${v}; provide a value for ${v} or graph it.`
           );
         }
@@ -1695,6 +1711,7 @@ At ${v}=${xv}: ${gs}`;
       return; // allow newline
     }
     e.preventDefault();
+    try{ normalizeTextarea(); }catch(_){ }
     runEvaluate();
     return;
   }

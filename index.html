@@ -559,17 +559,35 @@ button{
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
 
-    .dbg-mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px 10px;border-radius:12px;font-weight:900;cursor:pointer;min-height:44px}
-    .dbg-mini:hover{background:rgba(255,255,255,.05)}
+    .dbg-mini{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--ink);padding:8px 12px;border-radius:14px;font-weight:900;cursor:pointer;min-height:44px;line-height:1}
+    .dbg-mini:hover{background:rgba(255,255,255,.06)}
+    .dbg-mini .dbg-dot{width:10px;height:10px;border-radius:999px;background:#31c27c;box-shadow:0 0 0 3px rgba(49,194,124,.16)}
+    .dbg-mini.warn .dbg-dot{background:#f5e160;box-shadow:0 0 0 3px rgba(245,225,96,.16)}
+    .dbg-mini.err .dbg-dot{background:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.16)}
+    .dbg-mini .dbg-label{letter-spacing:.01em}
+    .dbg-mini .dbg-count{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted);font-size:.78rem;align-items:center;justify-content:center}
+    .dbg-mini.has-count .dbg-count{display:inline-flex}
     .dbg-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9999}
-    .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:60vh;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
+    .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:min(78vh,760px);background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
     .gear-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px;min-height:44px}
     .gear-mini:hover{background:rgba(255,255,255,.06)}
-    .dbg-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
-    .dbg-mini:hover{background:rgba(255,255,255,.06)}
+
+    .dbg-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+    .dbg-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:10px}
+    .dbg-stat-label{font-size:.74rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .dbg-stat-value{margin-top:4px;font-size:1rem;font-weight:900;color:var(--ink);word-break:break-word}
+    .dbg-sub{font-size:.82rem;color:var(--muted)}
+    .dbg-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .dbg-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+    .dbg-kv .kv{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;padding:9px 10px}
+    .dbg-kv .kv strong{display:block;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .dbg-kv .kv span{display:block;margin-top:3px;font-weight:800;color:var(--ink);word-break:break-word}
+    .glHelpGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .glHelpList{margin:0;padding-left:18px;color:var(--muted);font-size:.94rem;line-height:1.45}
+    .glHelpList li+li{margin-top:4px}
 
     /* Debug log readability */
-    #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:48vh}
+    #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:40vh}
 
     /* Overlay hardening */
     .dbg-panel,.settings-drawer{pointer-events:none;}
@@ -594,6 +612,7 @@ button{
     /* Diagnostics pill */
     #diag{pointer-events:none;display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
     #diag.ok{background:rgba(91,211,142,.14);border:1px solid rgba(91,211,142,.35);color:var(--ink)}
+    #diag.warn{background:rgba(245,225,96,.14);border:1px solid rgba(245,225,96,.35);color:var(--ink)}
     #diag.err{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:var(--ink)}
     #diag .diag-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
     #diag .diag-x{border:0;background:transparent;color:var(--muted);font-size:1.1rem;font-weight:900;cursor:pointer;padding:2px 6px;border-radius:10px}
@@ -1233,7 +1252,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.38 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.39 • 2026-03-08</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1248,7 +1267,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
           <option value="light">Light</option>
           <option value="inspire">TI-Inspire</option>
         </select>
-        <button class="dbg-mini" id="dbgBtn" title="Debug">DBG</button>
+        <button class="dbg-mini ok" id="dbgBtn" title="System status" aria-label="System status"><span class="dbg-dot" aria-hidden="true"></span><span class="dbg-label">Status</span><span class="dbg-count" id="dbgCount">0</span></button>
         <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
       </div>
     </header>
@@ -1303,14 +1322,22 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     </div>
 
 <div class="dbg-panel" id="dbgPanel" aria-hidden="true">
-      <div class="card" role="dialog" aria-label="Debug panel">
+      <div class="card" role="dialog" aria-label="System status panel">
         <div class="top">
-          <div style="font-weight:900">Debug</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn" id="dbgCopy">Copy</button>
+          <div>
+            <div style="font-weight:900">System status</div>
+            <div class="dbg-sub">Quick health view, GraphLab transfer snapshot, and copyable diagnostics.</div>
+          </div>
+          <div class="dbg-actions">
+            <button class="btn" id="dbgCopyTransfer">Copy transfer</button>
+            <button class="btn" id="dbgCopy">Copy report</button>
             <button class="btn" id="dbgClose">Close</button>
           </div>
         </div>
+        <div class="dbg-summary" id="dbgSummary">
+          <div class="dbg-stat"><div class="dbg-stat-label">Health</div><div class="dbg-stat-value">Ready</div></div>
+        </div>
+        <div class="dbg-kv" id="dbgQuickFacts"></div>
         <pre id="dbgLog">(no errors yet)</pre>
       </div>
     </div>
@@ -1331,6 +1358,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         DI.style.display='flex';
         if(cls==='ok'){ clearTimeout(note._t); note._t=setTimeout(()=>{ if(!DI.classList.contains('expanded')) DI.style.display='none'; }, 2500); }
       };
+    window.diagNote = note;
 
     DI.addEventListener('click',(e)=>{
         if(e.target && e.target.classList.contains('diag-x')){ DI.style.display='none'; return; }
@@ -2501,6 +2529,45 @@ function waitForGraphLibs(cb, tries=40){
 
       /* ---------- Debug capture ---------- */
       const DBG=[];
+      function dbgCounts(){
+        const rows = Array.isArray(DBG) ? DBG : [];
+        const err = rows.filter(x=>/ERROR:|PROMISE:/.test(String(x||''))).length;
+        const warn = rows.filter(x=>/WARN:/.test(String(x||''))).length;
+        return {err, warn};
+      }
+      function dbgTransferSnapshot(){
+        let saved = null;
+        try{ saved = loadTab('graphlab', null); }catch(_){}
+        const active = window.__glTransfer && typeof window.__glTransfer==='object' ? window.__glTransfer : null;
+        const firstSaved = saved && Array.isArray(saved.glLines) && saved.glLines[0] ? String(saved.glLines[0].expr||'').trim() : '';
+        const firstArmed = active && Array.isArray(active.glLines) && active.glLines[0] ? String(active.glLines[0].expr||'').trim() : '';
+        return {
+          armed: !!active,
+          gx: String((active && active.gx) || (saved && saved.gx) || document.getElementById('gx')?.value || '').trim(),
+          line0: String(firstArmed || firstSaved || '').trim(),
+          lineCount: saved && Array.isArray(saved.glLines) ? saved.glLines.length : (active && Array.isArray(active.glLines) ? active.glLines.length : 0)
+        };
+      }
+      function updateDebugButton(){
+        try{
+          const btn = document.getElementById('dbgBtn');
+          const countEl = document.getElementById('dbgCount');
+          if(!btn) return;
+          const counts = dbgCounts();
+          btn.classList.remove('ok','warn','err','has-count');
+          let mode = 'ok';
+          let count = 0;
+          if(counts.err > 0){ mode = 'err'; count = counts.err; }
+          else if(counts.warn > 0){ mode = 'warn'; count = counts.warn; }
+          btn.classList.add(mode);
+          if(countEl){
+            countEl.textContent = String(count);
+            if(count > 0) btn.classList.add('has-count');
+          }
+          btn.title = mode==='err' ? `System status: ${counts.err} error(s)` : (mode==='warn' ? `System status: ${counts.warn} warning(s)` : 'System status: healthy');
+          btn.setAttribute('aria-label', btn.title);
+        }catch(_){}
+      }
       function dbgLine(level, msg){
         const t=new Date();
         const stamp=t.toLocaleTimeString();
@@ -2508,6 +2575,7 @@ function waitForGraphLibs(cb, tries=40){
         if(DBG.length>600) DBG.shift();
         const pre=$('#dbgLog');
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
+        updateDebugButton();
       }
 
       function dbgState(){
@@ -2532,10 +2600,15 @@ function waitForGraphLibs(cb, tries=40){
 
       function dbgReport(){
         const s = dbgState();
+        const counts = dbgCounts();
+        const transfer = dbgTransferSnapshot();
         return [
           'LegendCalc Debug Report',
           'Version: ' + s.version,
           'Active tab: ' + s.activeTab,
+          'Health: ' + (counts.err ? 'error' : (counts.warn ? 'warning' : 'ok')),
+          'Errors: ' + counts.err,
+          'Warnings: ' + counts.warn,
           'math loaded: ' + s.hasMath,
           'Plotly loaded: ' + s.hasPlotly,
           'gx field exists: ' + s.hasGX,
@@ -2543,10 +2616,29 @@ function waitForGraphLibs(cb, tries=40){
           'View exists: ' + s.hasView,
           'Graph input preview: ' + (s.gx || '(empty)'),
           'MathPad input preview: ' + (s.mp || '(empty)'),
+          'Transfer armed: ' + transfer.armed,
+          'Transfer gx: ' + (transfer.gx || '(empty)'),
+          'Transfer row 1: ' + (transfer.line0 || '(empty)'),
+          'Saved GraphLab rows: ' + transfer.lineCount,
           'ServiceWorker API: ' + s.sw,
           '',
           'Log:',
           (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)'
+        ].join('\n');
+      }
+      function dbgTransferReport(){
+        const s = dbgState();
+        const transfer = dbgTransferSnapshot();
+        return [
+          'LegendCalc Graph Transfer Snapshot',
+          'Version: ' + s.version,
+          'Active tab: ' + s.activeTab,
+          'MathPad input preview: ' + (s.mp || '(empty)'),
+          'Graph input preview: ' + (s.gx || '(empty)'),
+          'Transfer armed: ' + transfer.armed,
+          'Saved gx: ' + (transfer.gx || '(empty)'),
+          'Visible row 1 / saved line 1: ' + (transfer.line0 || '(empty)'),
+          'Saved line count: ' + transfer.lineCount
         ].join('\n');
       }
 
@@ -2575,9 +2667,50 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       function initDebugUI(){
         const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
+        const copyTransfer=$('#dbgCopyTransfer'), summary=$('#dbgSummary'), facts=$('#dbgQuickFacts');
         if(!btn || !panel) return;
+        const copyText = async (text, okMsg)=>{
+          try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:", okMsg);} }
+          catch(_){
+            try{
+              const ta=document.createElement('textarea');
+              ta.value=text; document.body.appendChild(ta);
+              ta.select(); document.execCommand('copy');
+              document.body.removeChild(ta);
+              if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:", okMsg);}
+            }catch(__){ if(typeof toast==="function"){toast('Copy failed');}else{console.warn("Toast:",'Copy failed');} }
+          }
+        };
+        const renderStatus = ()=>{
+          try{
+            const s = dbgState();
+            const counts = dbgCounts();
+            const transfer = dbgTransferSnapshot();
+            const mode = counts.err ? 'Error attention' : (counts.warn ? 'Warnings present' : 'Healthy');
+            if(summary){
+              summary.innerHTML = [
+                ['Health', mode],
+                ['Version', s.version || '(missing)'],
+                ['Active tab', s.activeTab || '(unknown)'],
+                ['Transfer', transfer.gx || '(empty)']
+              ].map(([label,val])=>`<div class="dbg-stat"><div class="dbg-stat-label">${escapeHtml(label)}</div><div class="dbg-stat-value">${escapeHtml(String(val||''))}</div></div>`).join('');
+            }
+            if(facts){
+              facts.innerHTML = [
+                ['Math engine', s.hasMath ? 'Loaded' : 'Missing'],
+                ['Plotly', s.hasPlotly ? 'Loaded' : 'Missing'],
+                ['Graph button', s.hasGraphBtn ? 'Ready' : 'Missing'],
+                ['Errors', String(counts.err)],
+                ['Warnings', String(counts.warn)],
+                ['Saved row 1', transfer.line0 || '(empty)'],
+                ['Saved rows', String(transfer.lineCount)],
+                ['MathPad preview', s.mp || '(empty)']
+              ].map(([label,val])=>`<div class="kv"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(String(val||''))}</span></div>`).join('');
+            }
+          }catch(_){}
+        };
         const open=()=>{ panel.style.display='block';
-          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Debug opened');
+          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); renderStatus(); dbgLine('INFO','Debug opened');
           try{
             const s=dbgState();
             dbgLine('STATE', `tab=${s.activeTab} math=${s.hasMath} plotly=${s.hasPlotly} gx=${s.hasGX} graphBtn=${s.hasGraphBtn}`);
@@ -2590,27 +2723,22 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
           const text = dbgReport();
-          try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast('Debug log copied');}else{console.warn("Toast:",'Debug log copied');} }
-          catch(_){
-            try{
-              const ta=document.createElement('textarea');
-              ta.value=text; document.body.appendChild(ta);
-              ta.select(); document.execCommand('copy');
-              document.body.removeChild(ta);
-              if(typeof toast==="function"){toast('Debug log copied');}else{console.warn("Toast:",'Debug log copied');}
-            }catch(__){ if(typeof toast==="function"){toast('Copy failed');}else{console.warn("Toast:",'Copy failed');} }
-          }
-          // visually select the log so it feels like a real copy
+          await copyText(text, 'Debug report copied');
           const pre=$('#dbgLog');
           if(pre){
             const r=document.createRange(); r.selectNodeContents(pre);
             const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
             setTimeout(()=>{ try{ sel.removeAllRanges(); }catch(_){} }, 900);
           }
+          renderStatus();
         });
+        copyTransfer && copyTransfer.addEventListener('click', async ()=>{
+          await copyText(dbgTransferReport(), 'Transfer snapshot copied');
+          renderStatus();
+        });
+        updateDebugButton();
       }
 
-      
       function initSettingsUI(){
         const gear=$('#gearBtn'), drawer=$('#settingsDrawer'), close=$('#setClose');
         if(!gear || !drawer) return;
@@ -3110,6 +3238,26 @@ sin(x)+x^2
                     <button class="exampleChip" type="button" data-expr="sqrt(x+4)">sqrt(x+4)</button>
                   </div>
                 </div>
+                <div class="glHelpGrid">
+                  <div class="tipCard">
+                    <div class="tipTitle">What can I type?</div>
+                    <div class="tipText">LegendCalc already normalizes common input, so you can type naturally and refine after plotting.</div>
+                    <ul class="glHelpList">
+                      <li><code>2x</code> becomes <code>2*x</code></li>
+                      <li><code>Cos(2x)</code> becomes <code>cos(2*x)</code></li>
+                      <li>Try <code>sqrt(x+4)</code>, <code>log(x)</code>, or <code>x*(x+1)</code></li>
+                    </ul>
+                  </div>
+                  <div class="tipCard">
+                    <div class="tipTitle">Best quick flow</div>
+                    <div class="tipText">Use this when you want the least friction.</div>
+                    <ul class="glHelpList">
+                      <li>Type in Calc and hit Graph</li>
+                      <li>Or load an example chip here</li>
+                      <li>Then tweak row 1, color, and toggles live</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
               <div class="glr">
@@ -3245,6 +3393,13 @@ sin(x)+x^2
             textEl.textContent = body || '';
             metaEl.innerHTML = (metaList||[]).filter(Boolean).map(x=>`<span class="glStatusPill">${x}</span>`).join('');
             exprEl.innerHTML = (exprList||[]).filter(Boolean).map(x=>`<span class="glExprChip">${escapeHtml(String(x))}</span>`).join('');
+            try{
+              if(typeof window.diagNote==='function' && title){
+                const shortMsg = kind==='warn' ? `${title}: check GraphLab` : title;
+                const fullMsg = [title, body, (exprList||[]).join(' • ')].filter(Boolean).join(' — ');
+                window.diagNote(kind==='warn' ? 'warn' : 'ok', shortMsg, fullMsg);
+              }
+            }catch(_){}
           }
           function glRenderLines(lines){
             const host=$('#glLines'); if(!host) return;

@@ -559,35 +559,30 @@ button{
 /* v1.3.1: full-width equals on phones */
 .span4{grid-column: span 4;}
 
-    .dbg-mini{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--ink);padding:8px 12px;border-radius:14px;font-weight:900;cursor:pointer;min-height:44px;line-height:1}
-    .dbg-mini:hover{background:rgba(255,255,255,.06)}
-    .dbg-mini .dbg-dot{width:10px;height:10px;border-radius:999px;background:#31c27c;box-shadow:0 0 0 3px rgba(49,194,124,.16)}
-    .dbg-mini.warn .dbg-dot{background:#f5e160;box-shadow:0 0 0 3px rgba(245,225,96,.16)}
-    .dbg-mini.err .dbg-dot{background:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.16)}
-    .dbg-mini .dbg-label{letter-spacing:.01em}
-    .dbg-mini .dbg-count{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted);font-size:.78rem;align-items:center;justify-content:center}
-    .dbg-mini.has-count .dbg-count{display:inline-flex}
+    .dbg-mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px 10px;border-radius:12px;font-weight:900;cursor:pointer;min-height:44px}
+    .dbg-mini:hover{background:rgba(255,255,255,.05)}
     .dbg-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);z-index:9999}
-    .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:min(78vh,760px);background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
+    .dbg-panel .card{position:absolute;left:12px;right:12px;bottom:12px;max-height:60vh;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px}
     .gear-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px;min-height:44px}
     .gear-mini:hover{background:rgba(255,255,255,.06)}
-
-    .dbg-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-    .dbg-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:10px}
-    .dbg-stat-label{font-size:.74rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-    .dbg-stat-value{margin-top:4px;font-size:1rem;font-weight:900;color:var(--ink);word-break:break-word}
-    .dbg-sub{font-size:.82rem;color:var(--muted)}
-    .dbg-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .dbg-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
-    .dbg-kv .kv{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;padding:9px 10px}
-    .dbg-kv .kv strong{display:block;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-    .dbg-kv .kv span{display:block;margin-top:3px;font-weight:800;color:var(--ink);word-break:break-word}
-    .glHelpGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-    .glHelpList{margin:0;padding-left:18px;color:var(--muted);font-size:.94rem;line-height:1.45}
-    .glHelpList li+li{margin-top:4px}
+    .dbg-mini{border:0;background:transparent;color:var(--muted);font-weight:900;cursor:pointer;padding:8px 10px;border-radius:12px}
+    .status-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)!important;background:rgba(255,255,255,.04)!important;color:var(--ink)!important;padding:8px 12px!important;min-height:44px}
+    .status-dot{width:10px;height:10px;border-radius:999px;background:var(--ok);box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+    .status-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(255,107,107,.16);border:1px solid rgba(255,107,107,.35);font-size:.78rem;font-weight:900;color:var(--ink)}
+    .status-btn[data-health="warn"] .status-dot{background:#f6c453}
+    .status-btn[data-health="err"] .status-dot{background:var(--error)}
+    .dbg-summary{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .dbg-card{border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.04);padding:10px 12px}
+    .dbg-k{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .dbg-v{font-weight:900;margin-top:4px;word-break:break-word}
+    .dbg-list{display:grid;gap:8px}
+    .dbg-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);padding:6px 10px;border-radius:999px;font-weight:800}
+    .dbg-pill.ok::before,.dbg-pill.warn::before,.dbg-pill.err::before{content:"";width:8px;height:8px;border-radius:999px;background:var(--ok)}
+    .dbg-pill.warn::before{background:#f6c453}
+    .dbg-pill.err::before{background:var(--error)}
 
     /* Debug log readability */
-    #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:40vh}
+    #dbgLog{background:var(--screen);border:1px solid var(--border);border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;color:var(--ink);font-size:.9rem;line-height:1.25;max-height:48vh}
 
     /* Overlay hardening */
     .dbg-panel,.settings-drawer{pointer-events:none;}
@@ -612,7 +607,6 @@ button{
     /* Diagnostics pill */
     #diag{pointer-events:none;display:none;margin:10px 0;padding:8px 10px;border-radius:999px;font-weight:800;font-size:.9rem;line-height:1.1;align-items:center;gap:10px}
     #diag.ok{background:rgba(91,211,142,.14);border:1px solid rgba(91,211,142,.35);color:var(--ink)}
-    #diag.warn{background:rgba(245,225,96,.14);border:1px solid rgba(245,225,96,.35);color:var(--ink)}
     #diag.err{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:var(--ink)}
     #diag .diag-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
     #diag .diag-x{border:0;background:transparent;color:var(--muted);font-size:1.1rem;font-weight:900;cursor:pointer;padding:2px 6px;border-radius:10px}
@@ -625,6 +619,17 @@ button{
     @media (max-width:520px){
       #diag{pointer-events:none;position:fixed;left:10px;right:10px;bottom:64px;margin:0;z-index:2000}
       .settings-drawer .sheet{left:12px;right:12px;width:auto}
+      .dbg-summary{grid-template-columns:1fr}
+      .dbg-panel .card{left:10px;right:10px;bottom:10px;max-height:74vh;padding:10px}
+      .theme-picker{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+      .theme-picker .theme-select{min-width:132px}
+      .status-btn,.gear-mini{flex:0 0 auto}
+      .glline{display:grid;grid-template-columns:18px 1fr 40px 40px;align-items:center}
+      .glline .expr{min-width:0}
+      .chartwrap{overflow:hidden;border-radius:16px}
+      .glStatusTop,.glStatusMeta,.glExprList{gap:6px}
+      .glExprChip,.glStatusPill,.kpill,.kbdpill{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .tipCard,.glStatusCard,.mathdetails,.calcRef{scroll-margin-top:14px}
     }
 
     .dbg-panel .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -1252,7 +1257,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.39 • 2026-03-08</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.38 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1267,7 +1272,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
           <option value="light">Light</option>
           <option value="inspire">TI-Inspire</option>
         </select>
-        <button class="dbg-mini ok" id="dbgBtn" title="System status" aria-label="System status"><span class="dbg-dot" aria-hidden="true"></span><span class="dbg-label">Status</span><span class="dbg-count" id="dbgCount">0</span></button>
+        <button class="dbg-mini status-btn" id="dbgBtn" title="System status" aria-label="System status" data-health="ok"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Status</span><span class="status-badge" id="dbgBadge" style="display:none">0</span></button>
         <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
       </div>
     </header>
@@ -1322,22 +1327,19 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     </div>
 
 <div class="dbg-panel" id="dbgPanel" aria-hidden="true">
-      <div class="card" role="dialog" aria-label="System status panel">
+      <div class="card" role="dialog" aria-label="Status panel">
         <div class="top">
           <div>
             <div style="font-weight:900">System status</div>
-            <div class="dbg-sub">Quick health view, GraphLab transfer snapshot, and copyable diagnostics.</div>
+            <div class="note">Quick health, transfer snapshot, and debug log</div>
           </div>
-          <div class="dbg-actions">
-            <button class="btn" id="dbgCopyTransfer">Copy transfer</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn" id="dbgCopy">Copy report</button>
+            <button class="btn" id="dbgCopyTransfer">Copy transfer</button>
             <button class="btn" id="dbgClose">Close</button>
           </div>
         </div>
-        <div class="dbg-summary" id="dbgSummary">
-          <div class="dbg-stat"><div class="dbg-stat-label">Health</div><div class="dbg-stat-value">Ready</div></div>
-        </div>
-        <div class="dbg-kv" id="dbgQuickFacts"></div>
+        <div id="dbgSummary" class="dbg-summary"></div>
         <pre id="dbgLog">(no errors yet)</pre>
       </div>
     </div>
@@ -1358,7 +1360,6 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
         DI.style.display='flex';
         if(cls==='ok'){ clearTimeout(note._t); note._t=setTimeout(()=>{ if(!DI.classList.contains('expanded')) DI.style.display='none'; }, 2500); }
       };
-    window.diagNote = note;
 
     DI.addEventListener('click',(e)=>{
         if(e.target && e.target.classList.contains('diag-x')){ DI.style.display='none'; return; }
@@ -2529,45 +2530,6 @@ function waitForGraphLibs(cb, tries=40){
 
       /* ---------- Debug capture ---------- */
       const DBG=[];
-      function dbgCounts(){
-        const rows = Array.isArray(DBG) ? DBG : [];
-        const err = rows.filter(x=>/ERROR:|PROMISE:/.test(String(x||''))).length;
-        const warn = rows.filter(x=>/WARN:/.test(String(x||''))).length;
-        return {err, warn};
-      }
-      function dbgTransferSnapshot(){
-        let saved = null;
-        try{ saved = loadTab('graphlab', null); }catch(_){}
-        const active = window.__glTransfer && typeof window.__glTransfer==='object' ? window.__glTransfer : null;
-        const firstSaved = saved && Array.isArray(saved.glLines) && saved.glLines[0] ? String(saved.glLines[0].expr||'').trim() : '';
-        const firstArmed = active && Array.isArray(active.glLines) && active.glLines[0] ? String(active.glLines[0].expr||'').trim() : '';
-        return {
-          armed: !!active,
-          gx: String((active && active.gx) || (saved && saved.gx) || document.getElementById('gx')?.value || '').trim(),
-          line0: String(firstArmed || firstSaved || '').trim(),
-          lineCount: saved && Array.isArray(saved.glLines) ? saved.glLines.length : (active && Array.isArray(active.glLines) ? active.glLines.length : 0)
-        };
-      }
-      function updateDebugButton(){
-        try{
-          const btn = document.getElementById('dbgBtn');
-          const countEl = document.getElementById('dbgCount');
-          if(!btn) return;
-          const counts = dbgCounts();
-          btn.classList.remove('ok','warn','err','has-count');
-          let mode = 'ok';
-          let count = 0;
-          if(counts.err > 0){ mode = 'err'; count = counts.err; }
-          else if(counts.warn > 0){ mode = 'warn'; count = counts.warn; }
-          btn.classList.add(mode);
-          if(countEl){
-            countEl.textContent = String(count);
-            if(count > 0) btn.classList.add('has-count');
-          }
-          btn.title = mode==='err' ? `System status: ${counts.err} error(s)` : (mode==='warn' ? `System status: ${counts.warn} warning(s)` : 'System status: healthy');
-          btn.setAttribute('aria-label', btn.title);
-        }catch(_){}
-      }
       function dbgLine(level, msg){
         const t=new Date();
         const stamp=t.toLocaleTimeString();
@@ -2575,7 +2537,7 @@ function waitForGraphLibs(cb, tries=40){
         if(DBG.length>600) DBG.shift();
         const pre=$('#dbgLog');
         if(pre) pre.textContent = DBG.join('\n') || '(no errors yet)';
-        updateDebugButton();
+        try{ renderDebugSummary(); }catch(_){}
       }
 
       function dbgState(){
@@ -2600,15 +2562,10 @@ function waitForGraphLibs(cb, tries=40){
 
       function dbgReport(){
         const s = dbgState();
-        const counts = dbgCounts();
-        const transfer = dbgTransferSnapshot();
         return [
           'LegendCalc Debug Report',
           'Version: ' + s.version,
           'Active tab: ' + s.activeTab,
-          'Health: ' + (counts.err ? 'error' : (counts.warn ? 'warning' : 'ok')),
-          'Errors: ' + counts.err,
-          'Warnings: ' + counts.warn,
           'math loaded: ' + s.hasMath,
           'Plotly loaded: ' + s.hasPlotly,
           'gx field exists: ' + s.hasGX,
@@ -2616,30 +2573,96 @@ function waitForGraphLibs(cb, tries=40){
           'View exists: ' + s.hasView,
           'Graph input preview: ' + (s.gx || '(empty)'),
           'MathPad input preview: ' + (s.mp || '(empty)'),
-          'Transfer armed: ' + transfer.armed,
-          'Transfer gx: ' + (transfer.gx || '(empty)'),
-          'Transfer row 1: ' + (transfer.line0 || '(empty)'),
-          'Saved GraphLab rows: ' + transfer.lineCount,
           'ServiceWorker API: ' + s.sw,
           '',
           'Log:',
           (DBG && DBG.length) ? DBG.join('\n') : '(no errors yet)'
         ].join('\n');
       }
+
+      function dbgTransferState(){
+        let visibleRow='';
+        let savedRow='';
+        let armed='';
+        try{ visibleRow = (document.querySelector('#glLines .expr')?.value || '').slice(0,120); }catch(_){}
+        try{ savedRow = String((loadTab && loadTab('graphlab', {})?.glLines || [])[0]?.expr || '').slice(0,120); }catch(_){}
+        try{ armed = String((window.__glTransfer && window.__glTransfer.gx) || '').slice(0,120); }catch(_){}
+        return {
+          armed,
+          visibleRow,
+          savedRow
+        };
+      }
+
       function dbgTransferReport(){
         const s = dbgState();
-        const transfer = dbgTransferSnapshot();
+        const t = dbgTransferState();
         return [
-          'LegendCalc Graph Transfer Snapshot',
+          'LegendCalc Transfer Snapshot',
           'Version: ' + s.version,
           'Active tab: ' + s.activeTab,
-          'MathPad input preview: ' + (s.mp || '(empty)'),
-          'Graph input preview: ' + (s.gx || '(empty)'),
-          'Transfer armed: ' + transfer.armed,
-          'Saved gx: ' + (transfer.gx || '(empty)'),
-          'Visible row 1 / saved line 1: ' + (transfer.line0 || '(empty)'),
-          'Saved line count: ' + transfer.lineCount
+          'MathPad input: ' + (s.mp || '(empty)'),
+          'gx textarea: ' + (s.gx || '(empty)'),
+          'Armed transfer gx: ' + (t.armed || '(empty)'),
+          'Visible first row: ' + (t.visibleRow || '(empty)'),
+          'Saved first glLine: ' + (t.savedRow || '(empty)')
         ].join('\n');
+      }
+
+      function dbgHealth(){
+        const errCount = DBG.filter(x=>/\b(ERROR|PROMISE)\b/.test(x)).length;
+        const warnCount = DBG.filter(x=>/\bWARN\b/.test(x)).length;
+        const health = errCount ? 'err' : (warnCount ? 'warn' : 'ok');
+        return {health, errCount, warnCount};
+      }
+
+      function renderDebugSummary(){
+        const btn = document.getElementById('dbgBtn');
+        const badge = document.getElementById('dbgBadge');
+        const host = document.getElementById('dbgSummary');
+        const s = dbgState();
+        const t = dbgTransferState();
+        const h = dbgHealth();
+        if(btn){ btn.dataset.health = h.health; }
+        if(badge){
+          const n = h.errCount + h.warnCount;
+          badge.textContent = String(n);
+          badge.style.display = n ? 'inline-flex' : 'none';
+        }
+        if(!host) return;
+        const statusPill = `<span class="dbg-pill ${h.health}">${h.health==='err' ? 'Needs attention' : (h.health==='warn' ? 'Warnings present' : 'Healthy')}</span>`;
+        host.innerHTML = `
+          <div class="dbg-card">
+            <div class="dbg-k">App health</div>
+            <div class="dbg-v">${statusPill}</div>
+            <div class="dbg-list" style="margin-top:8px">
+              <div class="dbg-k">Version</div><div class="dbg-v">${escapeHtml(String(s.version||''))}</div>
+              <div class="dbg-k">Active tab</div><div class="dbg-v">${escapeHtml(String(s.activeTab||''))}</div>
+            </div>
+          </div>
+          <div class="dbg-card">
+            <div class="dbg-k">Runtime</div>
+            <div class="dbg-list" style="margin-top:8px">
+              <div class="dbg-v">${s.hasMath ? 'Math.js ready' : 'Math.js missing'}</div>
+              <div class="dbg-v">${s.hasPlotly ? 'Plotly ready' : 'Plotly missing'}</div>
+              <div class="dbg-v">${s.hasGraphBtn ? 'Graph button found' : 'Graph button missing'}</div>
+            </div>
+          </div>
+          <div class="dbg-card">
+            <div class="dbg-k">Current inputs</div>
+            <div class="dbg-list" style="margin-top:8px">
+              <div><div class="dbg-k">MathPad</div><div class="dbg-v">${escapeHtml(s.mp || '(empty)')}</div></div>
+              <div><div class="dbg-k">gx textarea</div><div class="dbg-v">${escapeHtml(s.gx || '(empty)')}</div></div>
+            </div>
+          </div>
+          <div class="dbg-card">
+            <div class="dbg-k">Transfer snapshot</div>
+            <div class="dbg-list" style="margin-top:8px">
+              <div><div class="dbg-k">Armed gx</div><div class="dbg-v">${escapeHtml(t.armed || '(empty)')}</div></div>
+              <div><div class="dbg-k">Visible first row</div><div class="dbg-v">${escapeHtml(t.visibleRow || '(empty)')}</div></div>
+              <div><div class="dbg-k">Saved first glLine</div><div class="dbg-v">${escapeHtml(t.savedRow || '(empty)')}</div></div>
+            </div>
+          </div>`;
       }
 
       function dbgAction(label, extra){
@@ -2666,55 +2689,27 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       window.addEventListener('unhandledrejection', (e)=>{ dbgLine('PROMISE', (e.reason && (e.reason.message||String(e.reason))) || 'unhandled rejection'); });
 
       function initDebugUI(){
-        const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy');
-        const copyTransfer=$('#dbgCopyTransfer'), summary=$('#dbgSummary'), facts=$('#dbgQuickFacts');
+        const btn=$('#dbgBtn'), panel=$('#dbgPanel'), close=$('#dbgClose'), copy=$('#dbgCopy'), copyTransfer=$('#dbgCopyTransfer');
         if(!btn || !panel) return;
         const copyText = async (text, okMsg)=>{
-          try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:", okMsg);} }
+          try{ await navigator.clipboard.writeText(text); if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:",okMsg);} }
           catch(_){
             try{
               const ta=document.createElement('textarea');
               ta.value=text; document.body.appendChild(ta);
               ta.select(); document.execCommand('copy');
               document.body.removeChild(ta);
-              if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:", okMsg);}
+              if(typeof toast==="function"){toast(okMsg);}else{console.warn("Toast:",okMsg);}
             }catch(__){ if(typeof toast==="function"){toast('Copy failed');}else{console.warn("Toast:",'Copy failed');} }
           }
         };
-        const renderStatus = ()=>{
-          try{
-            const s = dbgState();
-            const counts = dbgCounts();
-            const transfer = dbgTransferSnapshot();
-            const mode = counts.err ? 'Error attention' : (counts.warn ? 'Warnings present' : 'Healthy');
-            if(summary){
-              summary.innerHTML = [
-                ['Health', mode],
-                ['Version', s.version || '(missing)'],
-                ['Active tab', s.activeTab || '(unknown)'],
-                ['Transfer', transfer.gx || '(empty)']
-              ].map(([label,val])=>`<div class="dbg-stat"><div class="dbg-stat-label">${escapeHtml(label)}</div><div class="dbg-stat-value">${escapeHtml(String(val||''))}</div></div>`).join('');
-            }
-            if(facts){
-              facts.innerHTML = [
-                ['Math engine', s.hasMath ? 'Loaded' : 'Missing'],
-                ['Plotly', s.hasPlotly ? 'Loaded' : 'Missing'],
-                ['Graph button', s.hasGraphBtn ? 'Ready' : 'Missing'],
-                ['Errors', String(counts.err)],
-                ['Warnings', String(counts.warn)],
-                ['Saved row 1', transfer.line0 || '(empty)'],
-                ['Saved rows', String(transfer.lineCount)],
-                ['MathPad preview', s.mp || '(empty)']
-              ].map(([label,val])=>`<div class="kv"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(String(val||''))}</span></div>`).join('');
-            }
-          }catch(_){}
-        };
         const open=()=>{ panel.style.display='block';
-          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); renderStatus(); dbgLine('INFO','Debug opened');
+          panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); dbgLine('INFO','Status opened');
           try{
             const s=dbgState();
             dbgLine('STATE', `tab=${s.activeTab} math=${s.hasMath} plotly=${s.hasPlotly} gx=${s.hasGX} graphBtn=${s.hasGraphBtn}`);
           }catch(_){}
+          try{ renderDebugSummary(); }catch(_){}
         };
         const shut=()=>{ panel.style.display='none';
           panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); };
@@ -2722,23 +2717,21 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         panel.addEventListener('click', (e)=>{ if(e.target===panel) shut(); });
         close && close.addEventListener('click', shut);
         copy && copy.addEventListener('click', async ()=>{
-          const text = dbgReport();
-          await copyText(text, 'Debug report copied');
+          await copyText(dbgReport(), 'Debug report copied');
           const pre=$('#dbgLog');
           if(pre){
             const r=document.createRange(); r.selectNodeContents(pre);
             const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
             setTimeout(()=>{ try{ sel.removeAllRanges(); }catch(_){} }, 900);
           }
-          renderStatus();
         });
         copyTransfer && copyTransfer.addEventListener('click', async ()=>{
           await copyText(dbgTransferReport(), 'Transfer snapshot copied');
-          renderStatus();
         });
-        updateDebugButton();
+        renderDebugSummary();
       }
 
+      
       function initSettingsUI(){
         const gear=$('#gearBtn'), drawer=$('#settingsDrawer'), close=$('#setClose');
         if(!gear || !drawer) return;
@@ -3238,25 +3231,10 @@ sin(x)+x^2
                     <button class="exampleChip" type="button" data-expr="sqrt(x+4)">sqrt(x+4)</button>
                   </div>
                 </div>
-                <div class="glHelpGrid">
-                  <div class="tipCard">
-                    <div class="tipTitle">What can I type?</div>
-                    <div class="tipText">LegendCalc already normalizes common input, so you can type naturally and refine after plotting.</div>
-                    <ul class="glHelpList">
-                      <li><code>2x</code> becomes <code>2*x</code></li>
-                      <li><code>Cos(2x)</code> becomes <code>cos(2*x)</code></li>
-                      <li>Try <code>sqrt(x+4)</code>, <code>log(x)</code>, or <code>x*(x+1)</code></li>
-                    </ul>
-                  </div>
-                  <div class="tipCard">
-                    <div class="tipTitle">Best quick flow</div>
-                    <div class="tipText">Use this when you want the least friction.</div>
-                    <ul class="glHelpList">
-                      <li>Type in Calc and hit Graph</li>
-                      <li>Or load an example chip here</li>
-                      <li>Then tweak row 1, color, and toggles live</li>
-                    </ul>
-                  </div>
+                <div class="tipCard">
+                  <div class="tipTitle">What can I type?</div>
+                  <div class="tipText">Use forms like <b>sin(x)</b>, <b>cos(2x)</b>, <b>x^2</b>, <b>sqrt(x+4)</b>, or <b>log(x)</b>. LegendCalc will normalize common typing like <b>2x</b> into <b>2*x</b>.</div>
+                  <div class="tipText" style="margin-top:8px"><b>Best quick flow:</b> type in Calc → tap Graph → confirm the first GraphLab row matches → adjust color, visibility, and range from there.</div>
                 </div>
               </div>
 
@@ -3394,10 +3372,8 @@ sin(x)+x^2
             metaEl.innerHTML = (metaList||[]).filter(Boolean).map(x=>`<span class="glStatusPill">${x}</span>`).join('');
             exprEl.innerHTML = (exprList||[]).filter(Boolean).map(x=>`<span class="glExprChip">${escapeHtml(String(x))}</span>`).join('');
             try{
-              if(typeof window.diagNote==='function' && title){
-                const shortMsg = kind==='warn' ? `${title}: check GraphLab` : title;
-                const fullMsg = [title, body, (exprList||[]).join(' • ')].filter(Boolean).join(' — ');
-                window.diagNote(kind==='warn' ? 'warn' : 'ok', shortMsg, fullMsg);
+              if(typeof note==='function' && title){
+                note(kind==='warn' ? 'err' : 'ok', title, [body].concat(metaList||[]).filter(Boolean).join(' • '));
               }
             }catch(_){}
           }
@@ -4642,7 +4618,7 @@ function stageRow(nmValue='30', unit='nm'){
       initDebugUI();
       try{
         document.addEventListener('click', (e)=>{
-          const t = e.target && e.target.closest ? e.target.closest('#mpGraph,.tab,#dbgBtn,#dbgCopy') : null;
+          const t = e.target && e.target.closest ? e.target.closest('#mpGraph,.tab,#dbgBtn,#dbgCopy,#dbgCopyTransfer') : null;
           if(!t) return;
           if(t.id==='mpGraph'){
             const expr=(document.getElementById('mpLine')?.value||'').trim().slice(0,120);
@@ -4650,9 +4626,9 @@ function stageRow(nmValue='30', unit='nm'){
           }else if(t.classList && t.classList.contains('tab')){
             dbgAction('Tab clicked', t.dataset?.tab || t.textContent || '(unknown)');
           }else if(t.id==='dbgBtn'){
-            dbgAction('Debug button clicked');
+            dbgAction('Status button clicked');
           }else if(t.id==='dbgCopy'){
-            dbgAction('Debug copy clicked');
+            dbgAction('Debug report copy clicked');
           }
         }, true);
       }catch(_){}

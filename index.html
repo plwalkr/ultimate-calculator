@@ -1510,6 +1510,7 @@ function initMathPad(){
 
   const histBox = document.getElementById('mpHist');
   const histBody= document.getElementById('mpHistBody');
+  const compactHistory = document.getElementById('mpCompactHistory');
   const btnHistClear = document.getElementById('mpHistClear');
   const btnAlpha = document.getElementById('mpAlpha');
   const alphaPad = document.getElementById('mpAlphaPad');
@@ -1543,6 +1544,8 @@ function initMathPad(){
       lineEl.setAttribute('enterkeyhint','done');
     }
   }catch(_){/* ignore */}
+
+  if(compactHistory && isMobileCompact()) compactHistory.style.display = 'none';
 
   lineEl.addEventListener('blur', ()=>{ try{ normalizeTextarea(); }catch(_){} });
 
@@ -1580,6 +1583,7 @@ function initMathPad(){
     setErr(errMsg||'');
     if(outLab) outLab.textContent = label || '—';
     if(outBox) outBox.style.display = 'block';
+    if(compactHistory) compactHistory.style.display = 'block';
     if(outTxt) outTxt.textContent = val ?? '';
     if(workHtml){
       if(workDet){ workDet.style.display='block'; try{ workDet.open = false; }catch(_){} }
@@ -1593,6 +1597,7 @@ function initMathPad(){
   const addHist = (title, expr, out, workHtml)=>{
     if(!histBox || !histBody) return;
     histBox.style.display = 'block';
+    if(compactHistory) compactHistory.style.display = 'block';
 
     const rawExpr = String(expr||'').trim();
     const normExpr = rawExpr
@@ -2903,6 +2908,30 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       })();
 
       
+
+      function isMobileCompact(){
+        return window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
+      }
+      function syncMobileCompactClass(){
+        try{ document.body.classList.toggle('mobile-compact', !!isMobileCompact()); }catch(_){}
+      }
+      function applyCompactDefaults(root){
+        syncMobileCompactClass();
+        const mobile = isMobileCompact();
+        if(!root) root = document;
+        try{
+          root.querySelectorAll('[data-compact-default]').forEach(el=>{
+            const mode = String(el.getAttribute('data-compact-default')||'').trim();
+            if(mode === 'closed-mobile'){ el.open = !mobile; }
+            else if(mode === 'open-mobile'){ el.open = !!mobile; }
+          });
+        }catch(_){}
+      }
+      window.addEventListener('resize', syncMobileCompactClass);
+      window.addEventListener('orientationchange', syncMobileCompactClass);
+      syncMobileCompactClass();
+
+
       /* ---------- Calculator ---------- */
       function renderCalc(){
         const view=$('#view');
@@ -2911,6 +2940,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             <div class="mpHead">
               <span class="kpill">MathPad</span>
               <span class="note" style="font-weight:800;">TI-style worksheet • Enter = evaluate • Shift+Enter = new line</span>
+              <span class="kpill" id="mpCompactBadge" style="display:none">Compact</span>
             </div>
 
             
@@ -2975,56 +3005,65 @@ sin(x)+x^2
                 </div>
 
                 <div class="mpRight">
-                  <div class="mpField" style="margin-top:12px">
-                    <label class="note">Evaluate/verify at (optional)</label>
-                    <div class="mpRow">
-                      <input id="mpVar" class="inp" value="x" style="max-width:120px" aria-label="variable">
-                      <span class="note" style="font-weight:900">=</span>
-                      <input id="mpX" class="inp" value="" placeholder="value (e.g. 2.5)" style="max-width:220px" aria-label="x value">
-                      <span class="note" style="font-weight:700;opacity:.85">blank = evaluate constants</span>
+                  <details class="mCompactDetails" id="mpCompactTools" data-compact-default="closed-mobile">
+                    <summary>Tools & graph actions</summary>
+                    <div class="mCompactBody">
+                      <div class="mpField" style="margin-top:0">
+                        <label class="note">Evaluate/verify at (optional)</label>
+                        <div class="mpRow">
+                          <input id="mpVar" class="inp" value="x" style="max-width:120px" aria-label="variable">
+                          <span class="note" style="font-weight:900">=</span>
+                          <input id="mpX" class="inp" value="" placeholder="value (e.g. 2.5)" style="max-width:220px" aria-label="x value">
+                          <span class="note" style="font-weight:700;opacity:.85">blank = evaluate constants</span>
+                        </div>
+                      </div>
+
+                      <div class="mpCard" style="margin-top:12px">
+                        <div class="mpCardTitle">Integral settings</div>
+                        <div class="mpRow">
+                          <div class="mpField" style="flex:1 1 120px">
+                            <label class="note">a</label>
+                            <input id="mpA" class="inp" value="0">
+                          </div>
+                          <div class="mpField" style="flex:1 1 120px">
+                            <label class="note">b</label>
+                            <input id="mpB" class="inp" value="1">
+                          </div>
+                          <div class="mpField" style="flex:1 1 140px">
+                            <label class="note">N (even)</label>
+                            <input id="mpN" class="inp" value="400">
+                          </div>
+                        </div>
+
+                        <div class="note" style="margin-top:10px">
+                          Definite integral uses <b>Simpson’s Rule</b> (signed). Bigger N = more accuracy but slower.
+                        </div>
+
+                        <div class="mpBtns" style="margin-top:12px">
+                          <button class="mpBtn" id="mpEval">Evaluate</button>
+                          <button class="mpBtn" id="mpDeriv">Derivative d/dx</button>
+                          <button class="mpBtn" id="mpInt">Integral ∫ a→b</button>
+                          <button class="mpBtn" id="mpGraph">Graph</button>
+                          <button class="mpBtn" id="mpClear">Clear</button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </details>
 
-                  <div class="mpCard">
-                  <div class="mpCardTitle">Integral settings</div>
-                  <div class="mpRow">
-                    <div class="mpField" style="flex:1 1 120px">
-                      <label class="note">a</label>
-                      <input id="mpA" class="inp" value="0">
-                    </div>
-                    <div class="mpField" style="flex:1 1 120px">
-                      <label class="note">b</label>
-                      <input id="mpB" class="inp" value="1">
-                    </div>
-                    <div class="mpField" style="flex:1 1 140px">
-                      <label class="note">N (even)</label>
-                      <input id="mpN" class="inp" value="400">
-                    </div>
-                  </div>
+                  <details class="mCompactDetails" id="mpCompactHistory" data-compact-default="closed-mobile" style="display:none">
+                    <summary>History & result</summary>
+                    <div class="mCompactBody">
+                      <div class="mpHist" id="mpHist" style="display:none">
+                        <div class="mpHistHead">
+                          <span>History</span>
+                          <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
+                        </div>
+                        <div class="mpHistBody" id="mpHistBody"></div>
+                      </div>
 
-                  <div class="note" style="margin-top:10px">
-                    Definite integral uses <b>Simpson’s Rule</b> (signed). Bigger N = more accuracy but slower.
-                  </div>
+                      <div id="mpErr" class="mpErr" style="display:none"></div>
 
-                  <div class="mpBtns" style="margin-top:12px">
-                    <button class="mpBtn" id="mpEval">Evaluate</button>
-                    <button class="mpBtn" id="mpDeriv">Derivative d/dx</button>
-                    <button class="mpBtn" id="mpInt">Integral ∫ a→b</button>
-                    <button class="mpBtn" id="mpGraph">Graph</button>
-                    <button class="mpBtn" id="mpClear">Clear</button>
-                  </div>
-                </div>
-
-                  <div class="mpHist" id="mpHist" style="display:none">
-                    <div class="mpHistHead">
-                      <span>History</span>
-                      <button class="mpBtn" id="mpHistClear" style="padding:8px 10px;min-width:auto">Clear</button>
-                    </div>
-                    <div class="mpHistBody" id="mpHistBody"></div>
-
-                  <div id="mpErr" class="mpErr" style="display:none"></div>
-
-                  <div class="mpOut" id="mpOut" style="display:none">
+                      <div class="mpOut" id="mpOut" style="display:none">
                 <div class="label"><span class="mpPill">Result</span><span id="mpOutLabel">—</span></div>
                 <pre id="mpOutText" class="mono" style="white-space:pre-wrap;margin:10px 0 0 0"></pre>
 
@@ -3033,11 +3072,17 @@ sin(x)+x^2
                 <div class="workBody" id="mpWorkBody"></div>
               </details>
                 </div>
+                    </div>
+                  </details>
+                </div>
               </div>
             </div>
           </div>
         `;
 
+        applyCompactDefaults(view);
+        const compactBadge = $('#mpCompactBadge');
+        if(compactBadge) compactBadge.style.display = isMobileCompact() ? 'inline-flex' : 'none';
         try{ initMathPad(); }catch(e){ try{ dbgAdd('ERROR','MathPad: '+(e&&e.message?e.message:e)); }catch(_){} }
       
     // duplicate broken Option A bindings removed
@@ -3219,23 +3264,28 @@ sin(x)+x^2
                 </div>
                 <div id="glLines" class="gllines"></div>
                 <textarea id="gx" class="input" rows="4" style="display:none" aria-hidden="true"></textarea>
-                <div class="tipCard">
-                  <div class="tipTitle">Graph ideas</div>
-                  <div class="tipText">
-                    Click an example to load it into the first function row. Colors, toggles, and the graph update from there.
+                <details class="mCompactDetails" id="glCompactHelp" data-compact-default="closed-mobile">
+                  <summary>Examples, typing help, and quick flow</summary>
+                  <div class="mCompactBody">
+                    <div class="tipCard">
+                      <div class="tipTitle">Graph ideas</div>
+                      <div class="tipText">
+                        Click an example to load it into the first function row. Colors, toggles, and the graph update from there.
+                      </div>
+                      <div class="exampleBar" id="graphExamples">
+                        <button class="exampleChip" type="button" data-expr="sin(x)">sin(x)</button>
+                        <button class="exampleChip" type="button" data-expr="tan(3*x)">tan(3*x)</button>
+                        <button class="exampleChip" type="button" data-expr="x^2">x^2</button>
+                        <button class="exampleChip" type="button" data-expr="sqrt(x+4)">sqrt(x+4)</button>
+                      </div>
+                    </div>
+                    <div class="tipCard">
+                      <div class="tipTitle">What can I type?</div>
+                      <div class="tipText">Use forms like <b>sin(x)</b>, <b>cos(2x)</b>, <b>x^2</b>, <b>sqrt(x+4)</b>, or <b>log(x)</b>. LegendCalc will normalize common typing like <b>2x</b> into <b>2*x</b>.</div>
+                      <div class="tipText" style="margin-top:8px"><b>Best quick flow:</b> type in Calc → tap Graph → confirm the first GraphLab row matches → adjust color, visibility, and range from there.</div>
+                    </div>
                   </div>
-                  <div class="exampleBar" id="graphExamples">
-                    <button class="exampleChip" type="button" data-expr="sin(x)">sin(x)</button>
-                    <button class="exampleChip" type="button" data-expr="tan(3*x)">tan(3*x)</button>
-                    <button class="exampleChip" type="button" data-expr="x^2">x^2</button>
-                    <button class="exampleChip" type="button" data-expr="sqrt(x+4)">sqrt(x+4)</button>
-                  </div>
-                </div>
-                <div class="tipCard">
-                  <div class="tipTitle">What can I type?</div>
-                  <div class="tipText">Use forms like <b>sin(x)</b>, <b>cos(2x)</b>, <b>x^2</b>, <b>sqrt(x+4)</b>, or <b>log(x)</b>. LegendCalc will normalize common typing like <b>2x</b> into <b>2*x</b>.</div>
-                  <div class="tipText" style="margin-top:8px"><b>Best quick flow:</b> type in Calc → tap Graph → confirm the first GraphLab row matches → adjust color, visibility, and range from there.</div>
-                </div>
+                </details>
               </div>
 
               <div class="glr">
@@ -3301,37 +3351,44 @@ sin(x)+x^2
               </div>
 
               <div class="gllBottom">
-                <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end">
-                  <label style="min-width:120px"><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
-                  <label style="min-width:120px"><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
-                  <label style="min-width:120px"><div class="note">samples</div><input id="samples" class="input" type="number" value="600" min="80" max="2500"></label>
+                <details class="mCompactDetails" id="glCompactControls" data-compact-default="closed-mobile">
+                  <summary>Graph controls, range, and calculus tools</summary>
+                  <div class="mCompactBody">
+                    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end">
+                      <label style="min-width:120px"><div class="note">x-min</div><input id="xmin" class="input" type="number" value="-10"></label>
+                      <label style="min-width:120px"><div class="note">x-max</div><input id="xmax" class="input" type="number" value="10"></label>
+                      <label style="min-width:120px"><div class="note">samples</div><input id="samples" class="input" type="number" value="600" min="80" max="2500"></label>
 
-                  <div class="btnbar">
-                    <button class="btn" id="plotBtn" type="button">Plot</button>
-                    <label class="pill" style="margin-left:8px"><input type="checkbox" id="livePlot" checked> Live</label>
-                    <label class="pill"><input type="checkbox" id="gridOn" checked> Grid</label>
+                      <div class="btnbar">
+                        <button class="btn" id="plotBtn" type="button">Plot</button>
+                        <label class="pill" style="margin-left:8px"><input type="checkbox" id="livePlot" checked> Live</label>
+                        <label class="pill"><input type="checkbox" id="gridOn" checked> Grid</label>
+                      </div>
+                    </div>
+
+                    <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px;align-items:flex-end">
+                      <label class="pill"><input type="checkbox" id="d1"> f'(x)</label>
+
+                      <label class="pill"><input type="checkbox" id="tanOn"> Tangent</label>
+                      <label style="min-width:110px"><div class="note">x0</div><input id="x0" class="input" type="number" value="0"></label>
+
+                      <label class="pill"><input type="checkbox" id="intOn"> ∫ area</label>
+                      <label style="min-width:110px"><div class="note">a</div><input id="a" class="input" type="number" value="-1"></label>
+                      <label style="min-width:110px"><div class="note">b</div><input id="b" class="input" type="number" value="1"></label>
+
+                      <label class="pill"><input type="checkbox" id="rootsOn"> roots</label>
+                    </div>
+
+                    <div class="note" style="margin-top:10px">
+                      Tip: use lowercase functions: <b>sin(x)</b>, <b>cos(x)</b>, <b>tan(x)</b>. Toggle lines off with the checkbox.
+                    </div>
                   </div>
-                </div>
-
-                <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px;align-items:flex-end">
-                  <label class="pill"><input type="checkbox" id="d1"> f'(x)</label>
-
-                  <label class="pill"><input type="checkbox" id="tanOn"> Tangent</label>
-                  <label style="min-width:110px"><div class="note">x0</div><input id="x0" class="input" type="number" value="0"></label>
-
-                  <label class="pill"><input type="checkbox" id="intOn"> ∫ area</label>
-                  <label style="min-width:110px"><div class="note">a</div><input id="a" class="input" type="number" value="-1"></label>
-                  <label style="min-width:110px"><div class="note">b</div><input id="b" class="input" type="number" value="1"></label>
-
-                  <label class="pill"><input type="checkbox" id="rootsOn"> roots</label>
-                </div>
-
-                <div class="note" style="margin-top:10px">
-                  Tip: use lowercase functions: <b>sin(x)</b>, <b>cos(x)</b>, <b>tan(x)</b>. Toggle lines off with the checkbox.
-                </div>
+                </details>
               </div>
             </div>
           </section>`;
+
+        applyCompactDefaults(view);
 
         // Init after paint (prevents null element crashes)
         setTimeout(() => {

@@ -110,145 +110,6 @@
     .tests .pass{color:#5bd38e}
     .tests .fail{color:#ff6b6b}
 
-/* Phase 1 cleanup: keep self-tests/dev clutter out of normal user view */
-#selfTests{display:none !important;}
-
-/* Phase 1b: spacing + hierarchy polish (logic-safe) */
-.surface{
-  padding:20px;
-}
-
-.surface > * + *{
-  margin-top:14px;
-}
-
-#view .surface{
-  border-radius:20px;
-}
-
-#view .surface details + details,
-#view .surface .surface + .surface{
-  margin-top:14px;
-}
-
-#view .surface .row{
-  gap:12px;
-}
-
-#view .surface .two-col{
-  gap:18px;
-}
-
-#view .surface .input,
-#view .surface select,
-#view .surface textarea{
-  min-height:46px;
-}
-
-#view .surface textarea{
-  line-height:1.4;
-}
-
-#view .surface .btn{
-  min-height:46px;
-}
-
-#view .surface .note{
-  line-height:1.35;
-}
-
-#view .surface .section-title{
-  margin:10px 0 12px;
-}
-
-#view .surface details{
-  border-radius:16px;
-  overflow:hidden;
-}
-
-#view .surface details > summary{
-  padding:10px 12px;
-}
-
-#view .surface details[open] > summary{
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.theme-light #view .surface details[open] > summary{
-  border-bottom-color:#d6e3fb;
-}
-
-/* Units page: feel less empty, more intentional */
-#view .surface > .row:first-of-type{
-  align-items:end;
-}
-
-#view .surface table{
-  margin-top:10px;
-}
-
-/* Time / Torque readability */
-#view .surface .mathbox,
-#view .surface .calcRef,
-#view .surface .tests{
-  border-radius:14px;
-}
-
-#view .surface .mathbox{
-  padding:12px 14px;
-}
-
-#view .surface .calcRef summary,
-#view .surface .mathdetails summary{
-  font-weight:800;
-}
-
-#view .surface hr{
-  margin:18px 0;
-  opacity:.25;
-}
-
-/* Better bottom finish */
-#view{
-  padding-bottom:20px;
-}
-
-/* Phase 2A: safe usability polish */
-.tipCard{
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  background:rgba(255,255,255,.04);
-  padding:12px 14px;
-}
-.theme-light .tipCard{border-color:#d6e3fb;background:#ffffff}
-.tipTitle{
-  font-weight:900;
-  margin-bottom:8px;
-}
-.tipText{
-  color:var(--muted);
-  line-height:1.4;
-}
-.exampleBar{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
-.exampleChip{
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.05);
-  color:var(--ink);
-  border-radius:999px;
-  padding:8px 12px;
-  font-weight:800;
-  cursor:pointer;
-  min-height:40px;
-}
-.exampleChip:hover{transform:translateY(-1px)}
-.theme-light .exampleChip{border-color:#c9d7ef;background:#eef3ff}
-
-
     table{width:100%;border-collapse:collapse}
     th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
     th{color:#9bd3ff}
@@ -1161,7 +1022,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.35 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.31 • 2026-03-06</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -1616,20 +1477,6 @@ function initMathPad(){
     if(bEl && st.b!=null) bEl.value = st.b;
     if(nEl && st.n!=null) nEl.value = st.n;
     if(st.ans!=null) mpANS = st.ans;
-  }catch(_){}
-
-  // Calc example chips
-  try{
-    document.querySelectorAll('#calcExamples .exampleChip').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const expr = normalizeExpr(btn.dataset.expr || '');
-        lineEl.value = expr;
-        if(exprEl) exprEl.value = expr;
-        try{ save(); }catch(_){}
-        lineEl.focus();
-        try{ dbgLine('ACTION', 'Calc example inserted | ' + expr); }catch(_){}
-      });
-    });
   }catch(_){}
 
   // Persist on change
@@ -2987,18 +2834,6 @@ sin(x)+x^2
                 </div>
                 <div id="glLines" class="gllines"></div>
                 <textarea id="gx" class="input" rows="4" style="display:none" aria-hidden="true"></textarea>
-                <div class="tipCard">
-                  <div class="tipTitle">Graph ideas</div>
-                  <div class="tipText">
-                    Click an example to load it into the first function row. Colors, toggles, and the graph update from there.
-                  </div>
-                  <div class="exampleBar" id="graphExamples">
-                    <button class="exampleChip" type="button" data-expr="sin(x)">sin(x)</button>
-                    <button class="exampleChip" type="button" data-expr="tan(3*x)">tan(3*x)</button>
-                    <button class="exampleChip" type="button" data-expr="x^2">x^2</button>
-                    <button class="exampleChip" type="button" data-expr="sqrt(x+4)">sqrt(x+4)</button>
-                  </div>
-                </div>
               </div>
 
               <div class="glr">
@@ -3261,27 +3096,6 @@ sin(x)+x^2
           }catch(_){}
 
           try{ glSetStatus('ok', 'Ready', 'Plot a function to see a live graph and details here. The editable function list on the right should mirror what is being plotted.', ['Live ' + ($('#livePlot')?.checked ? 'on' : 'off')], lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>normalizeExpr(l.expr))); }catch(_){ }
-
-          // Graph example chips
-          try{
-            document.querySelectorAll('#graphExamples .exampleChip').forEach(btn=>{
-              btn.addEventListener('click', ()=>{
-                const expr = normalizeExpr(btn.dataset.expr || '');
-                const firstExpr = document.querySelector('#glLines .expr');
-                if(firstExpr){
-                  firstExpr.value = expr;
-                  firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
-                }
-                const gxEl = document.getElementById('gx');
-                if(gxEl) gxEl.value = expr;
-                try{
-                  glSetStatus('ok', 'Example loaded', 'The example is now in the first function row and ready to edit or plot.', ['source: examples'], [expr]);
-                }catch(_){}
-                try{ if(typeof doPlot==='function') doPlot(); }catch(_){}
-                try{ dbgLine('ACTION', 'Graph example inserted | ' + expr); }catch(_){}
-              });
-            });
-          }catch(_){}
 
           // restore controls
           if($('#xmin')) $('#xmin').value = saved.xmin || '-10';
@@ -4461,3 +4275,5 @@ function stageRow(nmValue='30', unit='nm'){
 </script>
 </body>
 </html>
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}

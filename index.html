@@ -248,78 +248,6 @@
 .exampleChip:hover{transform:translateY(-1px)}
 .theme-light .exampleChip{border-color:#c9d7ef;background:#eef3ff}
 
-/* Premium calculus output cards */
-.calcResultWrap{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-top:4px;
-}
-.calcResultHero{
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  padding:16px 18px;
-}
-.theme-light .calcResultHero{
-  border-color:#d6e3fb;
-  background:linear-gradient(180deg, #ffffff, #f7faff);
-}
-.calcResultTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.calcResultTitle{
-  font-size:1rem;
-  font-weight:900;
-}
-.calcResultPill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:7px 11px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.05);
-  font-weight:900;
-}
-.theme-light .calcResultPill{
-  border-color:#c9d7ef;
-  background:#eef3ff;
-}
-.calcResultValue{
-  margin-top:12px;
-  font-size:1.28rem;
-  font-weight:900;
-  line-height:1.25;
-  word-break:break-word;
-}
-.calcResultDetails{
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  background:rgba(255,255,255,.03);
-  padding:13px 15px;
-}
-.theme-light .calcResultDetails{
-  border-color:#d6e3fb;
-  background:#ffffff;
-}
-.calcResultDetailsTitle{
-  font-size:.94rem;
-  font-weight:900;
-  margin-bottom:8px;
-}
-.calcResultError{
-  border-left:4px solid var(--error);
-  border-radius:14px;
-  background:rgba(255,107,107,.08);
-  padding:12px 14px;
-  font-weight:800;
-}
-
 
     table{width:100%;border-collapse:collapse}
     th,td{padding:8px;border-bottom:1px solid #223046;text-align:left}
@@ -1233,7 +1161,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.37 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.35 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -3002,41 +2930,7 @@ sin(x)+x^2
         };
 
         function numericLimit(F,a){ const eps=1e-6; const left=F(a-eps); const right=F(a+eps); return (left+right)/2; }
-        function setCalcOut(html){
-          const raw = String(html||'');
-          const host = $('#calcOut');
-          if(!host) return;
-
-          const isErr = /class=['"]err['"]/.test(raw) || /^\s*<div class=['"]err['"]/.test(raw);
-          if(isErr){
-            host.innerHTML = `<div class="calcResultWrap"><div class="calcResultError">${raw.replace(/<\/?div[^>]*>/g,'')}</div></div>`;
-            return;
-          }
-
-          let title = 'Result';
-          if(/f'\(x\)/.test(raw) || /f'\s*\(/.test(raw)) title = 'Derivative';
-          else if(/∫/.test(raw)) title = 'Integral';
-          else if(/lim<sub>x→/.test(raw)) title = 'Limit';
-
-          const valueMatch = raw.match(/=\s*<b>([\s\S]*?)<\/b>/) || raw.match(/<b>([\s\S]*?)<\/b>/);
-          const heroValue = valueMatch ? valueMatch[1] : raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-
-          host.innerHTML = `
-            <div class="calcResultWrap">
-              <div class="calcResultHero">
-                <div class="calcResultTop">
-                  <div class="calcResultTitle">${title}</div>
-                  <div class="calcResultPill">${title}</div>
-                </div>
-                <div class="calcResultValue">${heroValue || '—'}</div>
-              </div>
-              <div class="calcResultDetails">
-                <div class="calcResultDetailsTitle">Details</div>
-                <div>${raw}</div>
-              </div>
-            </div>
-          `;
-        }
+        function setCalcOut(html){ $('#calcOut').innerHTML=html; }
         function setLimitOut(html){ $('#limitOut').innerHTML=html; }
         function round(x){ return +(+x).toPrecision(12); }
       }

@@ -1233,7 +1233,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 <body>
   <div class="wrap">
     <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.36 • 2026-03-07</span></div>
+      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.38 • 2026-03-07</span></div>
       <div class="tabswrap"><div class="tabs">
         <button class="tab active" data-tab="calc">Calc</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
@@ -2017,10 +2017,15 @@ if(btnHistClear) btnHistClear.addEventListener('click', ()=>{
       const def = {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null};
       const prev = (typeof loadTab==='function') ? (loadTab('graphlab', def) || def) : def;
 
-      const pal = (window.GL_PALETTE && window.GL_PALETTE.length) ? window.GL_PALETTE : ['#7fd6ff','#38d996','#ffd166','#ff5c5c','#b98bff'];
-      const glLines = norm.map((expr, i)=>({ on:true, expr:String(expr||'').trim(), color: pal[i % pal.length] }));
+      const normalizedList = norm.map(expr => normalizeExpr(String(expr||'').trim())).filter(Boolean);
+      const normalizedGx = normalizedList.join('\n').trim();
 
-      if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx, glLines});
+      const pal = (window.GL_PALETTE && window.GL_PALETTE.length) ? window.GL_PALETTE : ['#7fd6ff','#38d996','#ffd166','#ff5c5c','#b98bff'];
+      const glLines = normalizedList.map((expr, i)=>({ on:true, expr, color: pal[i % pal.length] }));
+
+      if(typeof saveTab==='function') saveTab('graphlab', {...prev, gx: normalizedGx, glLines});
+      window.__glTransfer = { gx: normalizedGx, glLines };
+      try{ dbgLine('INFO', 'Graph transfer armed from Graph button | ' + normalizedGx); }catch(_){}
 
       // HARD switch to GraphLab using the same logic as the nav bar (no reliance on a click event)
       const gtab = document.querySelector('.tab[data-tab="graphlab"]');
@@ -3331,9 +3336,9 @@ sin(x)+x^2
               if(!s) return;
               let on=true;
               if(s.startsWith('#') || s.startsWith('//')){ on=false; s=s.replace(/^(#+|\/\/+)\s*/,''); }
-              out.push({on, expr:s});
+              out.push({on, expr: normalizeExpr(s)});
             });
-            return out.length? out : [{on:true, expr:'sin(x)'}];
+            return out;
           }
 
           let lines = incoming && Array.isArray(incoming.glLines)
@@ -3351,7 +3356,11 @@ sin(x)+x^2
           }
 
           if(lines.length===0) lines.push({on:true, expr:'sin(x)'});
-          const initialGraphExpr = normalizeExpr((incoming && incoming.gx) ? incoming.gx : (saved.gx || $('#gx')?.value || ''));
+          const initialGraphExpr = normalizeExpr(
+            (incoming && incoming.gx)
+              ? incoming.gx
+              : ((lines && lines[0] && lines[0].expr) ? lines[0].expr : (saved.gx || $('#gx')?.value || ''))
+          );
           window.__glTransfer = null;
           glSyncTextarea(lines);
           glRenderLines(lines);

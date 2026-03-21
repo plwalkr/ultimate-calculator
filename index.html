@@ -961,23 +961,30 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 /* MathPad desktop two-column layout: controls left, outputs/work right */
 .mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
-.mpRight{padding-top:2px}
-.mpRight .mpOutTextBig{font-size:15px}
+@media (min-width: 820px){
+  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px
+  /* Desktop holy-sh*t factor: keep outputs visible + readable */
+  .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px}
+  .mpRight::-webkit-scrollbar{width:10px}
+  .mpRight::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
+  .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
+  .mpRight .mpHistBody{gap:14px}
+  .mpRight .mpItem{padding:12px 14px}
+
 .mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
 .mpMiniBtn:hover{background:rgba(255,255,255,.06)}
 .mpMiniBtn:active{transform:translateY(1px)}
 .mpSent{box-shadow:0 0 0 3px rgba(0,255,200,.18), 0 0 18px rgba(0,255,200,.22); border-color: rgba(0,255,200,.35) !important}
-@media (min-width: 820px){
-  .mpLayout{grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:16px}
-  .mpRight{position:sticky;top:84px;max-height:calc(100vh - 110px);overflow:auto;padding-left:16px;padding-right:6px;border-left:1px solid var(--border)}
-  .mpRight::-webkit-scrollbar{width:10px}
-  .mpRight::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
-  .mpRight .mpHistHead{position:sticky;top:0;background:rgba(0,0,0,.22);backdrop-filter: blur(6px);z-index:3}
-  .mpRight .mpHistBody{gap:14px}
-  .mpRight .mpItem{padding:12px 14px}
-  .mpRight .mono{font-size:14px;line-height:1.35}
+
+
+  .mpRight .mono{font-size:14px; line-height:1.35}
   .mpRight pre{line-height:1.35}
+
+}
+  .mpRight{border-left:1px solid var(--border);padding-left:14px}
+  .mpRight{padding-top:2px}
+  .mpRight .mpOutTextBig{font-size:15px}
 }
 
 .theme-light .mathpad .mpBody{border-top-color:#d6e3fb}
@@ -1245,7 +1252,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.7.0 shell unification + TI-Nspire layout pass */
+/* v1.7.1 stable shell refresh */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1312,11 +1319,11 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.7.0 • 2026-03-21</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.7.1 • 2026-03-21</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
-            <span class="note">TI-Nspire-inspired shell refresh</span>
+            <span class="note">Stable TI shell refresh</span>
           </div>
         </div>
         <div class="device-right">
@@ -1325,7 +1332,7 @@ header{margin-bottom:0}
             <select id="themeSel" class="theme-select">
               <option value="dark">Dark</option>
               <option value="light">Light</option>
-              <option value="inspire">TI-Nspire</option>
+              <option value="inspire">TI-Inspire</option>
             </select>
             <button class="dbg-mini status-btn" id="dbgBtn" title="System status" aria-label="System status" data-health="ok"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Status</span><span class="status-badge" id="dbgBadge" style="display:none">0</span></button>
             <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
@@ -1409,6 +1416,7 @@ header{margin-bottom:0}
     <div class="toast" id="toast"></div>
 
     <div id="selfTests" class="tests"></div>
+    </div>
   </div>
 
   <script>
@@ -2945,19 +2953,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       /* ---------- Router & theme ---------- */
       const tabs=$$('.tab');
-      const TAB_LABELS={calc:'Calculator', graphlab:'GraphLab', units:'Units', time:'Time', torque:'Torque', sound:'Settings'};
-      function syncShell(which){
-        const resolved = TAB_LABELS[which] ? which : 'calc';
-        try{ document.body.setAttribute('data-active-tab', resolved); }catch(_){ }
-        try{ $('#view')?.setAttribute('data-view-tab', resolved); }catch(_){ }
-        const label = $('#activeModule');
-        if(label) label.textContent = TAB_LABELS[resolved] || 'Calculator';
-      }
       tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
 
       function render(which){
-        syncShell(which);
-
         try{ dbgLine('INFO',`render(${which}) called`); }catch(_){}
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
@@ -4835,7 +4833,5 @@ function stageRow(nmValue='30', unit='nm'){
   }, {passive:true});
 })();
 </script>
-    </div>
-  </div>
 </body>
 </html>

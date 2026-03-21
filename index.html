@@ -961,30 +961,23 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 /* MathPad desktop two-column layout: controls left, outputs/work right */
 .mpLayout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;width:100%}
 .mpLeft,.mpRight{min-width:0}
-@media (min-width: 820px){
-  .mpLayout{grid-template-columns:1.0fr 1.0fr;gap:14px
-  /* Desktop holy-sh*t factor: keep outputs visible + readable */
-  .mpRight{position:sticky; top:84px; max-height:calc(100vh - 98px); overflow:auto; padding-right:6px}
-  .mpRight::-webkit-scrollbar{width:10px}
-  .mpRight::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
-  .mpRight .mpHistHead{position:sticky; top:0; background:rgba(0,0,0,.22); backdrop-filter: blur(6px); z-index:3}
-  .mpRight .mpHistBody{gap:14px}
-  .mpRight .mpItem{padding:12px 14px}
-
+.mpRight{padding-top:2px}
+.mpRight .mpOutTextBig{font-size:15px}
 .mpItem .mpRowTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mpMiniBtn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.10);cursor:pointer}
 .mpMiniBtn:hover{background:rgba(255,255,255,.06)}
 .mpMiniBtn:active{transform:translateY(1px)}
 .mpSent{box-shadow:0 0 0 3px rgba(0,255,200,.18), 0 0 18px rgba(0,255,200,.22); border-color: rgba(0,255,200,.35) !important}
-
-
-  .mpRight .mono{font-size:14px; line-height:1.35}
+@media (min-width: 820px){
+  .mpLayout{grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:16px}
+  .mpRight{position:sticky;top:84px;max-height:calc(100vh - 110px);overflow:auto;padding-left:16px;padding-right:6px;border-left:1px solid var(--border)}
+  .mpRight::-webkit-scrollbar{width:10px}
+  .mpRight::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
+  .mpRight .mpHistHead{position:sticky;top:0;background:rgba(0,0,0,.22);backdrop-filter: blur(6px);z-index:3}
+  .mpRight .mpHistBody{gap:14px}
+  .mpRight .mpItem{padding:12px 14px}
+  .mpRight .mono{font-size:14px;line-height:1.35}
   .mpRight pre{line-height:1.35}
-
-}
-  .mpRight{border-left:1px solid var(--border);padding-left:14px}
-  .mpRight{padding-top:2px}
-  .mpRight .mpOutTextBig{font-size:15px}
 }
 
 .theme-light .mathpad .mpBody{border-top-color:#d6e3fb}
@@ -1251,33 +1244,103 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
   #mathPad.tiSkin .mpKey{min-height:46px;font-size:1.02rem}
 }
 
+
+/* v1.7.0 shell unification + TI-Nspire layout pass */
+.wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
+.app-shell{position:relative}
+.device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
+.device-left{min-width:0;flex:1 1 520px}
+.device-right{display:flex;align-items:flex-start;justify-content:flex-end;flex:0 1 auto;min-width:260px}
+.device-kicker{font-size:.72rem;font-weight:900;letter-spacing:.16em;color:var(--muted);opacity:.9;margin-bottom:8px}
+.device-subline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.active-module{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);font-weight:900;letter-spacing:.01em}
+.device-divider{width:6px;height:6px;border-radius:999px;background:var(--accent-2);opacity:.8}
+header{margin-bottom:0}
+.theme-picker{margin-left:0;padding-top:0;justify-content:flex-end}
+.device-nav{margin-top:14px;padding:10px 12px 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+.tabs{gap:10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:12px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));color:var(--tab-fg);padding:11px 15px;border-radius:14px;cursor:pointer;font-weight:900;letter-spacing:.01em;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.tab.active{background:linear-gradient(180deg,rgba(0,162,255,.94),rgba(0,136,214,.94));color:#fff;border-color:rgba(0,162,255,.85);box-shadow:0 0 0 1px rgba(0,162,255,.16), inset 0 -2px 0 rgba(255,255,255,.14)}
+#view{margin-top:16px;min-height:calc(100vh - 235px);padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(180deg,rgba(8,12,18,.96),rgba(11,16,23,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 48px rgba(0,0,0,.28)}
+.theme-light #view{background:linear-gradient(180deg,#ffffff,#eef3ff);border-color:#d6e3fb;box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 18px 48px rgba(57,85,140,.10)}
+.theme-inspire #view{background:linear-gradient(180deg,#081017,#0d141c);border-color:#223242;box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 18px 52px rgba(0,0,0,.34)}
+#view > section.surface,
+#view > .mathpad{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);box-shadow:none}
+.theme-light #view > section.surface,
+.theme-light #view > .mathpad{background:#f8fbff;border-color:#d6e3fb}
+.theme-inspire #view > section.surface,
+.theme-inspire #view > .mathpad{background:rgba(255,255,255,.025);border-color:#223242}
+#view[data-view-tab="graphlab"]{min-height:calc(100vh - 185px)}
+#view[data-view-tab="graphlab"] > section.surface{padding:18px}
+.glgrid{gap:16px}
+@media (min-width: 820px){
+  .glgrid{grid-template-columns:minmax(320px,380px) minmax(0,1fr)}
+}
+.glr{display:flex;flex-direction:column;gap:12px;min-width:0}
+.chartwrap{min-height:clamp(460px,70vh,860px);border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.16)}
+.theme-light .chartwrap{border-color:#d6e3fb;background:#ffffff}
+.theme-inspire .chartwrap{border-color:#223242;background:rgba(0,0,0,.22)}
+.glr .chart{height:clamp(500px,72vh,900px);min-height:520px}
+.mpLayout{gap:14px}
+.mpCard,.glStatusCard,.tipCard,.calcRef,.mathdetails,.mathpad{border-radius:18px}
+.theme-inspire .kpill,
+.theme-inspire .kbdpill,
+.theme-inspire .glStatusPill,
+.theme-inspire .active-module{border-color:#244056;background:rgba(0,162,255,.10);color:#e8f2ff}
+@media (max-width:900px){
+  .device-header{flex-direction:column;align-items:stretch;gap:12px}
+  .device-right{justify-content:space-between}
+  #view{min-height:auto}
+}
+@media (max-width:520px){
+  .wrap{padding:10px}
+  .device-nav{padding:8px 10px 0}
+  .tab{padding:10px 12px;min-height:44px}
+  #view{padding:12px;border-radius:20px}
+  .glr .chart{height:clamp(360px,58vh,560px);min-height:380px}
+  .chartwrap{min-height:360px}
+  .device-subline{gap:8px}
+}
+
 </style>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22LegendCalc%22%2C%22short_name%22%3A%22LegendCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1a12%22%2C%22theme_color%22%3A%22%230b1a12%22%2C%22icons%22%3A%5B%5D%7D">
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.6.38 • 2026-03-07</span></div>
-      <div class="tabswrap"><div class="tabs">
-        <button class="tab active" data-tab="calc">Calc</button>
+    <div class="app-shell">
+      <header class="device-header">
+        <div class="device-left">
+          <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.7.0 • 2026-03-21</span></div>
+          <div class="device-subline">
+            <span class="active-module" id="activeModule">Calculator</span>
+            <span class="device-divider" aria-hidden="true"></span>
+            <span class="note">TI-Nspire-inspired shell refresh</span>
+          </div>
+        </div>
+        <div class="device-right">
+          <div class="theme-picker">
+            <span class="note">Theme</span>
+            <select id="themeSel" class="theme-select">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="inspire">TI-Nspire</option>
+            </select>
+            <button class="dbg-mini status-btn" id="dbgBtn" title="System status" aria-label="System status" data-health="ok"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Status</span><span class="status-badge" id="dbgBadge" style="display:none">0</span></button>
+            <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
+          </div>
+        </div>
+      </header>
+      <div class="tabswrap device-nav"><div class="tabs">
+        <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
         <button class="tab" data-tab="units">Units</button>
         <button class="tab" data-tab="time">Time</button>
-                <button class="tab" data-tab="torque">Torque</button>
-</div>
-      <div class="theme-picker">
-        <span class="note">Theme</span>
-        <select id="themeSel" class="theme-select">
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
-          <option value="inspire">TI-Inspire</option>
-        </select>
-        <button class="dbg-mini status-btn" id="dbgBtn" title="System status" aria-label="System status" data-health="ok"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Status</span><span class="status-badge" id="dbgBadge" style="display:none">0</span></button>
-        <button class="gear-mini" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
-      </div>
-    </header>
-    <div id="diag" class="ok">Loading…</div>
-    <main id="view"></main>
+        <button class="tab" data-tab="torque">Torque</button>
+      </div></div>
+      <div id="diag" class="ok">Loading…</div>
+      <main id="view" data-view-tab="calc"></main>
 
     
 
@@ -2882,9 +2945,19 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       /* ---------- Router & theme ---------- */
       const tabs=$$('.tab');
+      const TAB_LABELS={calc:'Calculator', graphlab:'GraphLab', units:'Units', time:'Time', torque:'Torque', sound:'Settings'};
+      function syncShell(which){
+        const resolved = TAB_LABELS[which] ? which : 'calc';
+        try{ document.body.setAttribute('data-active-tab', resolved); }catch(_){ }
+        try{ $('#view')?.setAttribute('data-view-tab', resolved); }catch(_){ }
+        const label = $('#activeModule');
+        if(label) label.textContent = TAB_LABELS[resolved] || 'Calculator';
+      }
       tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));t.classList.add('active');render(t.dataset.tab);}));
 
       function render(which){
+        syncShell(which);
+
         try{ dbgLine('INFO',`render(${which}) called`); }catch(_){}
         if(which==='graphlab') return renderGraphLab();
                 if(which==='units') return renderUnits();
@@ -4762,5 +4835,7 @@ function stageRow(nmValue='30', unit='nm'){
   }, {passive:true});
 })();
 </script>
+    </div>
+  </div>
 </body>
 </html>

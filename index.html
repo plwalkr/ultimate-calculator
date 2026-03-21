@@ -1252,7 +1252,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.7.1 stable shell refresh */
+/* v1.7.2 shell unification + MathPad recovery */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1279,6 +1279,13 @@ header{margin-bottom:0}
 .theme-inspire #view > section.surface,
 .theme-inspire #view > .mathpad{background:rgba(255,255,255,.025);border-color:#223242}
 #view[data-view-tab="graphlab"]{min-height:calc(100vh - 185px)}
+#diag{margin-top:12px;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);font-weight:800;letter-spacing:.01em}
+.theme-light #diag{border-color:#d6e3fb;background:#f8fbff}
+.theme-inspire #diag{border-color:#223242;background:rgba(255,255,255,.03)}
+#view .surface .section-title,
+#view .mpCardTitle,
+#view .glCardTitle{letter-spacing:.02em;font-weight:900}
+#view .surface{padding:20px}
 #view[data-view-tab="graphlab"] > section.surface{padding:18px}
 .glgrid{gap:16px}
 @media (min-width: 820px){
@@ -1319,11 +1326,11 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.7.1 • 2026-03-21</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.7.2 • 2026-03-21</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
-            <span class="note">Stable TI shell refresh</span>
+            <span class="note">TI shell refresh + MathPad recovery</span>
           </div>
         </div>
         <div class="device-right">
@@ -1583,6 +1590,11 @@ function initMathPad(){
   const histBody= document.getElementById('mpHistBody');
   const compactHistory = document.getElementById('mpCompactHistory');
   const btnHistClear = document.getElementById('mpHistClear');
+
+  const mobileCompact = ()=>{
+    try{ return !!(window.matchMedia && window.matchMedia('(max-width: 520px)').matches); }
+    catch(_){ return false; }
+  };
   const btnAlpha = document.getElementById('mpAlpha');
   const alphaPad = document.getElementById('mpAlphaPad');
 
@@ -1616,7 +1628,7 @@ function initMathPad(){
     }
   }catch(_){/* ignore */}
 
-  if(compactHistory && isMobileCompact()) compactHistory.style.display = 'none';
+  if(compactHistory && mobileCompact()) compactHistory.style.display = 'none';
 
   lineEl.addEventListener('blur', ()=>{ try{ normalizeTextarea(); }catch(_){} });
 
@@ -2980,8 +2992,12 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       
 
+      window.isMobileCompact = window.isMobileCompact || function(){
+        try{ return !!(window.matchMedia && window.matchMedia('(max-width: 520px)').matches); }
+        catch(_){ return false; }
+      };
       function isMobileCompact(){
-        return window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
+        return window.isMobileCompact();
       }
       function syncMobileCompactClass(){
         try{ document.body.classList.toggle('mobile-compact', !!isMobileCompact()); }catch(_){}

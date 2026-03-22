@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v1.9.0 — TI Pass 4</title>
+<title>LegendCalc Suite v1.9.1 — TI Shell Accent Restore</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.8.0 TI suite pass 3 */
+/* v1.9.1 TI shell accent restore */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.8.0 TI suite pass 3 */
+/* v1.9.1 TI shell accent restore */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -1336,6 +1336,49 @@ header{margin-bottom:0}
   border-color:#223242;
   background:linear-gradient(180deg,#0a1015,#0d141c);
   box-shadow:0 24px 74px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.03);
+}
+.app-shell::after{
+  content:'';
+  position:absolute;
+  top:22px;
+  right:14px;
+  bottom:22px;
+  width:14px;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(120,214,255,.16) 0%, rgba(0,162,255,.82) 18%, rgba(0,123,214,.92) 55%, rgba(0,71,132,.88) 100%);
+  box-shadow:0 0 0 1px rgba(164,226,255,.10), inset 0 0 12px rgba(255,255,255,.16), 0 0 28px rgba(0,162,255,.18);
+  opacity:.98;
+  pointer-events:none;
+}
+.app-shell::before{
+  content:'';
+  position:absolute;
+  top:18px;
+  right:34px;
+  bottom:18px;
+  width:1px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+  opacity:.7;
+  pointer-events:none;
+}
+.theme-light .app-shell::after{
+  background:linear-gradient(180deg,rgba(210,232,255,.96) 0%, rgba(86,149,236,.88) 20%, rgba(32,95,190,.94) 58%, rgba(20,63,136,.92) 100%);
+  box-shadow:0 0 0 1px rgba(126,167,226,.24), inset 0 0 10px rgba(255,255,255,.42), 0 10px 28px rgba(32,95,190,.10);
+}
+.theme-light .app-shell::before{
+  background:linear-gradient(180deg,rgba(126,167,226,.28),rgba(126,167,226,.08));
+}
+.theme-inspire .app-shell::after{
+  background:linear-gradient(180deg,rgba(138,228,255,.20) 0%, rgba(0,176,255,.90) 18%, rgba(0,128,224,.96) 56%, rgba(0,72,128,.92) 100%);
+  box-shadow:0 0 0 1px rgba(115,211,255,.14), inset 0 0 12px rgba(255,255,255,.18), 0 0 34px rgba(0,162,255,.22);
+}
+@media (max-width:900px){
+  .app-shell::after{right:10px;width:10px;top:18px;bottom:18px}
+  .app-shell::before{right:26px;top:16px;bottom:16px}
+}
+@media (max-width:620px){
+  .app-shell::after{top:16px;bottom:16px;width:8px}
+  .app-shell::before{display:none}
 }
 .device-nav{
   border-radius:18px;

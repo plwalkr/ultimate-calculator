@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v1.9.3 — TI Left Bar Match Fix</title>
+<title>LegendCalc Suite v2.0.4 — GraphLab Desktop Smoothing</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1436,7 +1436,7 @@ header{margin-bottom:0}
   overflow:hidden;
   isolation:isolate;
 }
-/* v2.0.3 desktop: make every non-calc tab use the same side bars as Calculator */
+/* v2.0.4 desktop: GraphLab smoothing and calmer live plotting */
 @media (min-width:821px){
   #view > section.surface{
     background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.10));
@@ -1692,7 +1692,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.3 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.4 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -2624,16 +2624,40 @@ function startApp(){
         return (window.math && typeof window.math.parse==='function' && window.Plotly && typeof window.Plotly.newPlot==='function');
       }
       let glPlotTimer=null;
+      let glTypingUntil=0;
+      function glLooksIncomplete(expr){
+        const s=String(expr||'').trim();
+        if(!s) return false;
+        if(/[+\-*/^(,]\s*$/.test(s)) return true;
+        const opens = (s.match(/\(/g)||[]).length;
+        const closes = (s.match(/\)/g)||[]).length;
+        if(opens > closes) return true;
+        if(/(?:sin|cos|tan|log|ln|sqrt|abs|min|max|exp)\s*\($/i.test(s)) return true;
+        return false;
+      }
+      function glMarkTyping(ms=650){ glTypingUntil = Date.now() + ms; }
+      function glIsTyping(){ return Date.now() < glTypingUntil; }
 
 function doPlot(){
         try{ const gxv=(document.getElementById('gx')?.value||'').slice(0,120); dbgLine('INFO','doPlot() called' + (gxv?(' | gx=' + gxv):'')); }catch(_){}
   // GraphLab plotter (multi-line, Desmos-ish)
   const chartEl = document.getElementById('chart');
-  
+
+  const glStatus = (kind, title, body, metaList, exprList)=>{
+    try{
+      if(typeof window.glSetStatus === 'function'){
+        window.glSetStatus(kind, title, body, metaList, exprList);
+        return;
+      }
+    }catch(_){ }
+    try{
+      const out=document.getElementById('glReadout');
+      if(out) out.textContent=[title, body].filter(Boolean).join(' — ');
+    }catch(_){ }
+  };
 
   // GraphLab readouts (defaults)
   try{
-    const out0=document.getElementById('glReadout'); if(out0) out0.innerHTML='';
     const det0=document.getElementById('areaDetails'); if(det0) det0.style.display='none';
     const math0=document.getElementById('areaMath'); if(math0) math0.textContent='(waiting for integral…)';
     const cref0=document.getElementById('glCalcRef'); if(cref0) cref0.style.display='none';
@@ -2641,14 +2665,6 @@ function doPlot(){
     const d20=document.getElementById('glDynLine2'); if(d20) d20.textContent='';
     const d30=document.getElementById('glDynLine3'); if(d30) d30.textContent='';
   }catch(_){}
-
-// GraphLab readouts (safe defaults)
-  const out0 = document.getElementById('glReadout');
-  const det0 = document.getElementById('areaDetails');
-  const math0 = document.getElementById('areaMath');
-  if(out0) out0.innerHTML = '';
-  if(det0) det0.style.display = 'none';
-  if(math0) math0.textContent = '(waiting for integral…)';
 
   const gxEl = document.getElementById('gx');
   const xminEl = document.getElementById('xmin');
@@ -2681,11 +2697,17 @@ function doPlot(){
     lines = parseGxLines(gxRawNow);
   }
 
-  const enabled = lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>({
+  const enabledAll = lines.filter(l=>l && l.on && String(l.expr||'').trim()).map(l=>({
     expr: normalizeExpr(String(l.expr||'').trim()),
     color: l.color || null
   }));
-  try{ dbgLine('INFO', `GraphLab enabled=${enabled.length} exprs=${enabled.map(e=>e.expr).join(' | ').slice(0,220)}`); }catch(_){}
+  const incomplete = enabledAll.filter(item => glLooksIncomplete(item.expr));
+  const enabled = enabledAll.filter(item => !glLooksIncomplete(item.expr));
+  try{ dbgLine('INFO', `GraphLab enabled=${enabledAll.length} exprs=${enabledAll.map(e=>e.expr).join(' | ').slice(0,220)}`); }catch(_){}
+  if(incomplete.length){
+    try{ dbgLine('INFO', `GraphLab buffered incomplete=${incomplete.map(e=>e.expr).join(' | ').slice(0,220)}`); }catch(_){}
+    glStatus('warn', glIsTyping() ? 'Typing…' : 'Live plot buffered', 'Finish the current expression to include it in the plot.', ['incomplete expression'], enabled.map(e=>e.expr));
+  }
 
   let xmin = parseFloat(xminEl.value); if(!isFinite(xmin)) xmin=-10;
   let xmax = parseFloat(xmaxEl.value); if(!isFinite(xmax)) xmax=10;
@@ -2734,8 +2756,11 @@ function doPlot(){
   try{ dbgLine('INFO', `GraphLab traces=${traces.length}`); }catch(_){}
   if(!traces.length){
     try{
-      const ro=document.getElementById('glReadout');
-      if(ro) ro.textContent = 'No plottable traces were generated';
+      if(incomplete.length){
+        glStatus('warn', glIsTyping() ? 'Typing…' : 'Check expression', 'No complete plottable expression yet.', ['live plot buffered'], []);
+      }else{
+        glStatus('warn', 'Check expression', 'No plottable traces were generated.', [], enabledAll.map(e=>e.expr));
+      }
     }catch(_){}
   }
 
@@ -2821,7 +2846,7 @@ function doPlot(){
     const d3 = document.getElementById('glDynLine3');
 
     if(out){
-      out.innerHTML = `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}<br><span style="font-weight:400">Simpson’s Rule (N=${N}, h=${h.toPrecision(6)}, signed)</span>`;
+      glStatus('ok', 'Integral ready', `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}`, [`Simpson’s Rule • N=${N}`, `h=${h.toPrecision(6)}`], [expr0||'f(x)']);
     }
     if(det){ det.style.display='block'; }
     if(cref){ cref.style.display='block'; }
@@ -2847,7 +2872,7 @@ function doPlot(){
   const det = document.getElementById('areaDetails');
   const mathBox = document.getElementById('areaMath');
   if(out){
-    out.innerHTML = `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}<br><span style=\"font-weight:400\">Simpson’s Rule (N = ${N}, h = ${h.toPrecision(6)}, signed)</span>`;
+    glStatus('ok', 'Integral ready', `∫[${lo}, ${hi}] f(x) dx ≈ ${areaVal.toPrecision(8)}`, [`Simpson’s Rule • N=${N}`, `h=${h.toPrecision(6)}`], [expr0||'f(x)']);
   }
   if(det){ det.style.display='block'; }
   if(mathBox){
@@ -2865,9 +2890,7 @@ function doPlot(){
 
         if(ro){
           const fmt = (v)=> (typeof v==='number' && isFinite(v)) ? (Math.abs(v)>=1e6 ? v.toExponential(6) : v.toPrecision(8)) : String(v);
-          ro.innerHTML =
-            `∫[${fmt(lo)}, ${fmt(hi)}] f(x) dx ≈ <b>${fmt(areaVal)}</b><br>` +
-            `<span style="font-weight:400">Simpson’s Rule (N=${N}, h=${fmt(h)}, signed)</span>`;
+          glStatus('ok', 'Integral ready', `∫[${fmt(lo)}, ${fmt(hi)}] f(x) dx ≈ ${fmt(areaVal)}`, [`Simpson’s Rule • N=${N}`, `h=${fmt(h)}`], [expr0||'f(x)']);
         }
 
         // Shading
@@ -2923,14 +2946,16 @@ function doPlot(){
   const config = {displayModeBar:false, responsive:true, scrollZoom:true, doubleClick:'reset'};
 
   try{
-    window.Plotly.newPlot(chartEl, traces.length? traces : [{x:[0],y:[0],mode:'lines',line:{width:0}}], layout, config);
-    try{ dbgLine('INFO', 'Plotly.newPlot succeeded'); }catch(_){}
+    const plotData = traces.length? traces : [{x:[0],y:[0],mode:'lines',line:{width:0}}];
+    if(window.Plotly && typeof window.Plotly.react==='function') window.Plotly.react(chartEl, plotData, layout, config);
+    else window.Plotly.newPlot(chartEl, plotData, layout, config);
+    try{ dbgLine('INFO', (window.Plotly && typeof window.Plotly.react==='function') ? 'Plotly.react succeeded' : 'Plotly.newPlot succeeded'); }catch(_){}
+    if(traces.length && !incomplete.length){
+      glStatus('ok', 'Plot ready', 'Live plot updated.', [`${traces.length} trace${traces.length===1?'':'s'}`, `x:[${xmin}, ${xmax}]`], enabled.map(e=>e.expr));
+    }
   }catch(e){
     try{ dbgAdd('ERROR', 'Plotly: ' + (e && e.message ? e.message : e)); }catch(_){}
-    try{
-      const ro=document.getElementById('glReadout');
-      if(ro) ro.textContent = 'Plotly error: ' + (e && e.message ? e.message : e);
-    }catch(_){}
+    try{ glStatus('warn', 'Plot error', (e && e.message ? e.message : String(e)), [], enabledAll.map(e=>e.expr)); }catch(_){}
   }
 
   // small legend
@@ -2949,7 +2974,7 @@ function doPlot(){
   }
 }
 
-function schedulePlot(ms=140){
+function schedulePlot(ms=240){
   try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
   glPlotTimer=setTimeout(()=>{ try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } } }, ms);
 }
@@ -3987,6 +4012,7 @@ sin(x)+x^2
               }
             }catch(_){}
           }
+          window.glSetStatus = glSetStatus;
           function glRenderLines(lines){
             const host=$('#glLines'); if(!host) return;
             host.innerHTML='';
@@ -4012,6 +4038,10 @@ sin(x)+x^2
               inp.className='input expr';
               inp.placeholder = idx===0 ? 'f(x) e.g. sin(x)' : 'g(x) ...';
               inp.value = l.expr||'';
+              inp.spellcheck = false;
+              inp.autocomplete = 'off';
+              inp.autocapitalize = 'off';
+              inp.setAttribute('autocorrect','off');
 
               const del=document.createElement('button');
               del.className='btn tiny'; del.type='button'; del.textContent='✕';
@@ -4032,9 +4062,11 @@ sin(x)+x^2
               });
               inp.addEventListener('input', ()=>{
                 l.expr=inp.value;
+                glMarkTyping(700);
                 glSyncTextarea(lines);
                 persist();
-                if($('#livePlot')?.checked) schedulePlot();
+                try{ glSetStatus('warn', 'Typing…', 'Live plot buffered while you finish the expression.', ['desktop smoothing'], lines.filter(r=>r && r.on && String(r.expr||'').trim()).map(r=>normalizeExpr(r.expr)).filter(Boolean)); }catch(_){ }
+                if($('#livePlot')?.checked) schedulePlot(320);
               });
               inp.addEventListener('blur', ()=>{
                 const norm = normalizeExpr(inp.value);
@@ -4043,8 +4075,8 @@ sin(x)+x^2
                   l.expr = norm;
                   glSyncTextarea(lines);
                   persist();
-                  if($('#livePlot')?.checked) schedulePlot();
                 }
+                if($('#livePlot')?.checked) schedulePlot(120);
               });
               del.addEventListener('click', ()=>{
                 lines.splice(idx,1);
@@ -4188,11 +4220,11 @@ sin(x)+x^2
           // live plot triggers
           ['xmin','xmax','samples','x0','a','b'].forEach(id=>{
             const el=$('#'+id);
-            if(el) el.addEventListener('input', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(); });
+            if(el) el.addEventListener('input', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180); });
           });
           ['d1','tanOn','intOn','rootsOn','gridOn','livePlot'].forEach(id=>{
             const el=$('#'+id);
-            if(el) el.addEventListener('change', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(); });
+            if(el) el.addEventListener('change', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180); });
           });
 
           // First plot when libs ready

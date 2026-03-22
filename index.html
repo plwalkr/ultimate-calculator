@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.9.4 TI left shell accent alignment */
+/* v1.9.5 TI left shell accent alignment */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.9.4 TI left shell accent alignment */
+/* v1.9.5 TI left shell accent alignment */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -3298,11 +3298,13 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function syncShellAccent(){
         try{
           const shell = document.querySelector('.app-shell');
-          const first = document.querySelector('#view > *');
-          if(!shell || !first) return;
+          const view = document.querySelector('#view');
+          const activeRoot = view?.querySelector('.mathpad, section.surface');
+          const anchor = activeRoot?.querySelector('.mpHead, .glgrid, .ti-panel, .gllTop') || activeRoot;
+          if(!shell || !anchor) return;
           const shellRect = shell.getBoundingClientRect();
-          const firstRect = first.getBoundingClientRect();
-          const offset = Math.max(0, Math.round(firstRect.top - shellRect.top));
+          const anchorRect = anchor.getBoundingClientRect();
+          const offset = Math.max(0, Math.round(anchorRect.top - shellRect.top));
           shell.style.setProperty('--shell-accent-top', offset + 'px');
         }catch(_){ }
       }

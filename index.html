@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v2.0.4 — GraphLab Desktop Smoothing</title>
+<title>LegendCalc Suite v2.0.5 — GraphLab Start Guard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1436,7 +1436,7 @@ header{margin-bottom:0}
   overflow:hidden;
   isolation:isolate;
 }
-/* v2.0.4 desktop: GraphLab smoothing and calmer live plotting */
+/* v2.0.5 desktop: GraphLab start guard and duplicate-plot cleanup */
 @media (min-width:821px){
   #view > section.surface{
     background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.10));
@@ -1692,7 +1692,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.4 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.5 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -2625,6 +2625,8 @@ function startApp(){
       }
       let glPlotTimer=null;
       let glTypingUntil=0;
+      let glLastPlotKey='';
+      let glLastPlotAt=0;
       function glLooksIncomplete(expr){
         const s=String(expr||'').trim();
         if(!s) return false;
@@ -2671,6 +2673,28 @@ function doPlot(){
   const xmaxEl = document.getElementById('xmax');
   const samplesEl = document.getElementById('samples');
   if(!chartEl || !gxEl || !xminEl || !xmaxEl || !samplesEl) return;
+
+  const plotKey = [
+    String(gxEl.value||''),
+    String(xminEl.value||''),
+    String(xmaxEl.value||''),
+    String(samplesEl.value||''),
+    String(document.getElementById('d1')?.checked ? '1':'0'),
+    String(document.getElementById('tanOn')?.checked ? '1':'0'),
+    String(document.getElementById('x0')?.value||''),
+    String(document.getElementById('intOn')?.checked ? '1':'0'),
+    String(document.getElementById('a')?.value||''),
+    String(document.getElementById('b')?.value||''),
+    String(document.getElementById('rootsOn')?.checked ? '1':'0'),
+    String(document.getElementById('gridOn')?.checked ? '1':'0')
+  ].join('||');
+  const now = Date.now();
+  if(glLastPlotKey===plotKey && (now - glLastPlotAt) < 240){
+    try{ dbgLine('INFO','GraphLab skipped duplicate plot'); }catch(_){ }
+    return;
+  }
+  glLastPlotKey = plotKey;
+  glLastPlotAt = now;
 
   if(!(window.math && window.Plotly)) { if(typeof toast==="function"){toast('GraphLab: loading libs...');}else{console.warn("Toast:",'GraphLab: loading libs...');} return; }
 
@@ -4138,13 +4162,16 @@ sin(x)+x^2
           glSyncTextarea(lines);
           glRenderLines(lines);
 
-          // UI-only force sync: make the first visible editable row mirror the current gx/transfer expression.
+          // UI-only force sync: mirror the current expression into the first visible row
+          // without firing a synthetic input event that causes an extra startup plot.
           try{
             const firstExpr = document.querySelector('#glLines .expr');
             if(firstExpr && initialGraphExpr){
               firstExpr.value = initialGraphExpr;
-              firstExpr.dispatchEvent(new Event('input', {bubbles:true}));
-              try{ dbgLine('INFO', 'renderGraphLab visible row initialized from current expression | ' + initialGraphExpr); }catch(_){}
+              if(lines[0]) lines[0].expr = initialGraphExpr;
+              glSyncTextarea(lines);
+              try{ persist(); }catch(_){ }
+              try{ dbgLine('INFO', 'renderGraphLab visible row initialized from current expression | ' + initialGraphExpr); }catch(_){ }
             }
           }catch(_){}
 

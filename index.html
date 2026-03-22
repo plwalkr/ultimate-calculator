@@ -1693,7 +1693,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.9 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.10 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -2630,6 +2630,8 @@ function startApp(){
       let glLastPlotKey='';
       let glLastPlotAt=0;
       let glLastPlotChart='';
+      let glLastRenderedKey='';
+      let glLastRenderedChart='';
       let glScheduleStamp=0;
       let glLastScheduledKey='';
       function glActiveTab(){
@@ -2719,6 +2721,10 @@ function doPlot(){
   const plotKey = glComputePlotKey();
   const chartToken = chartEl.dataset.glChartToken || (chartEl.dataset.glChartToken = 'gl-' + Math.random().toString(36).slice(2,10));
   const now = Date.now();
+  if(glLastRenderedKey===plotKey && glLastRenderedChart===chartToken && !glIsTyping()){
+    try{ dbgLine('INFO','GraphLab skipped no-op plot'); }catch(_){ }
+    return;
+  }
   if(glLastPlotKey===plotKey && glLastPlotChart===chartToken && (now - glLastPlotAt) < 700){
     try{ dbgLine('INFO','GraphLab skipped duplicate plot'); }catch(_){ }
     return;
@@ -3004,6 +3010,11 @@ function doPlot(){
     const plotData = traces.length? traces : [{x:[0],y:[0],mode:'lines',line:{width:0}}];
     if(window.Plotly && typeof window.Plotly.react==='function') window.Plotly.react(chartEl, plotData, layout, config);
     else window.Plotly.newPlot(chartEl, plotData, layout, config);
+    glLastRenderedKey = plotKey;
+    glLastRenderedChart = chartToken;
+    glLastScheduledKey = '';
+    try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
+    glPlotTimer = null;
     try{ dbgLine('INFO', (window.Plotly && typeof window.Plotly.react==='function') ? 'Plotly.react succeeded' : 'Plotly.newPlot succeeded'); }catch(_){}
     if(traces.length && !incomplete.length){
       glStatus('ok', 'Plot ready', 'Live plot updated.', [`${traces.length} trace${traces.length===1?'':'s'}`, `x:[${xmin}, ${xmax}]`], enabled.map(e=>e.expr));
@@ -3032,6 +3043,12 @@ function doPlot(){
 function schedulePlot(ms=240){
   if(!glActiveTab()) return;
   const nextKey = glComputePlotKey();
+  const chartEl = document.getElementById('chart');
+  const chartToken = chartEl ? (chartEl.dataset.glChartToken || '') : '';
+  if(nextKey && chartToken && nextKey===glLastRenderedKey && chartToken===glLastRenderedChart && !glIsTyping()){
+    try{ dbgLine('INFO','GraphLab skipped schedule (no changes)'); }catch(_){ }
+    return;
+  }
   if(glPlotTimer && nextKey && glLastScheduledKey===nextKey) return;
   try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
   glLastScheduledKey = nextKey;
@@ -3040,6 +3057,14 @@ function schedulePlot(ms=240){
     glPlotTimer=null;
     if(stamp !== glScheduleStamp) return;
     if(!glActiveTab()) return;
+    const currentKey = glComputePlotKey();
+    const liveChart = document.getElementById('chart');
+    const liveToken = liveChart ? (liveChart.dataset.glChartToken || '') : '';
+    if(currentKey && liveToken && currentKey===glLastRenderedKey && liveToken===glLastRenderedChart && !glIsTyping()){
+      try{ dbgLine('INFO','GraphLab skipped delayed no-op plot'); }catch(_){ }
+      glLastScheduledKey = '';
+      return;
+    }
     try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } }
   }, ms);
 }

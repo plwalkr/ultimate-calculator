@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v2.0.6 — GraphLab Trigger Cleanup</title>
+<title>LegendCalc Suite v2.0.7 — GraphLab Active Guard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1436,7 +1436,7 @@ header{margin-bottom:0}
   overflow:hidden;
   isolation:isolate;
 }
-/* v2.0.6 desktop: GraphLab duplicate-trigger cleanup */
+/* v2.0.7 desktop: GraphLab active-tab guard + stale timer cleanup */
 @media (min-width:821px){
   #view > section.surface{
     background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.10));
@@ -1692,7 +1692,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.6 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.7 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -2624,10 +2624,48 @@ function startApp(){
         return (window.math && typeof window.math.parse==='function' && window.Plotly && typeof window.Plotly.newPlot==='function');
       }
       let glPlotTimer=null;
+      let glLibWaitIv=null;
       let glTypingUntil=0;
       let glLastPlotKey='';
       let glLastPlotAt=0;
       let glLastPlotChart='';
+      let glScheduleStamp=0;
+      let glLastScheduledKey='';
+      function glActiveTab(){
+        try{
+          const viaView = document.getElementById('view')?.getAttribute('data-view-tab');
+          if(viaView) return viaView === 'graphlab';
+        }catch(_){ }
+        try{
+          return (document.querySelector('.tab.active')?.dataset?.tab || '') === 'graphlab';
+        }catch(_){ return false; }
+      }
+      function glComputePlotKey(){
+        try{
+          return [
+            String(document.getElementById('gx')?.value||''),
+            String(document.getElementById('xmin')?.value||''),
+            String(document.getElementById('xmax')?.value||''),
+            String(document.getElementById('samples')?.value||''),
+            String(document.getElementById('d1')?.checked ? '1':'0'),
+            String(document.getElementById('tanOn')?.checked ? '1':'0'),
+            String(document.getElementById('x0')?.value||''),
+            String(document.getElementById('intOn')?.checked ? '1':'0'),
+            String(document.getElementById('a')?.value||''),
+            String(document.getElementById('b')?.value||''),
+            String(document.getElementById('rootsOn')?.checked ? '1':'0'),
+            String(document.getElementById('gridOn')?.checked ? '1':'0')
+          ].join('||');
+        }catch(_){ return ''; }
+      }
+      function clearGraphlabTimers(){
+        try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
+        glPlotTimer=null;
+        try{ if(glLibWaitIv) clearInterval(glLibWaitIv); }catch(_){ }
+        glLibWaitIv=null;
+        glScheduleStamp++;
+        glLastScheduledKey='';
+      }
       function glLooksIncomplete(expr){
         const s=String(expr||'').trim();
         if(!s) return false;
@@ -2642,9 +2680,11 @@ function startApp(){
       function glIsTyping(){ return Date.now() < glTypingUntil; }
 
 function doPlot(){
-        try{ const gxv=(document.getElementById('gx')?.value||'').slice(0,120); dbgLine('INFO','doPlot() called' + (gxv?(' | gx=' + gxv):'')); }catch(_){}
+  if(!glActiveTab()) return;
   // GraphLab plotter (multi-line, Desmos-ish)
   const chartEl = document.getElementById('chart');
+  if(!chartEl) return;
+  try{ const gxv=(document.getElementById('gx')?.value||'').slice(0,120); dbgLine('INFO','doPlot() called' + (gxv?(' | gx=' + gxv):'')); }catch(_){}
 
   const glStatus = (kind, title, body, metaList, exprList)=>{
     try{
@@ -2675,20 +2715,7 @@ function doPlot(){
   const samplesEl = document.getElementById('samples');
   if(!chartEl || !gxEl || !xminEl || !xmaxEl || !samplesEl) return;
 
-  const plotKey = [
-    String(gxEl.value||''),
-    String(xminEl.value||''),
-    String(xmaxEl.value||''),
-    String(samplesEl.value||''),
-    String(document.getElementById('d1')?.checked ? '1':'0'),
-    String(document.getElementById('tanOn')?.checked ? '1':'0'),
-    String(document.getElementById('x0')?.value||''),
-    String(document.getElementById('intOn')?.checked ? '1':'0'),
-    String(document.getElementById('a')?.value||''),
-    String(document.getElementById('b')?.value||''),
-    String(document.getElementById('rootsOn')?.checked ? '1':'0'),
-    String(document.getElementById('gridOn')?.checked ? '1':'0')
-  ].join('||');
+  const plotKey = glComputePlotKey();
   const chartToken = chartEl.dataset.glChartToken || (chartEl.dataset.glChartToken = 'gl-' + Math.random().toString(36).slice(2,10));
   const now = Date.now();
   if(glLastPlotKey===plotKey && glLastPlotChart===chartToken && (now - glLastPlotAt) < 700){
@@ -3002,17 +3029,42 @@ function doPlot(){
 }
 
 function schedulePlot(ms=240){
+  if(!glActiveTab()) return;
+  const nextKey = glComputePlotKey();
+  if(glPlotTimer && nextKey && glLastScheduledKey===nextKey) return;
   try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
-  glPlotTimer=setTimeout(()=>{ try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } } }, ms);
+  glLastScheduledKey = nextKey;
+  const stamp = ++glScheduleStamp;
+  glPlotTimer=setTimeout(()=>{
+    glPlotTimer=null;
+    if(stamp !== glScheduleStamp) return;
+    if(!glActiveTab()) return;
+    try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } }
+  }, ms);
 }
 
 function waitForGraphLibs(cb, tries=40){
+        clearGraphlabTimers();
+        if(!glActiveTab()) return;
         if(graphLibsReady()) return cb();
         let n=0;
-        const iv=setInterval(()=>{
+        glLibWaitIv=setInterval(()=>{
           n++;
-          if(graphLibsReady()){ clearInterval(iv); cb(); }
-          else if(n>=tries){ clearInterval(iv); if(typeof toast==="function"){toast('GraphLab: libs not ready');}else{console.warn("Toast:",'GraphLab: libs not ready');} dbgAdd('ERROR','GraphLab libs not ready (math/Plotly)'); }
+          if(!glActiveTab()){
+            clearGraphlabTimers();
+            return;
+          }
+          if(graphLibsReady()){
+            try{ if(glLibWaitIv) clearInterval(glLibWaitIv); }catch(_){ }
+            glLibWaitIv=null;
+            cb();
+          }
+          else if(n>=tries){
+            try{ if(glLibWaitIv) clearInterval(glLibWaitIv); }catch(_){ }
+            glLibWaitIv=null;
+            if(typeof toast==="function"){toast('GraphLab: libs not ready');}else{console.warn("Toast:",'GraphLab: libs not ready');}
+            dbgAdd('ERROR','GraphLab libs not ready (math/Plotly)');
+          }
         }, 125);
       }
       window.waitForGraphLibs = waitForGraphLibs;
@@ -3429,6 +3481,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       function render(which){
         const target = which || 'calc';
         try{ dbgLine('INFO',`render(${target}) called`); }catch(_){ }
+        if(target!=='graphlab') clearGraphlabTimers();
         if(target==='graphlab') renderGraphLab();
         else if(target==='units') renderUnits();
         else if(target==='time') renderTime();

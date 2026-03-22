@@ -1432,7 +1432,30 @@ header{margin-bottom:0}
 }
 #view > section.surface,
 #view > .mathpad{position:relative}
-#view > section.surface::before,
+#view > section.surface::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:.92;
+  background:
+    linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 20px top 18px / calc(100% - 40px) 4px no-repeat,
+    linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) left 12px top 58px / 12px calc(100% - 86px) no-repeat,
+    linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) right 12px top 58px / 12px calc(100% - 86px) no-repeat;
+}
+.theme-light #view > section.surface::before{
+  background:
+    linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 20px top 18px / calc(100% - 40px) 4px no-repeat,
+    linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) left 12px top 58px / 12px calc(100% - 86px) no-repeat,
+    linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) right 12px top 58px / 12px calc(100% - 86px) no-repeat;
+}
+.theme-inspire #view > section.surface::before{
+  background:
+    linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 20px top 18px / calc(100% - 40px) 4px no-repeat,
+    linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) left 12px top 58px / 12px calc(100% - 86px) no-repeat,
+    linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) right 12px top 58px / 12px calc(100% - 86px) no-repeat;
+}
 #view > .mathpad::before{
   content:'';
   display:block;
@@ -1441,6 +1464,26 @@ header{margin-bottom:0}
   background:linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%);
   margin-bottom:14px;
   opacity:.9;
+}
+@media (max-width:820px){
+  #view > section.surface::before{
+    background:
+      linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 16px top 14px / calc(100% - 32px) 4px no-repeat,
+      linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) left 10px top 52px / 10px calc(100% - 74px) no-repeat,
+      linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) right 10px top 52px / 10px calc(100% - 74px) no-repeat;
+  }
+  .theme-light #view > section.surface::before{
+    background:
+      linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 16px top 14px / calc(100% - 32px) 4px no-repeat,
+      linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) left 10px top 52px / 10px calc(100% - 74px) no-repeat,
+      linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) right 10px top 52px / 10px calc(100% - 74px) no-repeat;
+  }
+  .theme-inspire #view > section.surface::before{
+    background:
+      linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%) left 16px top 14px / calc(100% - 32px) 4px no-repeat,
+      linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) left 10px top 52px / 10px calc(100% - 74px) no-repeat,
+      linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) right 10px top 52px / 10px calc(100% - 74px) no-repeat;
+  }
 }
 #view details > summary{
   cursor:pointer;
@@ -1654,7 +1697,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.0 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.1 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>

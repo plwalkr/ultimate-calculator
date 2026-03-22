@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v2.0.7 — GraphLab Active Guard</title>
+<title>LegendCalc Suite v2.0.8 — Active Row + Units Fix</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -798,7 +798,8 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     .glr{grid-area:right;}
 
     .gllines{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-    .glline{display:flex;align-items:center;gap:8px;}
+    .glline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:14px;border:1px solid transparent;transition:border-color .16s ease, box-shadow .16s ease, background .16s ease;}
+    .glline.is-active{border-color:rgba(93,176,255,.55);background:rgba(93,176,255,.10);box-shadow:inset 0 0 0 1px rgba(93,176,255,.14),0 0 0 1px rgba(0,0,0,.08);}
     .glline .expr{flex:1;min-width:160px;}
     .glline .chip{width:12px;height:12px;border-radius:999px;opacity:.9;flex:0 0 12px;}
     .glline .tiny{padding:8px 10px;}
@@ -1692,7 +1693,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.7 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.8 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -4096,9 +4097,10 @@ sin(x)+x^2
           function glRenderLines(lines){
             const host=$('#glLines'); if(!host) return;
             host.innerHTML='';
+            glClampSelectedIndex();
             (lines||[]).forEach((l,idx)=>{
               const row=document.createElement('div');
-              row.className='glline';
+              row.className='glline' + (idx===glSelectedIndex ? ' is-active' : '');
 
               const cb=document.createElement('input');
               cb.type='checkbox'; cb.checked=!!l.on; cb.title='Show/hide';
@@ -4140,7 +4142,16 @@ sin(x)+x^2
                 persist();
                 if($('#livePlot')?.checked) schedulePlot();
               });
+              const markActive = ()=> glSetSelectedIndex(idx);
+              row.addEventListener('mousedown', markActive);
+              row.addEventListener('click', markActive);
+              inp.addEventListener('focus', markActive);
+              cb.addEventListener('focus', markActive);
+              cPick.addEventListener('focus', markActive);
+              del.addEventListener('focus', markActive);
+
               inp.addEventListener('input', ()=>{
+                glSetSelectedIndex(idx);
                 l.expr=inp.value;
                 glMarkTyping(700);
                 glSyncTextarea(lines);
@@ -4161,9 +4172,12 @@ sin(x)+x^2
               del.addEventListener('click', ()=>{
                 lines.splice(idx,1);
                 if(lines.length===0) lines.push({on:true, expr:''});
+                glClampSelectedIndex();
+                if(glSelectedIndex >= lines.length) glSelectedIndex = Math.max(0, lines.length - 1);
                 glSyncTextarea(lines);
                 persist();
                 glRenderLines(lines);
+                glSetSelectedIndex(glSelectedIndex);
                 if($('#livePlot')?.checked) schedulePlot();
               });
 
@@ -4174,6 +4188,7 @@ sin(x)+x^2
               row.appendChild(del);
               host.appendChild(row);
             });
+            glSetSelectedIndex(glSelectedIndex);
           }
 
           const saved = loadTab('graphlab', {gx:'', xmin:'-10', xmax:'10', samples:'600', d1:'0', tanOn:'0', x0:'0', intOn:'0', a:'-1', b:'1', rootsOn:'0', gridOn:'1', livePlot:'1', glLines:null});
@@ -4217,6 +4232,7 @@ sin(x)+x^2
           window.__glTransfer = null;
           glSyncTextarea(lines);
           glRenderLines(lines);
+          glSetSelectedIndex(Math.min(glSelectedIndex, Math.max(0, lines.length-1)));
 
           // UI-only force sync: mirror the current expression into the first visible row
           // without firing a synthetic input event that causes an extra startup plot.
@@ -4238,20 +4254,21 @@ sin(x)+x^2
             document.querySelectorAll('#graphExamples .exampleChip').forEach(btn=>{
               btn.addEventListener('click', ()=>{
                 const expr = normalizeExpr(btn.dataset.expr || '');
-                const firstExpr = document.querySelector('#glLines .expr');
-                if(firstExpr) firstExpr.value = expr;
                 if(!Array.isArray(lines) || !lines.length) lines = [{on:true, expr:''}];
-                lines[0] = Object.assign({}, lines[0] || {}, { on:true, expr });
+                const targetIdx = glClampSelectedIndex();
+                lines[targetIdx] = Object.assign({}, lines[targetIdx] || {}, { on:true, expr });
                 glSyncTextarea(lines);
+                glRenderLines(lines);
+                glSetSelectedIndex(targetIdx, {focus:true});
                 try{ persist(); }catch(_){ }
                 try{
-                  glSetStatus('ok', 'Example loaded', 'The example is now in the first function row and ready to edit or plot.', ['source: examples'], [expr]);
+                  glSetStatus('ok', 'Example loaded', `The example is now in line ${targetIdx + 1} and ready to edit or plot.`, ['source: examples'], [expr]);
                 }catch(_){ }
                 try{
                   if($('#livePlot')?.checked) schedulePlot(90);
                   else if(typeof doPlot==='function') doPlot();
                 }catch(_){ }
-                try{ dbgLine('ACTION', 'Graph example inserted | ' + expr); }catch(_){ }
+                try{ dbgLine('ACTION', 'Graph example inserted | row=' + (targetIdx + 1) + ' | ' + expr); }catch(_){ }
               });
             });
           }catch(_){ }
@@ -4291,11 +4308,13 @@ sin(x)+x^2
 
           $('#glAddLine')?.addEventListener('click', ()=>{
             lines.push({on:true, expr:''});
-            glSyncTextarea(lines); persist(); glRenderLines(lines);
+            glSelectedIndex = lines.length - 1;
+            glSyncTextarea(lines); persist(); glRenderLines(lines); glSetSelectedIndex(glSelectedIndex, {focus:true});
           });
           $('#glClearLines')?.addEventListener('click', ()=>{
             lines.splice(0, lines.length, {on:true, expr:''});
-            glSyncTextarea(lines); persist(); glRenderLines(lines);
+            glSelectedIndex = 0;
+            glSyncTextarea(lines); persist(); glRenderLines(lines); glSetSelectedIndex(0, {focus:true});
             if(typeof toast==="function"){toast('Lines cleared');}else{console.warn("Toast:",'Lines cleared');}
             if($('#livePlot')?.checked) schedulePlot();
           });
@@ -5026,21 +5045,24 @@ function stageRow(nmValue='30', unit='nm'){
         }
         function unitCatalogByDim(groups){ const map={}; for(const arr of Object.values(groups)){ for(const u of arr){ try{ const dim = JSON.stringify(math.unit(1,u).dimensions); if(!map[dim]) map[dim]=new Set(); arr.forEach(x=>map[dim].add(x)); }catch(e){} } } for(const d in map){ map[d]=[...map[d]]; } return map; }
 
-        fromSel.addEventListener('change', ()=>{ refreshTargets(); smartSuggest(); persist(); });
-        $('#uVal').addEventListener('input', ()=> { smartSuggest(); persist(); });
+        fromSel.addEventListener('change', ()=>{ refreshTargets(toSel.value); smartSuggest(); persist(); });
+        $('#uVal').addEventListener('input', ()=> { convert(); persist(); });
+        toSel.addEventListener('change', ()=> { convert(); persist(); });
         $('#uSmart').onclick = ()=>{ smartSuggest(); persist(); };
         $('#uConvert').onclick = ()=>{ convert(); persist(); };
-        $('#clearSavedUnits').onclick = ()=>{ clearTab('units'); $('#uVal').value='1'; searchEl.value=''; populateFrom(''); fromSel.value='m'; refreshTargets(); smartSuggest(); };
+        $('#clearSavedUnits').onclick = ()=>{ clearTab('units'); $('#uVal').value='1'; searchEl.value=''; populateFrom(''); fromSel.value='m'; refreshTargets('km'); smartSuggest(); persist(); };
         $('#uSwap').onclick = ()=>{ const f=fromSel.value; const t=toSel.value;
-          if(currentFromList.includes(f) && currentFromList.includes(t)) { fromSel.value=t; refreshTargets(); toSel.value=f; smartSuggest(); persist(); } else {
-            const temp=f; fromSel.value=t; refreshTargets(); toSel.value=temp; smartSuggest(); persist(); }
+          if(currentFromList.includes(f) && currentFromList.includes(t)) { fromSel.value=t; refreshTargets(f); toSel.value=f; convert(); persist(); } else {
+            const temp=f; fromSel.value=t; refreshTargets(temp); toSel.value=temp; convert(); persist(); }
         };
-        searchEl.addEventListener('input', ()=>{ populateFrom(searchEl.value);
-          if(![...fromSel.options].some(o=>o.value===saved.from)) fromSel.selectedIndex=0; refreshTargets(); smartSuggest(); persist(); });
+        searchEl.addEventListener('input', ()=>{ const keepFrom = fromSel.value; const keepTo = toSel.value; populateFrom(searchEl.value);
+          if([ ...fromSel.options ].some(o=>o.value===keepFrom)) fromSel.value = keepFrom;
+          else fromSel.selectedIndex=0;
+          refreshTargets(keepTo); convert(); persist(); });
 
-        refreshTargets();
+        refreshTargets(saved.to || '');
         if(saved.to){ try{ const u = math.unit(1, fromSel.value); const dimKey=JSON.stringify(u.dimensions); const list=(catalogByDim[dimKey]||[]); if(list.includes(saved.to)) $('#uTo').value=saved.to; }catch(e){} }
-        if(saved.out){ setOut(saved.out); } else { smartSuggest(); }
+        if(saved.out){ convert(); } else { smartSuggest(); }
       }
 
      function renderTime(){

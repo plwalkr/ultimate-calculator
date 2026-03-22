@@ -1436,45 +1436,36 @@ header{margin-bottom:0}
   overflow:hidden;
   isolation:isolate;
 }
-#view{
-  --surface-rail-top:58px;
-  --surface-rail-bottom:28px;
-  --surface-rail-side:12px;
-  --surface-rail-width:12px;
-}
-#view > section.surface::before{
-  content:'';
-  position:absolute;
-  left:20px;
-  right:20px;
-  top:18px;
-  height:4px;
-  border-radius:999px;
-  pointer-events:none;
-  opacity:.92;
-  background:linear-gradient(90deg,var(--accent-2),rgba(255,255,255,0) 88%);
-}
-#view > section.surface::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  opacity:.88;
-  background:
-    linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) left var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat,
-    linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28)) right var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat;
-  -webkit-clip-path: inset(var(--surface-rail-top) 0 var(--surface-rail-bottom) 0 round 18px);
-  clip-path: inset(var(--surface-rail-top) 0 var(--surface-rail-bottom) 0 round 18px);
-}
-.theme-light #view > section.surface::after{
-  background:
-    linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) left var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat,
-    linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30)) right var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat;
-}
-.theme-inspire #view > section.surface::after{
-  background:
-    linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) left var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat,
-    linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28)) right var(--surface-rail-side) top 0 / var(--surface-rail-width) 100% no-repeat;
+/* v2.0.3 desktop: make every non-calc tab use the same side bars as Calculator */
+@media (min-width:821px){
+  #view > section.surface{
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.10));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:22px;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
+  .theme-light #view > section.surface{
+    background:#ffffff;
+    border-color:#c9d7ef;
+    box-shadow:0 18px 40px rgba(63,87,124,.12);
+  }
+  #view > section.surface::before,
+  #view > section.surface::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:12px;
+    pointer-events:none;
+    opacity:.8;
+    background:linear-gradient(180deg, rgba(41,182,255,.85), rgba(41,182,255,.25));
+  }
+  #view > section.surface::before{left:0}
+  #view > section.surface::after{right:0}
+  .theme-light #view > section.surface::before,
+  .theme-light #view > section.surface::after{
+    background:linear-gradient(180deg, rgba(86,149,236,.88), rgba(86,149,236,.24));
+  }
 }
 #view > .mathpad::before{
   content:'';
@@ -1486,17 +1477,8 @@ header{margin-bottom:0}
   opacity:.9;
 }
 @media (max-width:820px){
-  #view{
-    --surface-rail-top:52px;
-    --surface-rail-bottom:24px;
-    --surface-rail-side:10px;
-    --surface-rail-width:10px;
-  }
-  #view > section.surface::before{
-    left:16px;
-    right:16px;
-    top:14px;
-  }
+  #view > section.surface::before,
+  #view > section.surface::after{content:none}
 }
 #view details > summary{
   cursor:pointer;
@@ -1710,7 +1692,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.2 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.3 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>

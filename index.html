@@ -1693,7 +1693,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.8 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.9 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -4072,6 +4072,28 @@ sin(x)+x^2
               if(!e) return '';
               return l.on ? e : ('# ' + e);
             }).filter(Boolean).join('\n');
+          }
+
+          let glSelectedIndex = 0;
+          function glClampSelectedIndex(){
+            const max = Math.max(0, (Array.isArray(lines) ? lines.length : 1) - 1);
+            const n = Number(glSelectedIndex);
+            glSelectedIndex = Number.isFinite(n) ? Math.max(0, Math.min(max, Math.trunc(n))) : 0;
+            return glSelectedIndex;
+          }
+          function glSetSelectedIndex(nextIdx, opts){
+            glSelectedIndex = nextIdx;
+            glClampSelectedIndex();
+            const rows = Array.from(document.querySelectorAll('#glLines .glline'));
+            rows.forEach((row, idx)=> row.classList.toggle('is-active', idx === glSelectedIndex));
+            if(opts && opts.focus){
+              const target = rows[glSelectedIndex]?.querySelector('.expr');
+              try{
+                target?.focus();
+                target?.select?.();
+              }catch(_){}
+            }
+            return glSelectedIndex;
           }
 
           function glSetStatus(kind, title, body, metaList, exprList){

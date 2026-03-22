@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v1.9.2 — TI Left Accent Restore</title>
+<title>LegendCalc Suite v1.9.3 — TI Left Bar Match Fix</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.9.2 TI left shell accent restore */
+/* v1.9.3 TI left shell accent match */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.9.2 TI left shell accent restore */
+/* v1.9.3 TI left shell accent match */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -1337,48 +1337,32 @@ header{margin-bottom:0}
   background:linear-gradient(180deg,#0a1015,#0d141c);
   box-shadow:0 24px 74px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.03);
 }
+.app-shell{overflow:hidden}
 .app-shell::after{
-  content:'';
+  content:"";
   position:absolute;
-  top:22px;
-  left:14px;
-  bottom:22px;
-  width:14px;
-  border-radius:999px;
-  background:linear-gradient(180deg,rgba(120,214,255,.16) 0%, rgba(0,162,255,.82) 18%, rgba(0,123,214,.92) 55%, rgba(0,71,132,.88) 100%);
-  box-shadow:0 0 0 1px rgba(164,226,255,.10), inset 0 0 12px rgba(255,255,255,.16), 0 0 28px rgba(0,162,255,.18);
-  opacity:.98;
+  top:0;
+  left:0;
+  bottom:0;
+  width:12px;
+  background:linear-gradient(180deg, rgba(41,182,255,.85), rgba(41,182,255,.25));
+  opacity:.8;
   pointer-events:none;
 }
-.app-shell::before{
-  content:'';
-  position:absolute;
-  top:18px;
-  left:34px;
-  bottom:18px;
-  width:1px;
-  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
-  opacity:.7;
-  pointer-events:none;
-}
+.app-shell::before{display:none}
 .theme-light .app-shell::after{
-  background:linear-gradient(180deg,rgba(210,232,255,.96) 0%, rgba(86,149,236,.88) 20%, rgba(32,95,190,.94) 58%, rgba(20,63,136,.92) 100%);
-  box-shadow:0 0 0 1px rgba(126,167,226,.24), inset 0 0 10px rgba(255,255,255,.42), 0 10px 28px rgba(32,95,190,.10);
-}
-.theme-light .app-shell::before{
-  background:linear-gradient(180deg,rgba(126,167,226,.28),rgba(126,167,226,.08));
+  background:linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30));
+  opacity:.82;
 }
 .theme-inspire .app-shell::after{
-  background:linear-gradient(180deg,rgba(138,228,255,.20) 0%, rgba(0,176,255,.90) 18%, rgba(0,128,224,.96) 56%, rgba(0,72,128,.92) 100%);
-  box-shadow:0 0 0 1px rgba(115,211,255,.14), inset 0 0 12px rgba(255,255,255,.18), 0 0 34px rgba(0,162,255,.22);
+  background:linear-gradient(180deg, rgba(41,182,255,.88), rgba(41,182,255,.28));
+  opacity:.82;
 }
 @media (max-width:900px){
-  .app-shell::after{left:10px;width:10px;top:18px;bottom:18px}
-  .app-shell::before{left:26px;top:16px;bottom:16px}
+  .app-shell::after{width:10px}
 }
 @media (max-width:620px){
-  .app-shell::after{top:16px;bottom:16px;width:8px}
-  .app-shell::before{display:none}
+  .app-shell::after{width:8px}
 }
 .device-nav{
   border-radius:18px;
@@ -1616,7 +1600,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.2 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.3 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>

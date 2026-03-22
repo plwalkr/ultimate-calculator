@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.9.3 TI left shell accent match */
+/* v1.9.4 TI left shell accent alignment */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.9.3 TI left shell accent match */
+/* v1.9.4 TI left shell accent alignment */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -1341,9 +1341,9 @@ header{margin-bottom:0}
 .app-shell::after{
   content:"";
   position:absolute;
-  top:0;
+  top:var(--shell-accent-top, 160px);
   left:0;
-  bottom:0;
+  bottom:14px;
   width:12px;
   background:linear-gradient(180deg, rgba(41,182,255,.85), rgba(41,182,255,.25));
   opacity:.8;
@@ -1600,7 +1600,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.3 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.4 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -3292,8 +3292,28 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         else if(target==='torque') renderTorque();
         else renderCalc();
         syncModuleChrome(target);
+        try{ requestAnimationFrame(syncShellAccent); }catch(_){ }
       }
-      window.render = render;
+
+      function syncShellAccent(){
+        try{
+          const shell = document.querySelector('.app-shell');
+          const first = document.querySelector('#view > *');
+          if(!shell || !first) return;
+          const shellRect = shell.getBoundingClientRect();
+          const firstRect = first.getBoundingClientRect();
+          const offset = Math.max(0, Math.round(firstRect.top - shellRect.top));
+          shell.style.setProperty('--shell-accent-top', offset + 'px');
+        }catch(_){ }
+      }
+
+      window.addEventListener('resize', ()=>requestAnimationFrame(syncShellAccent));
+      window.addEventListener('orientationchange', ()=>requestAnimationFrame(syncShellAccent));
+
+      window.render = function(which){
+        render(which);
+        requestAnimationFrame(syncShellAccent);
+      };
 
       (function initTheme(){
         const prefs=loadPrefs();

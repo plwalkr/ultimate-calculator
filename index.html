@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.9.5 TI left shell accent alignment */
+/* v1.9.6 TI left shell accent panel match */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.9.5 TI left shell accent alignment */
+/* v1.9.6 TI left shell accent panel match */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -1342,14 +1342,17 @@ header{margin-bottom:0}
   content:"";
   position:absolute;
   top:var(--shell-accent-top, 160px);
-  left:0;
-  bottom:14px;
+  left:var(--shell-accent-left, 28px);
+  bottom:var(--shell-accent-bottom, 28px);
   width:12px;
-  background:linear-gradient(180deg, rgba(41,182,255,.85), rgba(41,182,255,.25));
-  opacity:.8;
+  border-radius:0 16px 16px 0;
+  background:linear-gradient(180deg, rgba(41,182,255,.90), rgba(41,182,255,.28));
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.18), 0 0 0 1px rgba(41,182,255,.10);
+  opacity:.86;
   pointer-events:none;
 }
 .app-shell::before{display:none}
+#mathPad.tiSkin:before{display:none}
 .theme-light .app-shell::after{
   background:linear-gradient(180deg, rgba(86,149,236,.90), rgba(86,149,236,.30));
   opacity:.82;
@@ -1600,7 +1603,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.4 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.6 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -3300,12 +3303,15 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
           const shell = document.querySelector('.app-shell');
           const view = document.querySelector('#view');
           const activeRoot = view?.querySelector('.mathpad, section.surface');
-          const anchor = activeRoot?.querySelector('.mpHead, .glgrid, .ti-panel, .gllTop') || activeRoot;
-          if(!shell || !anchor) return;
+          if(!shell || !activeRoot) return;
           const shellRect = shell.getBoundingClientRect();
-          const anchorRect = anchor.getBoundingClientRect();
-          const offset = Math.max(0, Math.round(anchorRect.top - shellRect.top));
-          shell.style.setProperty('--shell-accent-top', offset + 'px');
+          const panelRect = activeRoot.getBoundingClientRect();
+          const top = Math.max(0, Math.round(panelRect.top - shellRect.top));
+          const left = Math.max(0, Math.round(panelRect.left - shellRect.left));
+          const bottom = Math.max(0, Math.round(shellRect.bottom - panelRect.bottom));
+          shell.style.setProperty('--shell-accent-top', top + 'px');
+          shell.style.setProperty('--shell-accent-left', left + 'px');
+          shell.style.setProperty('--shell-accent-bottom', bottom + 'px');
         }catch(_){ }
       }
 

@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="LegendCalc">
     <meta name="theme-color" content="#0b1a12" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f6f5ef" media="(prefers-color-scheme: light)">
-<title>LegendCalc Suite v1.9.1 — TI Shell Accent Restore</title>
+<title>LegendCalc Suite v1.9.2 — TI Left Accent Restore</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/ringbearer" rel="stylesheet">
   <style>
@@ -1254,7 +1254,7 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
 }
 
 
-/* v1.9.1 TI shell accent restore */
+/* v1.9.2 TI left shell accent restore */
 .wrap{max-width:1360px;margin:18px auto;padding:0 14px 24px}
 .app-shell{position:relative}
 .device-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:0}
@@ -1319,7 +1319,7 @@ header{margin-bottom:0}
   .device-subline{gap:8px}
 }
 
-/* v1.9.1 TI shell accent restore */
+/* v1.9.2 TI left shell accent restore */
 .app-shell{
   padding:14px;
   border-radius:32px;
@@ -1341,7 +1341,7 @@ header{margin-bottom:0}
   content:'';
   position:absolute;
   top:22px;
-  right:14px;
+  left:14px;
   bottom:22px;
   width:14px;
   border-radius:999px;
@@ -1354,7 +1354,7 @@ header{margin-bottom:0}
   content:'';
   position:absolute;
   top:18px;
-  right:34px;
+  left:34px;
   bottom:18px;
   width:1px;
   background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
@@ -1373,8 +1373,8 @@ header{margin-bottom:0}
   box-shadow:0 0 0 1px rgba(115,211,255,.14), inset 0 0 12px rgba(255,255,255,.18), 0 0 34px rgba(0,162,255,.22);
 }
 @media (max-width:900px){
-  .app-shell::after{right:10px;width:10px;top:18px;bottom:18px}
-  .app-shell::before{right:26px;top:16px;bottom:16px}
+  .app-shell::after{left:10px;width:10px;top:18px;bottom:18px}
+  .app-shell::before{left:26px;top:16px;bottom:16px}
 }
 @media (max-width:620px){
   .app-shell::after{top:16px;bottom:16px;width:8px}
@@ -1616,7 +1616,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.0 • 2026-03-21</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v1.9.2 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>

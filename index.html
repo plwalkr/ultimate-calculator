@@ -797,11 +797,108 @@ main{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     .gllBottom{grid-area:bottom;}
     .glr{grid-area:right;}
 
-    .gllines{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-    .glline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:14px;border:1px solid transparent;transition:border-color .16s ease, box-shadow .16s ease, background .16s ease;}
-    .glline.is-active{border-color:rgba(93,176,255,.55);background:rgba(93,176,255,.10);box-shadow:inset 0 0 0 1px rgba(93,176,255,.14),0 0 0 1px rgba(0,0,0,.08);}
-    .glline .expr{flex:1;min-width:160px;}
-    .glline .chip{width:12px;height:12px;border-radius:999px;opacity:.9;flex:0 0 12px;}
+    .glEditorHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 0;}
+    .glEditorTitle{font-size:1rem;font-weight:900;letter-spacing:.02em;}
+    .glEditorSub{font-size:.86rem;color:var(--muted);line-height:1.35;margin-top:4px;max-width:34ch;}
+    .gllines{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+    .glline{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+      transition:border-color .16s ease, box-shadow .16s ease, background .16s ease, transform .16s ease;
+    }
+    .theme-light .glline{
+      border-color:#d6e3fb;
+      background:#ffffff;
+    }
+    .theme-inspire .glline{
+      border-color:#223242;
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+    }
+    .glline:hover{transform:translateY(-1px);}
+    .glline.is-active{
+      border-color:rgba(93,176,255,.60);
+      background:linear-gradient(180deg,rgba(93,176,255,.14),rgba(93,176,255,.06));
+      box-shadow:inset 0 0 0 1px rgba(93,176,255,.18),0 10px 24px rgba(0,0,0,.16);
+    }
+    .theme-light .glline.is-active{
+      border-color:#7aa8e9;
+      background:linear-gradient(180deg,#f3f8ff,#eef5ff);
+      box-shadow:inset 0 0 0 1px rgba(122,168,233,.20),0 10px 24px rgba(63,87,124,.10);
+    }
+    .gllineLead,.gllineTail{display:flex;align-items:center;gap:10px;}
+    .gllabel{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:40px;
+      height:32px;
+      padding:0 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.78rem;
+    }
+    .theme-light .gllabel{border-color:#d6e3fb;background:#f3f8ff;}
+    .theme-inspire .gllabel{border-color:#244056;background:rgba(0,162,255,.08);}
+    .glline.is-active .gllabel{
+      border-color:rgba(0,162,255,.82);
+      background:linear-gradient(180deg,rgba(0,162,255,.96),rgba(0,136,214,.94));
+      color:#fff;
+      box-shadow:0 8px 18px rgba(0,0,0,.16);
+    }
+    .glline .expr{
+      min-width:0;
+      width:100%;
+      border-radius:14px;
+      padding:12px 14px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:.99rem;
+      font-weight:700;
+      letter-spacing:.01em;
+    }
+    .glline .expr:focus{
+      box-shadow:0 0 0 3px rgba(0,162,255,.18);
+      border-color:rgba(0,162,255,.55);
+    }
+    .glline .chip{
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      opacity:.96;
+      flex:0 0 14px;
+      box-shadow:0 0 0 2px rgba(255,255,255,.12), inset 0 0 0 1px rgba(0,0,0,.18);
+    }
+    .glline input[type="checkbox"]{
+      width:18px;
+      height:18px;
+      accent-color:#29b6ff;
+      cursor:pointer;
+    }
+    .glColorPick{
+      width:42px;
+      height:42px;
+      padding:4px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+    }
+    .theme-light .glColorPick{border-color:#d6e3fb;background:#f8fbff;}
+    .glDeleteBtn{
+      min-width:42px;
+      height:42px;
+      border-radius:12px;
+      padding:0 12px;
+      font-size:1rem;
+      font-weight:900;
+    }
     .glline .tiny{padding:8px 10px;}
 
     /* old gll */
@@ -1514,6 +1611,16 @@ header{margin-bottom:0}
 }
 @media (min-width: 820px){
   .glgrid{grid-template-columns:minmax(360px,430px) minmax(0,1fr)}
+  .gllTop{
+    padding:16px 16px 18px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 14px 28px rgba(0,0,0,.12);
+  }
+  .gllBottom{
+    padding:16px;
+  }
+  .gllines{
+    gap:12px;
+  }
 }
 @media (max-width:700px){
   .module-strip{padding:11px 12px}
@@ -1693,7 +1800,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.10 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.11 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -3946,6 +4053,13 @@ sin(x)+x^2
                     <button class="btn" id="glClearLines" type="button">Clear</button>
                   </div>
                 </div>
+                <div class="glEditorHeader">
+                  <div>
+                    <div class="glEditorTitle">Y= editor</div>
+                    <div class="glEditorSub">Click any row to target it. Quick examples and edits follow the selected line, not just Y1.</div>
+                  </div>
+                  <div class="module-chip">Desktop graph editor</div>
+                </div>
                 <div id="glLines" class="gllines"></div>
                 <textarea id="gx" class="input" rows="4" style="display:none" aria-hidden="true"></textarea>
                 <details class="mCompactDetails" id="glCompactHelp" data-compact-default="closed-mobile">
@@ -3954,7 +4068,7 @@ sin(x)+x^2
                     <div class="tipCard">
                       <div class="tipTitle">Graph ideas</div>
                       <div class="tipText">
-                        Click an example to load it into the first function row. Colors, toggles, and the graph update from there.
+                        Click a row first, then tap an example to load it into the selected function line. Colors, toggles, and the graph update from there.
                       </div>
                       <div class="exampleBar" id="graphExamples">
                         <button class="exampleChip" type="button" data-expr="sin(x)">sin(x)</button>
@@ -4228,11 +4342,28 @@ sin(x)+x^2
                 if($('#livePlot')?.checked) schedulePlot();
               });
 
-              row.appendChild(cb);
-              row.appendChild(chip);
-              row.appendChild(cPick);
+              const lead=document.createElement('div');
+              lead.className='gllineLead';
+
+              const tag=document.createElement('span');
+              tag.className='gllabel';
+              tag.textContent='Y' + (idx + 1);
+
+              const tail=document.createElement('div');
+              tail.className='gllineTail';
+
+              cPick.classList.add('glColorPick');
+              del.classList.add('glDeleteBtn');
+
+              lead.appendChild(cb);
+              lead.appendChild(tag);
+              lead.appendChild(chip);
+              tail.appendChild(cPick);
+              tail.appendChild(del);
+
+              row.appendChild(lead);
               row.appendChild(inp);
-              row.appendChild(del);
+              row.appendChild(tail);
               host.appendChild(row);
             });
             glSetSelectedIndex(glSelectedIndex);

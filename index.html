@@ -1800,7 +1800,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.11 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.12 • 2026-03-22</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -2741,6 +2741,10 @@ function startApp(){
       let glLastRenderedChart='';
       let glScheduleStamp=0;
       let glLastScheduledKey='';
+      let glLastScheduledChart='';
+      let glLastScheduleSource='';
+      let glLastSkipLogKey='';
+      let glLastSkipLogAt=0;
       function glActiveTab(){
         try{
           const viaView = document.getElementById('view')?.getAttribute('data-view-tab');
@@ -2775,6 +2779,18 @@ function startApp(){
         glLibWaitIv=null;
         glScheduleStamp++;
         glLastScheduledKey='';
+        glLastScheduledChart='';
+        glLastScheduleSource='';
+      }
+      function glMaybeLogSkip(msg, key=''){
+        try{
+          const stamp = String(msg||'') + '||' + String(key||'');
+          const now = Date.now();
+          if(stamp===glLastSkipLogKey && (now - glLastSkipLogAt) < 900) return;
+          glLastSkipLogKey = stamp;
+          glLastSkipLogAt = now;
+          dbgLine('INFO', msg);
+        }catch(_){ }
       }
       function glLooksIncomplete(expr){
         const s=String(expr||'').trim();
@@ -3120,6 +3136,8 @@ function doPlot(){
     glLastRenderedKey = plotKey;
     glLastRenderedChart = chartToken;
     glLastScheduledKey = '';
+    glLastScheduledChart = '';
+    glLastScheduleSource = '';
     try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
     glPlotTimer = null;
     try{ dbgLine('INFO', (window.Plotly && typeof window.Plotly.react==='function') ? 'Plotly.react succeeded' : 'Plotly.newPlot succeeded'); }catch(_){}
@@ -3147,18 +3165,24 @@ function doPlot(){
   }
 }
 
-function schedulePlot(ms=240){
+function schedulePlot(ms=240, source='generic'){
   if(!glActiveTab()) return;
   const nextKey = glComputePlotKey();
   const chartEl = document.getElementById('chart');
   const chartToken = chartEl ? (chartEl.dataset.glChartToken || '') : '';
   if(nextKey && chartToken && nextKey===glLastRenderedKey && chartToken===glLastRenderedChart && !glIsTyping()){
-    try{ dbgLine('INFO','GraphLab skipped schedule (no changes)'); }catch(_){ }
+    glMaybeLogSkip('GraphLab skipped schedule (no changes)', nextKey);
     return;
   }
-  if(glPlotTimer && nextKey && glLastScheduledKey===nextKey) return;
+  if(glPlotTimer && nextKey && glLastScheduledKey===nextKey && glLastScheduledChart===chartToken){
+    if(source && glLastScheduleSource===source) return;
+    glLastScheduleSource = source || glLastScheduleSource;
+    return;
+  }
   try{ if(glPlotTimer) clearTimeout(glPlotTimer); }catch(_){ }
   glLastScheduledKey = nextKey;
+  glLastScheduledChart = chartToken;
+  glLastScheduleSource = source || 'generic';
   const stamp = ++glScheduleStamp;
   glPlotTimer=setTimeout(()=>{
     glPlotTimer=null;
@@ -3168,8 +3192,10 @@ function schedulePlot(ms=240){
     const liveChart = document.getElementById('chart');
     const liveToken = liveChart ? (liveChart.dataset.glChartToken || '') : '';
     if(currentKey && liveToken && currentKey===glLastRenderedKey && liveToken===glLastRenderedChart && !glIsTyping()){
-      try{ dbgLine('INFO','GraphLab skipped delayed no-op plot'); }catch(_){ }
+      glMaybeLogSkip('GraphLab skipped delayed no-op plot', currentKey);
       glLastScheduledKey = '';
+      glLastScheduledChart = '';
+      glLastScheduleSource = '';
       return;
     }
     try{ doPlot(); }catch(e){ try{ logErr(e); }catch(_){ } }
@@ -4041,6 +4067,7 @@ sin(x)+x^2
       }
 
       function renderGraphLab(){
+        clearGraphlabTimers();
         const view=$('#view');
         view.innerHTML=`
           <section class="surface">
@@ -4294,14 +4321,14 @@ sin(x)+x^2
                 l.on=cb.checked;
                 glSyncTextarea(lines);
                 persist();
-                if($('#livePlot')?.checked) schedulePlot();
+                if($('#livePlot')?.checked) schedulePlot(240,'row-toggle');
               });
               cPick.addEventListener('input', ()=>{
                 l.color = cPick.value;
                 chip.style.background = cPick.value;
                 glSyncTextarea(lines);
                 persist();
-                if($('#livePlot')?.checked) schedulePlot();
+                if($('#livePlot')?.checked) schedulePlot(240,'row-toggle');
               });
               const markActive = ()=> glSetSelectedIndex(idx);
               row.addEventListener('mousedown', markActive);
@@ -4318,7 +4345,7 @@ sin(x)+x^2
                 glSyncTextarea(lines);
                 persist();
                 try{ glSetStatus('warn', 'Typing…', 'Live plot buffered while you finish the expression.', ['desktop smoothing'], lines.filter(r=>r && r.on && String(r.expr||'').trim()).map(r=>normalizeExpr(r.expr)).filter(Boolean)); }catch(_){ }
-                if($('#livePlot')?.checked) schedulePlot(320);
+                if($('#livePlot')?.checked) schedulePlot(320,'expr-input');
               });
               inp.addEventListener('blur', ()=>{
                 const norm = normalizeExpr(inp.value);
@@ -4328,7 +4355,7 @@ sin(x)+x^2
                   glSyncTextarea(lines);
                   persist();
                 }
-                if($('#livePlot')?.checked) schedulePlot(120);
+                if($('#livePlot')?.checked) schedulePlot(120,'expr-blur');
               });
               del.addEventListener('click', ()=>{
                 lines.splice(idx,1);
@@ -4339,7 +4366,7 @@ sin(x)+x^2
                 persist();
                 glRenderLines(lines);
                 glSetSelectedIndex(glSelectedIndex);
-                if($('#livePlot')?.checked) schedulePlot();
+                if($('#livePlot')?.checked) schedulePlot(240,'row-toggle');
               });
 
               const lead=document.createElement('div');
@@ -4443,7 +4470,7 @@ sin(x)+x^2
                   glSetStatus('ok', 'Example loaded', `The example is now in line ${targetIdx + 1} and ready to edit or plot.`, ['source: examples'], [expr]);
                 }catch(_){ }
                 try{
-                  if($('#livePlot')?.checked) schedulePlot(90);
+                  if($('#livePlot')?.checked) schedulePlot(90,'example-chip');
                   else if(typeof doPlot==='function') doPlot();
                 }catch(_){ }
                 try{ dbgLine('ACTION', 'Graph example inserted | row=' + (targetIdx + 1) + ' | ' + expr); }catch(_){ }
@@ -4488,13 +4515,14 @@ sin(x)+x^2
             lines.push({on:true, expr:''});
             glSelectedIndex = lines.length - 1;
             glSyncTextarea(lines); persist(); glRenderLines(lines); glSetSelectedIndex(glSelectedIndex, {focus:true});
+            if($('#livePlot')?.checked) schedulePlot(180,'add-line');
           });
           $('#glClearLines')?.addEventListener('click', ()=>{
             lines.splice(0, lines.length, {on:true, expr:''});
             glSelectedIndex = 0;
             glSyncTextarea(lines); persist(); glRenderLines(lines); glSetSelectedIndex(0, {focus:true});
             if(typeof toast==="function"){toast('Lines cleared');}else{console.warn("Toast:",'Lines cleared');}
-            if($('#livePlot')?.checked) schedulePlot();
+            if($('#livePlot')?.checked) schedulePlot(240,'row-toggle');
           });
 
           $('#plotBtn')?.addEventListener('click', ()=>{ persist(); doPlot(); });
@@ -4502,11 +4530,11 @@ sin(x)+x^2
           // live plot triggers
           ['xmin','xmax','samples','x0','a','b'].forEach(id=>{
             const el=$('#'+id);
-            if(el) el.addEventListener('input', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180); });
+            if(el) el.addEventListener('input', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180,'graph-control'); });
           });
           ['d1','tanOn','intOn','rootsOn','gridOn','livePlot'].forEach(id=>{
             const el=$('#'+id);
-            if(el) el.addEventListener('change', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180); });
+            if(el) el.addEventListener('change', ()=>{ persist(); if($('#livePlot')?.checked) schedulePlot(180,'graph-control'); });
           });
 
           // First plot when libs ready

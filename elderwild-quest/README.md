@@ -34,3 +34,13 @@ http://127.0.0.1:8080
 - Collect 3 relics to open sanctum gate
 - NPC guidance dialogue
 - Final rescue condition
+
+
+## Visual direction
+
+This build intentionally uses an original retro top-down fantasy look (not copied assets) with:
+- a brave warrior hero
+- knight enemies
+- a mischievous/naughty imp foe
+- dragonling magic bolts
+- relic + rescue progression

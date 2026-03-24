@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ultimate-calculator-cache-v10';
+const CACHE_NAME = 'ultimate-calculator-cache-v11';
 const urlsToCache = [
   '/',
   '/index.html',

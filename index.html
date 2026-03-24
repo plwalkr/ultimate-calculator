@@ -1851,12 +1851,12 @@ header{margin-bottom:0}
     <div class="app-shell">
       <header class="device-header">
         <div class="device-left">
-          <div class="device-kicker">ELARION // ADVENTURE PROTOTYPE & TOOLS</div>
-          <div class="titleline"><h1>Legends of Elarion</h1><span class="ver" id="verTag">v2.1.0 • 2026-03-23</span></div>
+          <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.1.1 • 2026-03-24</span></div>
           <div class="device-subline">
-            <span class="active-module" id="activeModule">Adventure</span>
+            <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
-            <span class="note">classic Zelda-inspired exploration • high fantasy atmosphere</span>
+            <span class="note">desktop calculator pass • TI keypad hierarchy</span>
           </div>
         </div>
         <div class="device-right">
@@ -1873,10 +1873,7 @@ header{margin-bottom:0}
         </div>
       </header>
       <div class="tabswrap device-nav"><div class="tabs">
-        <button class="tab active" data-tab="adventure">Adventure</button>
-        <button class="tab" data-tab="world">World</button>
-        <button class="tab" data-tab="prototype">Prototype</button>
-        <button class="tab" data-tab="calc">Calculator</button>
+        <button class="tab active" data-tab="calc">Calculator</button>
         <button class="tab" data-tab="graphlab">GraphLab</button>
         <button class="tab" data-tab="units">Units</button>
         <button class="tab" data-tab="time">Time</button>
@@ -1885,11 +1882,12 @@ header{margin-bottom:0}
       <div class="device-rail" aria-hidden="true">
         <span class="rail-pill">HOME</span>
         <span class="rail-pill">DOC</span>
-        <span class="rail-pill rail-pill-live">ACTIVE <strong id="railActive">Adventure</strong></span>
+        <span class="rail-pill rail-pill-live">ACTIVE <strong id="railActive">Calculator</strong></span>
+        <a class="rail-pill" href="game.html" style="text-decoration:none;color:inherit">GAME PROJECT</a>
         <span class="rail-pill">CAS READY</span>
       </div>
       <div id="diag" class="ok">Loading…</div>
-      <main id="view" data-view-tab="adventure"></main>
+      <main id="view" data-view-tab="calc"></main>
 
     
 
@@ -3733,7 +3731,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       window.addEventListener('orientationchange', ()=>requestAnimationFrame(syncShellAccent));
 
       window.render = function(which){
-        const next = which || 'adventure';
+        const next = which || 'calc';
         try{ location.hash = next; }catch(_){ }
         render(next);
         requestAnimationFrame(syncShellAccent);
@@ -3821,7 +3819,7 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
             <div class="hero-grid">
               <div>
                 <span class="eyebrow">Love letter to classic adventure fantasy</span>
-                <h2 class="hero-title">Legends of Elarion</h2>
+                <h2 class="hero-title">LegendCalc Suite</h2>
                 <p class="hero-copy">A princess is trapped within ancient star-magic, dragon-fire is stirring in forgotten shrines, and the last heir of the Dawnward order must cross forests, ruins, castles, temples, and mountain paths to stop an old evil from waking beneath the kingdom.</p>
                 <div class="hero-actions">
                   <button class="hero-btn primary" type="button" data-goto="prototype">Play the prototype</button>
@@ -6012,7 +6010,7 @@ function stageRow(nmValue='30', unit='nm'){
         $('#testFanfare').addEventListener('click', ()=>{ ensureAudio(); fanfareSound(); if(typeof toast==="function"){toast('Fanfare');}else{console.warn("Toast:",'Fanfare');} });
       }
 
-      render((location.hash || '#adventure').slice(1));
+      render((location.hash || '#calc').slice(1));
       runSelfTests();
     }
   })();

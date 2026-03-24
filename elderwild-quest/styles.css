@@ -1,0 +1,22 @@
+:root{
+  --bg:#0d1218;
+  --card:#161f2b;
+  --line:#2b3d55;
+  --ink:#e9f1ff;
+  --muted:#9eb1cc;
+  --accent:#5fd494;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#111d2d,#0b0f15 68%);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
+.app{max-width:1220px;margin:20px auto;padding:0 16px 20px}
+.topbar h1{margin:0;font-size:2.1rem;color:#f8eec1}
+.subtitle{margin:6px 0 0;color:var(--muted)}
+.hud{margin:14px 0;padding:12px 14px;border:1px solid var(--line);background:var(--card);border-radius:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px}
+@media (max-width:1000px){.game-layout{grid-template-columns:1fr}}
+canvas{width:100%;display:block;border-radius:14px;border:1px solid #384d6e;background:#111b28;image-rendering:pixelated;box-shadow:0 12px 30px rgba(0,0,0,.35), inset 0 0 0 4px #24344d}
+.panel{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:14px}
+.panel h2{margin:0 0 8px;color:var(--accent)}
+.panel ul{margin:0 0 16px;padding-left:18px;color:var(--muted)}
+.message{min-height:64px;border:1px solid var(--line);border-radius:10px;background:#111826;padding:10px 12px;line-height:1.45;color:#d7e7ff;margin-bottom:14px}
+kbd{padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:#0f1622;color:#dce8ff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}

@@ -248,6 +248,58 @@
 .exampleChip:hover{transform:translateY(-1px)}
 .theme-light .exampleChip{border-color:#c9d7ef;background:#eef3ff}
 
+
+/* Elarion adventure modules */
+.adventure-shell,.world-shell,.prototype-shell{display:grid;gap:16px}
+.hero-surface{position:relative;overflow:hidden;padding:28px;border:1px solid rgba(255,255,255,.08);background:
+  radial-gradient(circle at top right, rgba(91,211,142,.18), transparent 30%),
+  radial-gradient(circle at left center, rgba(43,120,228,.18), transparent 28%),
+  linear-gradient(180deg, rgba(7,13,22,.94), rgba(18,25,36,.98));}
+.theme-light .hero-surface{background:linear-gradient(180deg,#ffffff,#edf4ff);border-color:#d6e3fb}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#dcecff;font-size:.82rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.theme-light .eyebrow{background:#eaf1ff;color:#205fbe}
+.hero-title{font-family:Ringbearer,Inter,serif;font-size:clamp(2.2rem,4vw,3.5rem);line-height:1.05;margin:14px 0 10px;color:#f7f2cf}
+.theme-light .hero-title{color:#163a73}
+.hero-copy{max-width:62ch;color:#dfe8f8;font-size:1.04rem;line-height:1.65}
+.theme-light .hero-copy{color:#29476f}
+.hero-actions,.hero-chips,.story-beats,.world-cards,.quest-grid,.prototype-stats,.prototype-controls,.prototype-actions,.prototype-legend{display:flex;gap:10px;flex-wrap:wrap}
+.hero-actions{margin-top:18px}
+.hero-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink);font-weight:900;cursor:pointer;text-decoration:none}
+.hero-btn.primary{background:linear-gradient(180deg,#2c87ff,#1a62d5);color:#fff;border-color:#2f8cff}
+.theme-light .hero-btn{background:#fff;border-color:#c9d7ef;color:#17355f}
+.theme-light .hero-btn.primary{color:#fff;background:linear-gradient(180deg,#2c87ff,#1a62d5)}
+.hero-chips span,.story-beat,.lore-pill,.world-card,.quest-card,.proto-card,.stat-pill,.control-pill,.legend-pill{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);border-radius:16px}
+.hero-chips span,.story-beat,.lore-pill,.stat-pill,.control-pill,.legend-pill{padding:10px 12px}
+.theme-light :is(.hero-chips span,.story-beat,.lore-pill,.world-card,.quest-card,.proto-card,.stat-pill,.control-pill,.legend-pill){border-color:#d6e3fb;background:#ffffff}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.story-beat strong,.world-card strong,.quest-card strong,.proto-card strong{display:block;margin-bottom:6px;color:#f5f0c8}
+.theme-light :is(.story-beat strong,.world-card strong,.quest-card strong,.proto-card strong){color:#17355f}
+.world-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.world-card,.quest-card,.proto-card{padding:16px}
+.world-card p,.quest-card p,.proto-card p{margin:0;color:var(--muted);line-height:1.5}
+.map-banner{padding:22px;border-radius:18px;background:linear-gradient(135deg, rgba(18,38,31,.92), rgba(24,36,69,.92));border:1px solid rgba(255,255,255,.08)}
+.theme-light .map-banner{background:linear-gradient(135deg,#eff6ff,#f8fbff);border-color:#d6e3fb}
+.map-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+.map-node{padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.theme-light .map-node{background:#fff;border-color:#d6e3fb}
+.map-node h3{margin:0 0 8px;font-size:1rem;color:#f5f0c8}
+.theme-light .map-node h3{color:#17355f}
+.map-node p{margin:0;color:var(--muted);line-height:1.45}
+.prototype-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:16px}
+@media (max-width:980px){.prototype-layout{grid-template-columns:1fr}}
+.prototype-stage{padding:16px;border-radius:20px;background:linear-gradient(180deg, rgba(5,11,18,.96), rgba(19,28,38,.96));border:1px solid rgba(255,255,255,.08)}
+.theme-light .prototype-stage{background:linear-gradient(180deg,#ffffff,#edf4ff);border-color:#d6e3fb}
+.prototype-stage canvas{width:100%;max-width:100%;display:block;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:#0d1721;image-rendering:pixelated}
+.prototype-panel{display:grid;gap:14px}
+.prototype-actions button{min-height:44px}
+.prototype-message{min-height:48px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);line-height:1.5}
+.theme-light .prototype-message{background:#fff;border-color:#d6e3fb}
+.prototype-hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;padding:2px 6px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.theme-light .kbd{background:#eef4ff;border-color:#d6e3fb}
+
 /* Premium calculus output cards */
 .calcResultWrap{
   display:flex;
@@ -1800,7 +1852,7 @@ header{margin-bottom:0}
       <header class="device-header">
         <div class="device-left">
           <div class="device-kicker">LEGENDCALC // HANDHELD SUITE</div>
-          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.0.12 • 2026-03-22</span></div>
+          <div class="titleline"><h1>LegendCalc Suite</h1><span class="ver" id="verTag">v2.1.1 • 2026-03-24</span></div>
           <div class="device-subline">
             <span class="active-module" id="activeModule">Calculator</span>
             <span class="device-divider" aria-hidden="true"></span>
@@ -1831,6 +1883,7 @@ header{margin-bottom:0}
         <span class="rail-pill">HOME</span>
         <span class="rail-pill">DOC</span>
         <span class="rail-pill rail-pill-live">ACTIVE <strong id="railActive">Calculator</strong></span>
+        <a class="rail-pill" href="game.html" style="text-decoration:none;color:inherit">GAME PROJECT</a>
         <span class="rail-pill">CAS READY</span>
       </div>
       <div id="diag" class="ok">Loading…</div>
@@ -3604,6 +3657,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
       function getModuleInfo(which){
         const map={
+          adventure:{label:'Adventure',title:'Adventure Landing',sub:'A heroic overview for the Zelda-inspired quest through Elarion.',chips:['Heroic tone','Main quest','Dungeon path']},
+          world:{label:'World',title:'World & Lore Atlas',sub:'A guided tour of the kingdom, its regions, and the legends beneath them.',chips:['Regions','Lore','Side quests']},
+          prototype:{label:'Prototype',title:'Playable Prototype',sub:'A lightweight top-down exploration slice with item gating and rescue goals.',chips:['Top-down','Item gate','Mini dungeon']},
           calc:{label:'Calculator',title:'Calculator Worksheet',sub:'Worksheet input, clustered keypad, and graph handoff.',chips:['Worksheet','Clustered keys','Graph bridge']},
           graphlab:{label:'GraphLab',title:'GraphLab Workspace',sub:'Function editor, live plot, and calculus tools in one screen.',chips:['Y= editor','Live plot','Calculus']},
           units:{label:'Units',title:'Unit Conversion',sub:'Fast engineering conversions with a shared TI-style panel layout.',chips:['Engineering','Panel view','Quick swap']},
@@ -3641,7 +3697,10 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
         const target = which || 'calc';
         try{ dbgLine('INFO',`render(${target}) called`); }catch(_){ }
         if(target!=='graphlab') clearGraphlabTimers();
-        if(target==='graphlab') renderGraphLab();
+        if(target==='adventure') renderAdventure();
+        else if(target==='world') renderWorld();
+        else if(target==='prototype') renderPrototype();
+        else if(target==='graphlab') renderGraphLab();
         else if(target==='units') renderUnits();
         else if(target==='time') renderTime();
         else if(target==='sound'){ renderCalc(); if(typeof openSettings==='function') openSettings(true); syncModuleChrome('calc'); return; }
@@ -3672,7 +3731,9 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
       window.addEventListener('orientationchange', ()=>requestAnimationFrame(syncShellAccent));
 
       window.render = function(which){
-        render(which);
+        const next = which || 'calc';
+        try{ location.hash = next; }catch(_){ }
+        render(next);
         requestAnimationFrame(syncShellAccent);
       };
 
@@ -3718,6 +3779,326 @@ window.addEventListener('error', (e)=>{ dbgLine('ERROR', (e.message||'') + (e.fi
 
 
       /* ---------- Calculator ---------- */
+
+      const adventureLore = {
+        relics:[
+          'Lantern of Aelwyn reveals hidden runes and burns away corruption.',
+          'Moonhook Chain lets the hero cross ravines, battlements, and broken bridges.',
+          'Gale Boots awaken wind bridges, cliff paths, and timed shrine puzzles.',
+          'Dawnfire Blade is the sacred weapon needed to break Malgareth\'s shield.'
+        ],
+        regions:[
+          {name:'Hearthmere', text:'A warm lakeside shire where festival lanterns glow, elders speak of dragons, and the first hints of corruption appear at dusk.'},
+          {name:'Greenwood of Lethen', text:'An enchanted forest of mossy ruins, spirit altars, and hidden paths that only open once ancient runes are rekindled.'},
+          {name:'Castle Aurum', text:'The golden seat of the old kingdom, now shadowed by political fear, sealed archives, and the princess\'s sudden disappearance.'},
+          {name:'Ashen Stair', text:'A steep mountain pass of rope bridges, watchfires, and dragon-worn stone where wind and courage decide the path forward.'},
+          {name:'Hollowdeep', text:'A buried mine-temple of ancient gears, echoing catacombs, and forgotten Dawnward vaults.'},
+          {name:'Starfall Sanctum', text:'The final celestial ruin where the kingdom\'s lost power and Malgareth\'s return collide.'}
+        ],
+        quests:[
+          {name:'The Broken Bridge of Rowan Ford', text:'Gather timber, win a mason\'s trust, and reopen a vital route that reveals a hidden cave and heart upgrade.'},
+          {name:'Songs for the Dragon Shrine', text:'Recover scattered verses of a sacred hymn to earn the Dragonflute and awaken an ancient ally.'},
+          {name:'The Knight Without a Banner', text:'Help a disgraced knight clear his name to gain combat training, a lore-heavy companion thread, and optional gear.'},
+          {name:'The Lantern Keeper\'s Child', text:'Lift a village curse by carrying protective flame through a cave network without letting darkness consume it.'}
+        ]
+      };
+
+      function bindTabLinks(scope){
+        (scope || document).querySelectorAll('[data-goto]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const tab = btn.getAttribute('data-goto');
+            if(tab){ location.hash = tab; render(tab); }
+          });
+        });
+      }
+
+      function renderAdventure(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface hero-surface adventure-shell">
+            <div class="hero-grid">
+              <div>
+                <span class="eyebrow">Love letter to classic adventure fantasy</span>
+                <h2 class="hero-title">LegendCalc Suite</h2>
+                <p class="hero-copy">A princess is trapped within ancient star-magic, dragon-fire is stirring in forgotten shrines, and the last heir of the Dawnward order must cross forests, ruins, castles, temples, and mountain paths to stop an old evil from waking beneath the kingdom.</p>
+                <div class="hero-actions">
+                  <button class="hero-btn primary" type="button" data-goto="prototype">Play the prototype</button>
+                  <button class="hero-btn" type="button" data-goto="world">Open the world atlas</button>
+                </div>
+                <div class="hero-chips" style="margin-top:18px">
+                  <span>Top-down exploration</span>
+                  <span>Memorable dungeons</span>
+                  <span>Meaningful item progression</span>
+                  <span>Dragons tied to the mythos</span>
+                  <span>Ancient kingdom atmosphere</span>
+                </div>
+              </div>
+              <div class="proto-card">
+                <strong>Main quest pillars</strong>
+                <p>Recover sacred relics, reopen the temples of the old kingdom, and gather enough light to pierce the prison holding Princess Elyra.</p>
+                <div class="prototype-hud" style="margin-top:14px">
+                  <div class="stat-pill"><strong>Hero</strong><div>Last blood of the Dawnward</div></div>
+                  <div class="stat-pill"><strong>Threat</strong><div>Malgareth, the star-eater</div></div>
+                  <div class="stat-pill"><strong>Wise dragon</strong><div>Aurelion of Ember Crown</div></div>
+                  <div class="stat-pill"><strong>Corrupted dragon</strong><div>Vharos beneath Starfall</div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="surface">
+            <div class="section-title">Escalating story arc</div>
+            <div class="section-grid story-beats">
+              <div class="story-beat"><strong>1. Peace before dusk</strong>Hearthmere begins as a cozy frontier village, but sacred lanterns dim and soldiers whisper that the princess vanished during a moonlit rite.</div>
+              <div class="story-beat"><strong>2. Mystery in the ruins</strong>The hero learns he carries Dawnward blood and can awaken relics hidden in the Greenwood and beneath Castle Aurum.</div>
+              <div class="story-beat"><strong>3. Corruption spreads</strong>Mountain passes freeze, caves blacken with star-ash, and dragon omens force the kingdom to confront a buried ancient war.</div>
+              <div class="story-beat"><strong>4. Relics and revelation</strong>Each dungeon grants a new traversal tool that opens the wider overworld and restores fragments of the kingdom's lost memory.</div>
+              <div class="story-beat"><strong>5. Kingdom at the brink</strong>The party discovers Malgareth is using the princess as a conduit to reopen the Starfall Sanctum and crown a dragon-host.</div>
+              <div class="story-beat"><strong>6. Final ascent</strong>With the Dawnfire Blade and Dragonflute, the hero crosses the sanctum, frees Elyra, and chooses how Elarion's ancient power will endure.</div>
+            </div>
+          </section>
+
+          <section class="surface">
+            <div class="section-title">Dungeon identity & progression rewards</div>
+            <div class="world-map">
+              <div class="world-card"><strong>Whisperroot Shrine</strong><p>Forest temple of roots and moon mirrors. Reward: <em>Lantern of Aelwyn</em> for hidden doors and shadow-clearing.</p></div>
+              <div class="world-card"><strong>Stormwatch Keep</strong><p>A mountain fortress built into the cliffs. Reward: <em>Gale Boots</em> for wind dashes and broken-bridge traversal.</p></div>
+              <div class="world-card"><strong>Hollowdeep Forge</strong><p>An underground ruin of gears, rails, and sealed Dawnward chambers. Reward: <em>Runebrand Gauntlet</em> for switches and stone lifting.</p></div>
+              <div class="world-card"><strong>Mere of Veils</strong><p>A drowned sanctuary wrapped in illusion magic. Reward: <em>Moonhook Chain</em> for grappling and puzzle timing.</p></div>
+              <div class="world-card"><strong>Ember Crown</strong><p>Dragonfire caverns where the hero earns Aurelion's trust. Reward: <em>Dragonflute</em> to call ancient mechanisms and allies.</p></div>
+              <div class="world-card"><strong>Starfall Sanctum</strong><p>The endgame ascent through celestial halls, corrupted dragon fire, and the prison of Princess Elyra. Reward: the fate of the kingdom.</p></div>
+            </div>
+          </section>
+        `;
+        bindTabLinks(view);
+      }
+
+      function renderWorld(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface world-shell">
+            <div class="map-banner">
+              <span class="eyebrow">World map & lore atlas</span>
+              <h2 style="margin:14px 0 8px">The Kingdom of Elarion</h2>
+              <p class="hero-copy" style="margin:0;max-width:70ch">Elarion is built to feel mysterious, ancient, and worth getting lost in: every region loops back into a larger legend, every shortcut feels earned, and every ruin hints that dragons and kings once fought for the same sacred fire.</p>
+              <div class="map-list">
+                ${adventureLore.regions.map(region=>`<div class="map-node"><h3>${region.name}</h3><p>${region.text}</p></div>`).join('')}
+              </div>
+            </div>
+          </section>
+          <section class="surface">
+            <div class="section-title">Legendary tools that reshape exploration</div>
+            <div class="section-grid">
+              ${adventureLore.relics.map(item=>`<div class="lore-pill">${item}</div>`).join('')}
+            </div>
+          </section>
+          <section class="surface">
+            <div class="section-title">Meaningful side quests</div>
+            <div class="world-map">
+              ${adventureLore.quests.map(quest=>`<div class="quest-card"><strong>${quest.name}</strong><p>${quest.text}</p></div>`).join('')}
+            </div>
+          </section>
+          <section class="surface">
+            <div class="section-title">Emotional tone</div>
+            <div class="section-grid">
+              <div class="proto-card"><strong>Cozy and dangerous</strong><p>Village hearths, gentle music, and friendly storytellers should sit right beside cursed woods, moonlit ruins, and distant war drums.</p></div>
+              <div class="proto-card"><strong>Heroic and magical</strong><p>The player should constantly feel that old magic still matters: sacred swords, hidden runes, dragon flame, and wise guardians are part of everyday myth.</p></div>
+              <div class="proto-card"><strong>Emotional stakes</strong><p>Princess Elyra is not just a quest marker. Her fate, the hero's bloodline, and the kingdom's memory are all intertwined.</p></div>
+            </div>
+          </section>
+        `;
+      }
+
+      let prototypeState = null;
+      let prototypeFrame = 0;
+      let prototypeKeys = {};
+
+      function renderPrototype(){
+        const view=$('#view');
+        view.innerHTML=`
+          <section class="surface prototype-shell">
+            <div class="prototype-layout">
+              <div class="prototype-stage">
+                <canvas id="protoCanvas" width="640" height="416" aria-label="Playable Elarion prototype"></canvas>
+                <div class="prototype-hud">
+                  <div class="stat-pill"><strong>Relics</strong><div id="protoRelics">0 / 3</div></div>
+                  <div class="stat-pill"><strong>Ability</strong><div id="protoAbility">No lantern yet</div></div>
+                  <div class="stat-pill"><strong>Quest</strong><div id="protoGoal">Find the shrine, cave, and tower relics</div></div>
+                  <div class="stat-pill"><strong>Status</strong><div id="protoStatus">Exploring Hearthmere</div></div>
+                </div>
+              </div>
+              <div class="prototype-panel">
+                <div class="proto-card">
+                  <strong>Prototype goal</strong>
+                  <p>Explore the overworld, collect three sacred relics, use the lantern to reveal the hidden bridge, and reach Princess Elyra in the tower.</p>
+                </div>
+                <div class="prototype-message" id="protoMessage">Move with <span class="kbd">WASD</span> or <span class="kbd">← ↑ ↓ →</span>. Step into glowing relic circles to collect them.</div>
+                <div class="proto-card">
+                  <strong>Controls</strong>
+                  <div class="prototype-controls" style="margin-top:12px">
+                    <div class="control-pill"><span class="kbd">WASD</span> or <span class="kbd">Arrows</span> move</div>
+                    <div class="control-pill"><span class="kbd">R</span> restart run</div>
+                    <div class="control-pill">Lantern reveals the hidden bridge</div>
+                  </div>
+                </div>
+                <div class="proto-card">
+                  <strong>What this slice demonstrates</strong>
+                  <div class="prototype-legend" style="margin-top:12px">
+                    <div class="legend-pill">Top-down overworld movement</div>
+                    <div class="legend-pill">Zelda-style item gate</div>
+                    <div class="legend-pill">Named locations and quest flavor</div>
+                    <div class="legend-pill">Rescue-driven story objective</div>
+                  </div>
+                </div>
+                <div class="prototype-actions">
+                  <button class="btn primary" type="button" id="protoReset">Restart prototype</button>
+                  <button class="btn" type="button" data-goto="world">Read the world atlas</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+        bindTabLinks(view);
+        initPrototype();
+      }
+
+      function initPrototype(){
+        const canvas = $('#protoCanvas');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const relicDefs = [
+          {id:'grove', x:112, y:112, label:'Lantern of Aelwyn', color:'#ffd166', hint:'The forest shrine grants a lantern. Hidden paths can now be revealed.', ability:'Lantern awakened'},
+          {id:'cave', x:560, y:118, label:'Moonhook Sigil', color:'#8be9fd', hint:'A cave relic remembers the old grappling ways of the Dawnward.', ability:'Lantern + sigil'},
+          {id:'tower', x:118, y:336, label:'Dragonflute Verse', color:'#ff9f6e', hint:'The tower verse calls ancient guardians and completes the rescue rite.', ability:'Lantern + sigil + verse'}
+        ];
+        prototypeState = {
+          ctx, canvas,
+          player:{x:74,y:210,size:14,speed:2.35},
+          relics: relicDefs.map(r=>({...r,collected:false})),
+          doors:{bridge:false, rescue:false},
+          win:false,
+          message:'Move through Hearthmere and seek three relics.'
+        };
+        $('#protoReset').onclick = ()=>initPrototype();
+        updatePrototypeHud();
+        cancelAnimationFrame(prototypeFrame);
+        const step = ()=>{
+          if(!prototypeState || $('#view')?.dataset?.viewTab !== 'prototype') return;
+          updatePrototype();
+          drawPrototype();
+          prototypeFrame = requestAnimationFrame(step);
+        };
+        step();
+      }
+
+      window.addEventListener('keydown', e=>{
+        prototypeKeys[e.key.toLowerCase()] = true;
+        if(e.key.toLowerCase()==='r' && $('#view')?.dataset?.viewTab === 'prototype') initPrototype();
+      });
+      window.addEventListener('keyup', e=>{ prototypeKeys[e.key.toLowerCase()] = false; });
+
+      function prototypeSolidAt(x,y){
+        const walls = [
+          {x:0,y:0,w:640,h:24},{x:0,y:392,w:640,h:24},{x:0,y:0,w:24,h:416},{x:616,y:0,w:24,h:416},
+          {x:232,y:24,w:24,h:132},{x:232,y:258,w:24,h:134},{x:384,y:24,w:24,h:188},{x:384,y:304,w:24,h:88},
+          {x:256,y:156,w:128,h:24},{x:256,y:236,w:128,h:24},{x:452,y:248,w:112,h:24}
+        ];
+        if(!prototypeState?.doors.bridge){ walls.push({x:256,y:180,w:128,h:56}); }
+        if(!prototypeState?.doors.rescue){ walls.push({x:500,y:248,w:24,h:96}); }
+        return walls.some(w=>x > w.x-10 && x < w.x+w.w+10 && y > w.y-10 && y < w.y+w.h+10);
+      }
+
+      function updatePrototype(){
+        const s = prototypeState;
+        if(!s || s.win) return;
+        const p = s.player;
+        let dx = 0, dy = 0;
+        if(prototypeKeys['arrowup'] || prototypeKeys['w']) dy -= p.speed;
+        if(prototypeKeys['arrowdown'] || prototypeKeys['s']) dy += p.speed;
+        if(prototypeKeys['arrowleft'] || prototypeKeys['a']) dx -= p.speed;
+        if(prototypeKeys['arrowright'] || prototypeKeys['d']) dx += p.speed;
+        const nx = p.x + dx, ny = p.y + dy;
+        if(!prototypeSolidAt(nx, p.y)) p.x = Math.max(38, Math.min(602, nx));
+        if(!prototypeSolidAt(p.x, ny)) p.y = Math.max(38, Math.min(378, ny));
+
+        s.relics.forEach(relic=>{
+          if(relic.collected) return;
+          const dist = Math.hypot(p.x - relic.x, p.y - relic.y);
+          if(dist < 22){
+            relic.collected = true;
+            s.message = `Found ${relic.label}. ${relic.hint}`;
+            if(relic.id==='grove') s.doors.bridge = true;
+            if(s.relics.filter(r=>r.collected).length >= 3) s.doors.rescue = true;
+            updatePrototypeHud();
+          }
+        });
+
+        const towerDist = Math.hypot(p.x - 552, p.y - 322);
+        if(s.doors.rescue && towerDist < 30){
+          s.win = true;
+          s.message = 'Princess Elyra is freed from the tower prism. Elarion has hope again.';
+          updatePrototypeHud(true);
+        }
+        $('#protoMessage').innerHTML = s.message;
+      }
+
+      function updatePrototypeHud(won){
+        const s = prototypeState;
+        if(!s) return;
+        const count = s.relics.filter(r=>r.collected).length;
+        $('#protoRelics').textContent = `${count} / 3`;
+        $('#protoAbility').textContent = count ? s.relics.filter(r=>r.collected).map(r=>r.label.split(' ')[0]).join(', ') : 'No lantern yet';
+        $('#protoGoal').textContent = won ? 'Princess rescued and sanctum opened' : (count < 3 ? 'Find the shrine, cave, and tower relics' : 'Reach the tower and free Elyra');
+        $('#protoStatus').textContent = won ? 'Victory at the moonlit tower' : (s.doors.bridge ? 'Lantern bridge revealed' : 'Exploring Hearthmere');
+        $('#protoMessage').innerHTML = s.message;
+      }
+
+      function drawPrototype(){
+        const s = prototypeState;
+        if(!s) return;
+        const {ctx, canvas, player} = s;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#183326'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#214233'; ctx.fillRect(36,36,170,344);
+        ctx.fillStyle = '#19314e'; ctx.fillRect(434,36,170,166);
+        ctx.fillStyle = '#3a2e46'; ctx.fillRect(430,214,176,166);
+        ctx.fillStyle = '#244338'; ctx.fillRect(250,36,140,344);
+
+        // paths and walls
+        const walls = [
+          [0,0,640,24],[0,392,640,24],[0,0,24,416],[616,0,24,416],[232,24,24,132],[232,258,24,134],[384,24,24,188],[384,304,24,88],[256,156,128,24],[256,236,128,24],[452,248,112,24]
+        ];
+        if(!s.doors.bridge) walls.push([256,180,128,56]);
+        if(!s.doors.rescue) walls.push([500,248,24,96]);
+        ctx.fillStyle = '#6c5b4c';
+        walls.forEach(([x,y,w,h])=>ctx.fillRect(x,y,w,h));
+        if(s.doors.bridge){ ctx.fillStyle = '#d7c07b'; ctx.fillRect(256,200,128,16); }
+        if(s.doors.rescue){ ctx.fillStyle = '#a9d8ff'; ctx.fillRect(500,248,24,96); }
+
+        ctx.fillStyle = '#f4e6a2'; ctx.font = 'bold 15px Inter';
+        ctx.fillText('Greenwood Shrine', 64, 72);
+        ctx.fillText('Hollowdeep Cave', 448, 72);
+        ctx.fillText('Moonlit Tower', 454, 236);
+        ctx.fillText('Hearthmere Field', 272, 62);
+
+        s.relics.forEach(relic=>{
+          if(relic.collected) return;
+          ctx.beginPath(); ctx.fillStyle = relic.color; ctx.arc(relic.x, relic.y, 12, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        });
+
+        // princess tower marker
+        ctx.fillStyle = s.doors.rescue ? '#9fe6a0' : '#ff7f7f';
+        ctx.fillRect(540,304,26,26);
+        ctx.fillStyle = '#fff'; ctx.fillText('E', 548, 323);
+
+        // player
+        ctx.fillStyle = '#66b2ff';
+        ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+        ctx.fillStyle = '#dcecff';
+        ctx.fillRect(player.x - 3, player.y - 18, 6, 8);
+      }
+
       function renderCalc(){
         const view=$('#view');
         view.innerHTML=`
@@ -5629,7 +6010,7 @@ function stageRow(nmValue='30', unit='nm'){
         $('#testFanfare').addEventListener('click', ()=>{ ensureAudio(); fanfareSound(); if(typeof toast==="function"){toast('Fanfare');}else{console.warn("Toast:",'Fanfare');} });
       }
 
-      render('calc');
+      render((location.hash || '#calc').slice(1));
       runSelfTests();
     }
   })();

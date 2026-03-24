@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elderwild Quest</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>Elderwild Quest</h1>
+      <p class="subtitle">Standalone prototype with original characters: knights, dragonlings, rogue imps, and magic</p>
+    </header>
+
+    <section class="hud">
+      <div><strong>Hearts:</strong> <span id="hearts">♥ ♥ ♥</span></div>
+      <div><strong>Relics:</strong> <span id="relics">0 / 3</span></div>
+      <div><strong>Objective:</strong> <span id="objective">Find all relics and free Princess Serin</span></div>
+    </section>
+
+    <section class="game-layout">
+      <canvas id="game" width="800" height="480" aria-label="Elderwild Quest prototype"></canvas>
+      <aside class="panel">
+        <h2>Controls</h2>
+        <ul>
+          <li><kbd>WASD</kbd> or <kbd>Arrow Keys</kbd> to move</li>
+          <li><kbd>Space</kbd> to sword attack</li>
+          <li><kbd>E</kbd> to talk/interact</li>
+          <li><kbd>R</kbd> restart</li>
+        </ul>
+
+        <h2>Message</h2>
+        <div id="message" class="message">Welcome, Warden. Keep it fun, brave, and a little naughty.</div>
+
+        <h2>Prototype goals</h2>
+        <ul>
+          <li>Top-down movement</li>
+          <li>Combat with enemies</li>
+          <li>NPC dialogue</li>
+          <li>Item-gated finale</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

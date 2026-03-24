@@ -1,7 +1,8 @@
-const CACHE_NAME = 'ultimate-calculator-cache-v10';
+const CACHE_NAME = 'ultimate-calculator-cache-v12';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/game.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'

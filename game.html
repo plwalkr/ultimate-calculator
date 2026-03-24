@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Legends of Elarion — Prototype</title>
+  <style>
+    :root{--bg:#0d1118;--card:#151d29;--ink:#e7efff;--muted:#9cb1d3;--accent:#59c98c;--line:#2a3950}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0a0f16,var(--bg));color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    h1{margin:0;font-size:2rem;color:#f1e9c0}
+    .back{padding:10px 14px;border-radius:10px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:#111826}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+    .tab{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#162131;color:var(--ink);cursor:pointer;font-weight:700}
+    .tab.active{background:#1f7be0;border-color:#2b90ff}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .muted{color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+    .card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#121b27}
+    .stage canvas{width:100%;border:1px solid var(--line);border-radius:12px;image-rendering:pixelated;background:#0f1724}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Legends of Elarion</h1>
+      <a class="back" href="index.html">Back to Ultimate Calculator</a>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="adventure">Adventure</button>
+      <button class="tab" data-tab="world">World</button>
+      <button class="tab" data-tab="prototype">Prototype</button>
+    </div>
+    <main id="view"></main>
+  </div>
+  <script>
+    const view = document.getElementById('view');
+    const tabs = [...document.querySelectorAll('.tab')];
+    function setTab(name){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+      if(name==='adventure') renderAdventure();
+      if(name==='world') renderWorld();
+      if(name==='prototype') renderPrototype();
+    }
+    tabs.forEach(t=>t.onclick=()=>setTab(t.dataset.tab));
+
+    function renderAdventure(){
+      view.innerHTML = `<section class="panel"><h2>Adventure Direction</h2><p class="muted">A classic top-down quest inspired by 16-bit fantasy adventures: recover relics, unlock temples, rescue Princess Elyra, and stop Malgareth's return.</p><div class="cards"><div class="card"><b>Core loop</b><br><span class="muted">Explore → dungeon → earn item → unlock new route.</span></div><div class="card"><b>World tone</b><br><span class="muted">Cozy villages, ancient ruins, dragon lore, rising corruption.</span></div><div class="card"><b>Hero arc</b><br><span class="muted">Dawnward bloodline awakens forgotten magic.</span></div></div></section>`;
+    }
+    function renderWorld(){
+      view.innerHTML = `<section class="panel"><h2>World Atlas</h2><div class="cards"><div class="card"><b>Hearthmere</b><br><span class="muted">Peaceful frontier village where omens begin.</span></div><div class="card"><b>Greenwood of Lethen</b><br><span class="muted">Enchanted forest with hidden runes.</span></div><div class="card"><b>Hollowdeep</b><br><span class="muted">Ancient mine-temple and sealed vaults.</span></div><div class="card"><b>Starfall Sanctum</b><br><span class="muted">Final celestial temple and rescue climax.</span></div></div></section>`;
+    }
+
+    let state, keys = {};
+    function renderPrototype(){
+      view.innerHTML = `<section class="panel grid"><div class="stage"><canvas id="c" width="640" height="400"></canvas></div><div><h3>Controls</h3><p class="muted">WASD or Arrow keys to move, R to restart. Collect 3 relics, then reach Elyra (E).</p><div id="msg" class="card">Find the three relics.</div></div></section>`;
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+      state={x:60,y:200,relics:[{x:120,y:90,g:0},{x:560,y:120,g:0},{x:100,y:320,g:0}],open:false,win:false,msg:document.getElementById('msg')};
+      function solid(x,y){
+        const walls=[[0,0,640,20],[0,380,640,20],[0,0,20,400],[620,0,20,400],[250,20,20,130],[250,250,20,130],[390,20,20,190],[390,290,20,90],[270,170,120,20],[270,230,120,20]];
+        if(!state.open) walls.push([270,190,120,40]);
+        return walls.some(([a,b,w,h])=>x>a-8&&x<a+w+8&&y>b-8&&y<b+h+8);
+      }
+      function loop(){
+        if(!document.getElementById('c')) return;
+        if(!state.win){
+          let dx=0,dy=0,s=2.4;
+          if(keys.w||keys.arrowup)dy-=s; if(keys.s||keys.arrowdown)dy+=s; if(keys.a||keys.arrowleft)dx-=s; if(keys.d||keys.arrowright)dx+=s;
+          const nx=state.x+dx, ny=state.y+dy; if(!solid(nx,state.y))state.x=Math.max(30,Math.min(610,nx)); if(!solid(state.x,ny))state.y=Math.max(30,Math.min(370,ny));
+          state.relics.forEach(r=>{if(!r.g&&Math.hypot(state.x-r.x,state.y-r.y)<20)r.g=1;});
+          if(state.relics.filter(r=>r.g).length===3) state.open=true;
+          if(state.open && Math.hypot(state.x-550,state.y-320)<26){state.win=true; state.msg.textContent='You rescued Princess Elyra!';}
+        }
+        ctx.clearRect(0,0,640,400);
+        ctx.fillStyle='#1a3729';ctx.fillRect(0,0,640,400);
+        ctx.fillStyle='#2f5a48';ctx.fillRect(35,35,160,330);
+        ctx.fillStyle='#223b60';ctx.fillRect(430,35,175,165);
+        ctx.fillStyle='#4b355f';ctx.fillRect(430,210,175,155);
+        ctx.fillStyle='#6f5f4f';[[0,0,640,20],[0,380,640,20],[0,0,20,400],[620,0,20,400],[250,20,20,130],[250,250,20,130],[390,20,20,190],[390,290,20,90],[270,170,120,20],[270,230,120,20],...(!state.open?[[270,190,120,40]]:[])].forEach(([x,y,w,h])=>ctx.fillRect(x,y,w,h));
+        if(state.open){ctx.fillStyle='#d5c082';ctx.fillRect(270,205,120,10);}        
+        state.relics.forEach(r=>{if(!r.g){ctx.fillStyle='#f2d27a';ctx.beginPath();ctx.arc(r.x,r.y,10,0,6.28);ctx.fill();}});
+        ctx.fillStyle=state.open?'#8fe59b':'#ff7a7a';ctx.fillRect(540,305,22,22);ctx.fillStyle='#fff';ctx.fillText('E',547,321);
+        ctx.fillStyle='#70b8ff';ctx.fillRect(state.x-6,state.y-6,12,12);
+        if(!state.win){state.msg.textContent = state.open ? 'Bridge open. Reach Elyra (E).' : `Relics: ${state.relics.filter(r=>r.g).length}/3`}
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+    window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=1; if(e.key.toLowerCase()==='r') setTab('prototype');});
+    window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0;});
+    setTab('adventure');
+  </script>
+</body>
+</html>
